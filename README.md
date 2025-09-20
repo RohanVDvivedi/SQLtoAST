@@ -1,13 +1,15 @@
-# c_template_application
-A template for all of my c projects.
+# SQLtoAST
+As the name suggests this C library converts SQL to an AST, that can be used to pass it to a conforming storage engine to execute it.
 
 ## Setup instructions
+**Install dependencies :**
+ * [Cutlery](https://github.com/RohanVDvivedi/Cutlery)
 
 **Download source code :**
- * `git clone https://github.com/RohanVDvivedi/c_template_application.git`
+ * `git clone https://github.com/RohanVDvivedi/SQLtoAST.git`
 
 **Build from source :**
- * `cd c_template_application`
+ * `cd SQLtoAST`
  * `make clean all`
 
 **Install from the build :**
@@ -23,5 +25,9 @@ A template for all of my c projects.
 ## Instructions for uninstalling library
 
 **Uninstall :**
- * `cd c_template_application`
+ * `cd SQLtoAST`
  * `sudo make uninstall`
+
+## Third party acknowledgements
+ * *SQL lexer, internally supported by [flex](https://github.com/westes/flex).*
+ * *SQL parser, internally supported by bison, checkout their website [here](https://www.gnu.org/software/bison/).*
