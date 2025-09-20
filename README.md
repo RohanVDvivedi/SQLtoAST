@@ -1,5 +1,5 @@
 # SQLtoAST
-As the name suggests this C library converts SQL to an AST, that can be used to pass it to a conforming storage engine to execute it.
+As the name "SQL-to-AST" suggests this C library converts SQL to an AST, that can be used to pass it to a conforming storage engine to execute it.
 
 ## Setup instructions
 **Install dependencies :**
