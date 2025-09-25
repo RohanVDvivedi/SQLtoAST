@@ -1,0 +1,9 @@
+ * read about SQL ANSI standard
+ * keep AST and logical query plan separate
+ * we only build logical query plan
+
+ * read about flex and bison
+ * implement lexer and parser
+   * read about reentrant and bison bridge
+   * read about how to replace input function with cutlery based stream, with the stream context, i.e. passing a scanner
+   * read about how to make keywords only case insensitive
