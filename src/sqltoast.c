@@ -19,5 +19,8 @@ sql* parsesql(stream* strm, int* error)
 	if(result == 0)
 		return res;
 	else
+	{
+		(*error) = result;
 		return NULL;
+	}
 }
