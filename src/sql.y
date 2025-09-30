@@ -16,7 +16,7 @@
 
 %start root
 
-%union{
+%union {
 	int ival;
 }
 
