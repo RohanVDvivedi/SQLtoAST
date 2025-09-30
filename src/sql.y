@@ -2,6 +2,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+#include<sqltoast/sqltoast.h>
+
 /* Forward declare scanner type from Flex */
 struct sql_yyscan_t;
 %}

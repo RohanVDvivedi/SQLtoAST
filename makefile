@@ -43,13 +43,13 @@ LEX_SRC:=./src/sql.l
 YACC_SRC:=./src/sql.y
 
 # below are the output files for lexer and the parser
-LEX_C:=./src/lex.yy.c
-YACC_C:=./src/parser.tab.c
-YACC_H:=./src/parser.tab.h
+LEX_C:=./src/sql.yy.c
+YACC_C:=./src/sql.tab.c
+YACC_H:=./src/sql.tab.h
 
 # sources and objects must be evaluated every time you use them
 # figure out all the sources in the project
-SOURCES=$(shell find ${SRC_DIR} -name '*.c')
+SOURCES=$(shell find ${SRC_DIR} -name '*.c') $(LEX_C) $(YACC_C)
 # and the required objects to be built, as intermediary
 OBJECTS=$(patsubst ${SRC_DIR}/%.c, ${OBJ_DIR}/%.o, ${SOURCES})
 
@@ -92,7 +92,7 @@ all : ${LIB_DIR}/${LIBRARY}
 
 # clean all the build, in this directory
 clean :
-	${RM} -r ${BIN_DIR} ${LIB_DIR} ${OBJ_DIR}
+	${RM} -r ${BIN_DIR} ${LIB_DIR} ${OBJ_DIR} ${LEX_C} ${YACC_C} ${YACC_H}
 
 # -----------------------------------------------------
 # INSTALLING and UNINSTALLING system wide
