@@ -11,7 +11,9 @@
 /* make all external symbol use sql as prefix */
 %define api.prefix {sql}
 
-%parse-param { sql_yyscan_t* scanner }
+%lex-param   { void* scanner }
+
+%parse-param { void* scanner }
 %parse-param { sql** sql_ast }
 
 %start root
