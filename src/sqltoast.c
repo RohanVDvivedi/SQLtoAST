@@ -1,5 +1,7 @@
 #include<sqltoast/sqltoast.h>
 
+#define YYSTYPE SQLSTYPE
+#include<sql.yy.h>
 #include<sql.tab.h>
 
 sql* parsesql(stream* strm, int* error)
@@ -10,7 +12,7 @@ sql* parsesql(stream* strm, int* error)
 	if(sqllex_init_extra(strm, &scanner))
     	return NULL;
 
-	int result = sqlparse(yyscan_t scanner, &res);
+	int result = sqlparse(scanner, &res);
 
 	sqllex_destroy(scanner);
 
