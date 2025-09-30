@@ -59,7 +59,7 @@ $(YACC_C) $(YACC_H): $(YACC_SRC)
 	$(BISON) -d -o $(YACC_C) $(YACC_SRC)
 
 # flex rule
-$(LEX_C): $(LEX_SRC) $(YACC_H)
+$(LEX_C) $(LEX_H): $(LEX_SRC) $(YACC_H)
 	$(FLEX) -o $(LEX_C) $(LEX_SRC)
 
 # rule to make the directory for storing object files, that we create
@@ -68,6 +68,9 @@ ${OBJ_DIR} :
 
 # generic rule to build any object file
 ${OBJ_DIR}/%.o : ${SRC_DIR}/%.c | ${OBJ_DIR}
+	${CC} ${CFLAGS} -c $< -o $@
+
+${OBJ_DIR}/sqltoast.o : ${SRC_DIR}/sqltoast.c ${YACC_H} ${LEX_H} | ${OBJ_DIR}
 	${CC} ${CFLAGS} -c $< -o $@
 
 # rule to make the directory for storing libraries, that we create
