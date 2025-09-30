@@ -29,7 +29,7 @@
 
 %%
 
-root:		NUM ADD NUM 		{$$ = $1 + $3;}
+root:		NUM ADD NUM 		{$$ = $1 + $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
 
 %%
 
