@@ -19,7 +19,7 @@
 
 %%
 
-[0-9]+					{yylval->ival = atoi(yyget_text(yyscanner)); return NUM;}
+[0-9]+					{yyget_lval(yyscanner)->ival = atoi(yyget_text(yyscanner)); return NUM;}
 
 "+" 					{return ADD;}
 
