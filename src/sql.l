@@ -9,17 +9,17 @@
 
 %option extra-type="stream *"
 
-#define YY_INPUT(buf, result, max_size) {
-	int read_error = 0;
-	result = read_from_stream(yyget_extra(yyscanner), buf, max_size, &read_error);
-	if(read_error)
-		yyterminate();
+#define YY_INPUT(buf, result, max_size) {                                                \
+	int read_error = 0;                                                                  \
+	result = read_from_stream(yyget_extra(yyscanner), buf, max_size, &read_error);       \
+	if(read_error)                                                                       \
+		yyterminate();                                                                   \
 }
 
 %%
 
-[0-9]*					{yylval->ival = atoi(); return NUM}
+[0-9]*					{yylval->ival = atoi(yytext); return NUM}
 
-"+" 					{return ADD};
+"+" 					{return ADD;}
 
 %%

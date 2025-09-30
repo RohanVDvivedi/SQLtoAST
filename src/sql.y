@@ -14,8 +14,8 @@ struct sql_yyscan_t;
 /* make all external symbol use sql as prefix */
 %define api.prefix {sql}
 
-%parse-param { sql** sql_ast }
 %parse-param { sql_yyscan_t *scanner }
+%parse-param { sql** sql_ast }
 
 %start root
 
@@ -30,7 +30,7 @@ struct sql_yyscan_t;
 
 %%
 
-root:		NUM ADD NUM 		{$$->ival = $1->ival + $3->ival;}
+root:		NUM ADD NUM 		{$$.ival = $1.ival + $3.ival;}
 
 %%
 
