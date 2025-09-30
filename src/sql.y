@@ -14,7 +14,7 @@ struct sql_yyscan_t;
 /* make all external symbol use sql as prefix */
 %define api.prefix {sql}
 
-%parse-param { sql_yyscan_t *scanner }
+%parse-param { sql_yyscan_t* scanner }
 %parse-param { sql** sql_ast }
 
 %start root

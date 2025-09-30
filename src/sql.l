@@ -4,10 +4,7 @@
 
 %{
 #include<cutlery/stream.h>
-#include"sql.tab.h"   /* Bison’s token definitions */
-%}
-
-%option extra-type="stream *"
+#include"sql.tab.h"
 
 #define YY_INPUT(buf, result, max_size) {                                                \
 	int read_error = 0;                                                                  \
@@ -15,10 +12,13 @@
 	if(read_error)                                                                       \
 		yyterminate();                                                                   \
 }
+%}
+
+%option extra-type="stream *"
 
 %%
 
-[0-9]*					{yylval->ival = atoi(yytext); return NUM}
+[0-9]*					{yylval->ival = atoi(yytext); return NUM;}
 
 "+" 					{return ADD;}
 
