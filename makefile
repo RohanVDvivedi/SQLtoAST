@@ -29,16 +29,37 @@ LFLAGS:=-L${LIB_DIR} -l${PROJECT_NAME}
 # Archiver
 AR:=ar rcs
 
+# for lexer and parser
+FLEX:=flex
+BISON:=bison
+
 # utility
 RM:=rm -f
 MK:=mkdir -p
 CP:=cp
+
+# source files for flex and bison
+LEX_SRC:=./src/sql.l
+YACC_SRC:=./src/sql.y
+
+# below are the output files for lexer and the parser
+LEX_C:=./src/lex.yy.c
+YACC_C:=./src/parser.tab.c
+YACC_H:=./src/parser.tab.h
 
 # sources and objects must be evaluated every time you use them
 # figure out all the sources in the project
 SOURCES=$(shell find ${SRC_DIR} -name '*.c')
 # and the required objects to be built, as intermediary
 OBJECTS=$(patsubst ${SRC_DIR}/%.c, ${OBJ_DIR}/%.o, ${SOURCES})
+
+# bison rule
+$(YACC_C) $(YACC_H): $(YACC_SRC)
+	$(BISON) -d -o $(YACC_C) $(YACC_SRC)
+
+# flex rule
+$(LEX_C): $(LEX_SRC) $(YACC_H)
+	$(FLEX) -o $(LEX_C) $(LEX_SRC)
 
 # rule to make the directory for storing object files, that we create
 ${OBJ_DIR} :
