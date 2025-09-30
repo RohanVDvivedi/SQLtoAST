@@ -44,6 +44,7 @@ YACC_SRC:=./src/sql.y
 
 # below are the output files for lexer and the parser
 LEX_C:=./src/sql.yy.c
+LEX_H:=./src/sql.yy.h
 YACC_C:=./src/sql.tab.c
 YACC_H:=./src/sql.tab.h
 
@@ -92,7 +93,7 @@ all : ${LIB_DIR}/${LIBRARY}
 
 # clean all the build, in this directory
 clean :
-	${RM} -r ${BIN_DIR} ${LIB_DIR} ${OBJ_DIR} ${LEX_C} ${YACC_C} ${YACC_H}
+	${RM} -r ${BIN_DIR} ${LIB_DIR} ${OBJ_DIR} ${LEX_C} ${LEX_H} ${YACC_C} ${YACC_H}
 
 # -----------------------------------------------------
 # INSTALLING and UNINSTALLING system wide

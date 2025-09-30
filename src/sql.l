@@ -1,7 +1,7 @@
 %option reentrant noyywrap
 %option bison-bridge
 %option prefix="sql"
-%option header-file="sql.yy.h"
+%option header-file="./src/sql.yy.h"
 
 %{
 #include<cutlery/stream.h>
