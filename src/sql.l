@@ -1,5 +1,4 @@
-%option reentrant noyywrap
-%option bison-bridge
+%option reentrant bison-bridge noyywrap
 %option prefix="sql"
 %option header-file="./src/sql.yy.h"
 

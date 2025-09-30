@@ -22,9 +22,9 @@
 	int ival;
 }
 
-%type <int> root
+%type <ival> root
 
-%token <int> NUM
+%token <ival> NUM
 %token ADD
 
 %%
