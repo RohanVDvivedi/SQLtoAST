@@ -13,15 +13,19 @@ struct sql_yyscan_t;
 %define api.prefix {sql}
 
 %parse-param { sql** sql_ast }
+%parse-param { sql_yyscan_t *scanner }
 
 %start root
 
 %%
 
+root:
+	;
+
 %%
 
 /* Error handling */
-int parsererror(void *scanner, const char *msg) {
+int sqlerror(void *scanner, const char *msg) {
 	fprintf(stderr, "Error: %s\n", msg);
 	return 0;
 }
