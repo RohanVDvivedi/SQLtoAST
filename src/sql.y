@@ -34,7 +34,7 @@ root:		NUM ADD NUM 		{$$ = $1 + $3;}
 %%
 
 /* Error handling */
-int sqlerror(void *scanner, const char *msg) {
+int sqlerror(void *scanner, struct sql** sql_ast, const char *msg) {
 	fprintf(stderr, "Error: %s\n", msg);
 	return 0;
 }
