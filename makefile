@@ -50,7 +50,7 @@ YACC_H:=./src/sql.tab.h
 
 # sources and objects must be evaluated every time you use them
 # figure out all the sources in the project
-SOURCES=$(shell find ${SRC_DIR} -name '*.c') $(LEX_C) $(YACC_C)
+SOURCES=$(shell find ${SRC_DIR} -name '*.c')
 # and the required objects to be built, as intermediary
 OBJECTS=$(patsubst ${SRC_DIR}/%.c, ${OBJ_DIR}/%.o, ${SOURCES})
 

@@ -1,8 +1,8 @@
 #include<sqltoast/sqltoast.h>
 
+#include<sql.tab.h>
 #define YYSTYPE SQLSTYPE
 #include<sql.yy.h>
-#include<sql.tab.h>
 
 sql* parsesql(stream* strm, int* error)
 {
