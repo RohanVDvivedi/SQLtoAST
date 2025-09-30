@@ -1,6 +1,8 @@
 #include<stdio.h>
+#include<stdlib.h>
 
 #include<cutlery/stream.h>
+#include<cutlery/stream_for_file_descriptor.h>
 #include<sqltoast/sqltoast.h>
 
 int main()
