@@ -4,8 +4,7 @@
 
 #include<sqltoast/sqltoast.h>
 
-/* Forward declare scanner type from Flex */
-struct sql_yyscan_t;
+typedef struct sql_yyguts_t* sql_yyscan_t;  // forward-declare scanner type
 %}
 
 /* Enable reentrant parser */
@@ -14,7 +13,7 @@ struct sql_yyscan_t;
 /* make all external symbol use sql as prefix */
 %define api.prefix {sql}
 
-%parse-param { sql_yyscan_t scanner }
+%parse-param { sql_yyscan_t* scanner }
 %parse-param { sql** sql_ast }
 
 %start root
@@ -30,7 +29,7 @@ struct sql_yyscan_t;
 
 %%
 
-root:		NUM ADD NUM 		{$$.ival = $1.ival + $3.ival;}
+root:		NUM ADD NUM 		{$$ = $1 + $3;}
 
 %%
 
