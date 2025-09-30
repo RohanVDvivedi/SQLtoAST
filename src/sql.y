@@ -30,7 +30,7 @@ struct sql_yyscan_t;
 
 %%
 
-root: NUM ADD NUM {$$->ival = $1->ival + $3->ival;}
+root:		NUM ADD NUM 		{$$->ival = $1->ival + $3->ival;}
 
 %%
 

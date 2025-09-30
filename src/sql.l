@@ -18,8 +18,8 @@
 
 %%
 
-[0-9]* NUM {yylval->ival = atoi();}
+[0-9]*					{yylval->ival = atoi(); return NUM}
 
-"+" ADD
+"+" 					{return ADD};
 
 %%
