@@ -14,7 +14,7 @@
 %lex-param   { void* scanner }
 
 %parse-param { void* scanner }
-%parse-param { sql** sql_ast }
+%parse-param { struct sql** sql_ast }
 
 %start root
 
