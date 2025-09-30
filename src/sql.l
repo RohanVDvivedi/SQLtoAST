@@ -19,7 +19,7 @@
 
 %%
 
-[0-9]+					{sqlget_lval(yyscanner)->ival = atoi(sqlget_text(yyscanner)); return NUM;}
+[0-9]+					{yylval->ival = atoi(sqlget_text(yyscanner)); return NUM;}
 
 "+" 					{return ADD;}
 
