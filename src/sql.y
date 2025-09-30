@@ -3,8 +3,6 @@
 #include<stdlib.h>
 
 #include<sqltoast/sqltoast.h>
-
-typedef struct sql_yyguts_t* sql_yyscan_t;  // forward-declare scanner type
 %}
 
 /* Enable reentrant parser */
