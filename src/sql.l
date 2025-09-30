@@ -4,7 +4,7 @@
 
 %{
 #include<cutlery/stream.h>
-#include"parser.tab.h"   /* Bison’s token definitions */
+#include"sql.tab.h"   /* Bison’s token definitions */
 %}
 
 %option extra-type="stream *"

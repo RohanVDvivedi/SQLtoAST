@@ -3,7 +3,7 @@
 #include<stdlib.h>
 
 /* Forward declare scanner type from Flex */
-struct yyscan_t;
+struct sql_yyscan_t;
 %}
 
 /* Enable reentrant parser */
