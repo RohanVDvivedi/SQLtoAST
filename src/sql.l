@@ -12,6 +12,8 @@
 	if(read_error)                                                                       \
 		yyterminate();                                                                   \
 }
+
+#define YYSTYPE SQLSTYPE
 %}
 
 %option extra-type="stream *"
