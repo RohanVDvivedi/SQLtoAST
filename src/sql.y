@@ -19,10 +19,18 @@ struct sql_yyscan_t;
 
 %start root
 
+%union{
+	int ival;
+}
+
+%type <int> root
+
+%token <int> NUM
+%token ADD
+
 %%
 
-root:
-	;
+root: NUM ADD NUM {$$->ival = $1->ival + $3->ival;}
 
 %%
 
