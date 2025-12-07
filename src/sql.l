@@ -23,5 +23,9 @@
 [0-9]+					{yylval->ival = atoi(sqlget_text(yyscanner)); return NUM;}
 
 "+" 					{return ADD;}
+"-" 					{return SUB;}
+"*" 					{return MUL;}
+"/" 					{return DIV;}
+"%" 					{return MOD;}
 
 %%

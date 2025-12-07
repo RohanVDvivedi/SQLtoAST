@@ -24,12 +24,24 @@
 
 %type <ival> root
 
+%type <ival> expr
+
 %token <ival> NUM
 %token ADD
+%token SUB
+%token MUL
+%token DIV
+%token MOD
 
 %%
 
-root:		NUM ADD NUM 		{$$ = $1 + $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
+root:		expr				{$$ = $1; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
+
+expr:		NUM ADD NUM 		{$$ = $1 + $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
+			| NUM SUB NUM 		{$$ = $1 - $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
+			| NUM MUL NUM 		{$$ = $1 * $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
+			| NUM DIV NUM 		{$$ = $1 / $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
+			| NUM MOD NUM 		{$$ = $1 % $3; (*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->ival = $$;}
 
 %%
 
