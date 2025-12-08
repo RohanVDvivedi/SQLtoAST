@@ -4,6 +4,14 @@
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
 {
+	SQL_NEG,
+
+	SQL_BITNOT,
+
+	SQL_LOGNOT,
+
+	// all operators above are unary operators
+
 	SQL_ADD,
 	SQL_SUB,
 	SQL_MUL,
@@ -15,24 +23,33 @@ enum sql_expression_type
 	SQL_LT,
 	SQL_LTE,
 	SQL_EQ,
-	SQL_NEQ,
+	SQL_NEQ, // relational operators, always binary
 
 	SQL_BITAND,
 	SQL_BITOR,
-	SQL_BITXOR,
-	SQL_BITNOT,
+	SQL_BITXOR, // bitwise operators
 
 	SQL_LOGAND,
 	SQL_LOGOR,
-	SQL_LOGXOR,
-	SQL_LOGNOT,
+	SQL_LOGXOR, // logical operators
+
+	// all operators above are binary operators
+
+	SQL_BTWN, // between operator in sql
+
+	// all operators above are operators that take bounds as input
 
 	SQL_IN,
-	SQL_BTWN, // between operator in sql
+
+	// all operators above take expression list as input
 
 	SQL_CONST,
 
+	// reflects a constant
+
 	SQL_VAR,
+
+	// reflects a variable, or a table accessible value
 };
 
 typedef struct sql_expression sql_expression;
@@ -42,16 +59,31 @@ struct sql_expression
 
 	union
 	{
+		// for all unary operators
+		sql_expression* unary_val;
+
+		// for all binary operators
 		struct
 		{
 			sql_expression* left;
 			sql_expression* right;
 		};
+
+		// for between operator
+		struct
+		{
+			sql_expression* bounds[2];
+		};
+
+		// for in operator
 		struct
 		{
 			int expr_list_size;
 			sql_expression* expr_list;
 		};
+
+		// for constant or variable
+		dstring value;
 	};
 };
 
