@@ -1,6 +1,8 @@
 #ifndef SQL_EXPRESSION_H
 #define SQL_EXPRESSION_H
 
+#include<cutlery/dstring.h>
+
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
 {
