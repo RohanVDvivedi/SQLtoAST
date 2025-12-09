@@ -22,10 +22,32 @@
 
 [0-9]+					{yylval->ival = atoi(sqlget_text(yyscanner)); return NUM;}
 
+"-" 					{return NEG;}
+"~" 					{return B_NOT;}
+"NOT" 					{return L_NOT;}
+
 "+" 					{return ADD;}
-"-" 					{return SUB;}
 "*" 					{return MUL;}
 "/" 					{return DIV;}
 "%" 					{return MOD;}
+
+">" 					{return GT;}
+">=" 					{return GTE;}
+"<" 					{return LT;}
+"<=" 					{return LTE;}
+"=" 					{return EQ;}
+"<>" 					{return NEQ;}
+
+"&" 					{return B_AND;}
+"|" 					{return B_OR;}
+"^" 					{return B_XOR;}
+
+"AND" 					{return L_AND;}
+"OR" 					{return L_OR;}
+"XOR" 					{return L_XOR;}
+
+"BETWEEN" 				{return BETWEEN;}
+
+"IN" 					{return IN;}
 
 %%
