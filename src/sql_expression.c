@@ -52,4 +52,62 @@ sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 	return expr;
 }
 
-void delete_sql_expr(sql_expression* expr);
+void delete_sql_expr(sql_expression* expr)
+{
+	switch(expr->type)
+	{
+		case SQL_NEG :
+		case SQL_BITNOT :
+		case SQL_LOGNOT :
+		{
+			delete_sql_expr(expr->unary_of);
+			break;
+		}
+
+		case SQL_ADD :
+		case SQL_SUB :
+		case SQL_MUL :
+		case SQL_DIV :
+		case SQL_MOD :
+		case SQL_GT :
+		case SQL_GTE :
+		case SQL_LT :
+		case SQL_LTE :
+		case SQL_EQ :
+		case SQL_NEQ :
+		case SQL_BITAND :
+		case SQL_BITOR :
+		case SQL_BITXOR :
+		case SQL_LOGAND :
+		case SQL_LOGOR :
+		case SQL_LOGXOR :
+		{
+			delete_sql_expr(expr->left);
+			delete_sql_expr(expr->right);
+			break;
+		}
+
+		case SQL_BTWN :
+		{
+			delete_sql_expr(expr->bounds[0]);
+			delete_sql_expr(expr->bounds[1]);
+			break;
+		}
+
+		case SQL_IN :
+		{
+			for(int i = 0; i < expr->expr_list_size; i++)
+				delete_sql_expr(expr->expr_list[i]);
+			free(expr->expr_list);
+			break;
+		}
+
+		case SQL_CONST :
+		case SQL_VAR :
+		{
+			deinit_dstring(&(expr->value));
+			break;
+		}
+	}
+	free(expr);
+}
