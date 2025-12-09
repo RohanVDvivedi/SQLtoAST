@@ -101,4 +101,6 @@ void insert_expr_to_in_sql_expr(sql_expression* in_expr, sql_expression* from_va
 
 sql_expression* new_valued_sql_expr(dstring* value);
 
+void delete_sql_expr(sql_expression* expr);
+
 #endif

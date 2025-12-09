@@ -8,7 +8,7 @@
 typedef struct sql sql;
 struct sql
 {
-	int ival;
+	sql_expression* expr;
 };
 
 sql* parsesql(stream* strm, int* error);
