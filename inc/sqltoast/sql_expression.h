@@ -62,7 +62,7 @@ struct sql_expression
 	union
 	{
 		// for all unary operators
-		sql_expression* unary_val;
+		sql_expression* unary_of;
 
 		// for all binary operators
 		struct
@@ -81,7 +81,7 @@ struct sql_expression
 		struct
 		{
 			int expr_list_size;
-			sql_expression* expr_list;
+			sql_expression** expr_list;
 		};
 
 		// for constant or variable
@@ -89,17 +89,17 @@ struct sql_expression
 	};
 };
 
-sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_val);
+sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_of);
 
 sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* left, sql_expression* right);
 
-sql_expression* new_between_sql_expr(sql_expression_type type, sql_expression* bounds0, sql_expression* bounds2);
+sql_expression* new_between_sql_expr(sql_expression* bounds0, sql_expression* bounds1);
 
 sql_expression* new_in_sql_expr();
 
 void insert_expr_to_in_sql_expr(sql_expression* in_expr, sql_expression* from_val);
 
-sql_expression* new_valued_sql_expr(dstring* value);
+sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
 void delete_sql_expr(sql_expression* expr);
 
