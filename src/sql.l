@@ -42,7 +42,7 @@
 "|" 					{return B_OR;}
 "^" 					{return B_XOR;}
 
-(?i:AND() 				{return L_AND;}
+(?i:AND) 				{return L_AND;}
 (?i:OR) 				{return L_OR;}
 (?i:XOR) 				{return L_XOR;}
 
