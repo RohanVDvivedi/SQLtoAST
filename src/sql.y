@@ -23,9 +23,6 @@ struct value
 	};
 };
 
-#define MAKE_ROOT(root) ((value){.type = SQL_ROOT, .root = root})
-#define MAKE_EXPR(expr) ((value){.type = SQL_EXPR, .expr = expr})
-
 %}
 
 /* Enable reentrant parser */
