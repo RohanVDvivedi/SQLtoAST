@@ -20,7 +20,9 @@
 
 %%
 
-[0-9]+					{yylval->ival = atoi(sqlget_text(yyscanner)); return NUM;}
+[0-9]+					{yylval->val.expr = new_valued_sql_expr(SQL_VAR, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
+						yylval->val.type = SQL_EXPR;
+						return NUM;}
 
 "-" 					{return NEG;}
 "~" 					{return B_NOT;}
