@@ -88,7 +88,7 @@ struct value
 
 root:		expr						{(*sql_ast) = malloc(sizeof(sql_ast)); (*sql_ast)->expr = $1;}
 
-expr:		| VAR 						{$$ = $1;}
+expr:		  VAR 						{$$ = $1;}
 			| CONST						{$$ = $1;}
 
 			| B_NOT expr 				{$$->expr = new_unary_sql_expr(SQL_BITNOT, $2->expr); $$->type = SQL_EXPR}
