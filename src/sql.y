@@ -4,26 +4,30 @@
 
 #include<sqltoast/sqltoast.h>
 #include<sqltoast/sql_expression.h>
-
-typedef enum value_type value_type;
-enum value_type
-{
-	SQL_ROOT,
-	SQL_EXPR,
-};
-
-typedef struct value value;
-struct value
-{
-	value_type type;
-	union
-	{
-		sql* root;
-		sql_expression* expr;
-	};
-};
-
 %}
+
+%code requires {
+	#include<sqltoast/sqltoast.h>
+	#include<sqltoast/sql_expression.h>
+
+	typedef enum value_type value_type;
+	enum value_type
+	{
+		SQL_ROOT,
+		SQL_EXPR,
+	};
+
+	typedef struct value value;
+	struct value
+	{
+		value_type type;
+		union
+		{
+			sql* root;
+			sql_expression* expr;
+		};
+	};
+}
 
 /* Enable reentrant parser */
 %define api.pure full
