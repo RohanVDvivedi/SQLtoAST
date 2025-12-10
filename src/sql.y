@@ -45,7 +45,7 @@ struct value
 	value val;
 }
 
-%type <ival> root
+%type <val> root
 
 %type <val> expr
 
