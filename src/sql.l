@@ -20,9 +20,11 @@
 
 %%
 
+[ \t\n\r]+      		{;}
+
 "-" 					{return NEG;}
 "~" 					{return B_NOT;}
-"NOT" 					{return L_NOT;}
+(?i:NOT) 				{return L_NOT;}
 
 "+" 					{return ADD;}
 "*" 					{return MUL;}
@@ -40,13 +42,13 @@
 "|" 					{return B_OR;}
 "^" 					{return B_XOR;}
 
-"AND" 					{return L_AND;}
-"OR" 					{return L_OR;}
-"XOR" 					{return L_XOR;}
+(?i:AND() 				{return L_AND;}
+(?i:OR) 				{return L_OR;}
+(?i:XOR) 				{return L_XOR;}
 
-"BETWEEN" 				{return BETWEEN;}
+(?i:BETWEEN) 			{return BETWEEN;}
 
-"IN" 					{return IN;}
+(?i:IN) 				{return IN;}
 
 [-+]?[0-9]+(\.[0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_VAR, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 							yylval->val.type = SQL_EXPR;

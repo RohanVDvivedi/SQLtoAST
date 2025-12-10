@@ -79,7 +79,7 @@ struct value
 
 %%
 
-root:		expr						{(*sql_ast) = malloc(sizeof(sql_ast)); (*sql_ast)->expr = $1.expr;}
+root:		expr						{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->expr = $1.expr;}
 
 expr:		  VAR 						{$$ = $1;}
 			| CONST						{$$ = $1;}
