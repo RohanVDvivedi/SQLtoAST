@@ -81,6 +81,24 @@
 
 %token IN
 
+/* Precedence + Associativity */
+%right UMINUS                 /* artificial precedence symbol */
+%right B_NOT L_NOT            /* unary ops: ~, ! */
+
+%left MUL DIV MOD             /* multiplicative */
+%left ADD NEG                 /* + and - */
+%left B_AND                   /* bitwise & */
+%left B_XOR                   /* bitwise ^ */
+%left B_OR                    /* bitwise | */
+
+%left GT GTE LT LTE EQ NEQ    /* comparisons */
+
+%left BETWEEN                 /* BETWEEN has lower precedence */
+
+%left L_AND                   /* logical AND */
+%left L_XOR                   /* logical XOR */
+%left L_OR                    /* logical OR */
+
 %%
 
 root:		expr						{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->expr = $1.expr;}
@@ -89,7 +107,7 @@ expr:		  VAR 						{$$ = $1;}
 			| CONST						{$$ = $1;}
 
 			| B_NOT expr 				{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
-			| NEG expr 					{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
+			| NEG expr %prec UMINUS		{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
 			| ADD expr 					{$$ = $2;}
 			| L_NOT expr 				{$$.expr = new_unary_sql_expr(SQL_LOGNOT, $2.expr); $$.type = SQL_EXPR;}
 
