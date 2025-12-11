@@ -12,12 +12,14 @@ int main()
 	initialize_stream_for_fd(&ws, 1);
 
 	int error = 0;
-	sql* tree = parsesql(&rs, &error);
+	sql* sqlast = parsesql(&rs, &error);
 
-	if(tree)
+	if(sqlast)
 	{
-		printf("%d with %d errr\n", tree->ival, error);
-		free(tree);
+		print_sql_expr(sqlast->expr);
+		printf("\n");
+		printf("error = %d\n", error);
+		destroysql(sqlast);
 	}
 	else
 		printf("error = %d\n", error);

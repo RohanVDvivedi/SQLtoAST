@@ -264,7 +264,7 @@ void print_sql_expr(const sql_expression* expr)
 		case SQL_VAR :
 		{
 			printf("\"");
-			print_dstring(&(expr->value));
+			printf_dstring(&(expr->value));
 			printf("\"");
 			break;
 		}
