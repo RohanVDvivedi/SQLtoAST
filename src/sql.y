@@ -95,7 +95,7 @@
 %left B_XOR
 %left B_AND
 
-%left ADD SUB
+%left ADD NEG
 %left MUL DIV MOD
 
 /* Highest: unary operators */
