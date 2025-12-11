@@ -82,22 +82,26 @@
 %token IN
 
 /* Precedence + Associativity */
-%right UMINUS                 /* artificial precedence symbol */
-%right B_NOT L_NOT            /* unary ops: ~, ! */
+/* Lowest precedence first (so Bison gives them the lowest binding) */
+%left L_OR
+%left L_XOR
+%left L_AND
 
-%left MUL DIV MOD             /* multiplicative */
-%left ADD NEG                 /* + and - */
-%left B_AND                   /* bitwise & */
-%left B_XOR                   /* bitwise ^ */
-%left B_OR                    /* bitwise | */
+%left BETWEEN
 
-%left GT GTE LT LTE EQ NEQ    /* comparisons */
+%left EQ NEQ GT GTE LT LTE
 
-%left BETWEEN                 /* BETWEEN has lower precedence */
+%left B_OR
+%left B_XOR
+%left B_AND
 
-%left L_AND                   /* logical AND */
-%left L_XOR                   /* logical XOR */
-%left L_OR                    /* logical OR */
+%left ADD SUB
+%left MUL DIV MOD
+
+/* Highest: unary operators */
+%right L_NOT
+%right B_NOT
+%right UMINUS
 
 %%
 
