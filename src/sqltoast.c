@@ -24,3 +24,9 @@ sql* parsesql(stream* strm, int* error)
 		return NULL;
 	}
 }
+
+void destroysql(sql* sqlast)
+{
+	delete_sql_expr(sqlast->expr);
+	free(sqlast);
+}
