@@ -1,6 +1,7 @@
 #include<sqltoast/sql_expression.h>
 
 #include<stdlib.h>
+#include<stdio.h>
 
 sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_of)
 {
@@ -50,6 +51,224 @@ sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 	expr->type = type;
 	expr->value = value;
 	return expr;
+}
+
+void print_sql_expr(const sql_expression* expr)
+{
+	switch(expr->type)
+	{
+		case SQL_NEG :
+		{
+			printf("-( ");
+			print_sql_expr(expr->unary_of);
+			printf(" )");
+			break;
+		}
+		case SQL_BITNOT :
+		{
+			printf("~( ");
+			print_sql_expr(expr->unary_of);
+			printf(" )");
+			break;
+		}
+		case SQL_LOGNOT :
+		{
+			printf("!( ");
+			print_sql_expr(expr->unary_of);
+			printf(" )");
+			break;
+		}
+
+		case SQL_ADD :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" + ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_SUB :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" - ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_MUL :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" * ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_DIV :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" / ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_MOD :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" % ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_GT :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" > ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_GTE :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" >= ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_LT :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" < ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_LTE :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" <= ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_EQ :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" = ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_NEQ :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" <> ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_BITAND :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" & ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_BITOR :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" | ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_BITXOR :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" ^ ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_LOGAND :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" AND ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_LOGOR :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" OR ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_LOGXOR :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" XOR ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+
+		case SQL_BTWN :
+		{
+			printf("( ");
+			print_sql_expr(expr->bounds[0]);
+			printf(" BETWEEN ");
+			print_sql_expr(expr->bounds[1]);
+			printf(" )");
+			break;
+		}
+
+		case SQL_IN :
+		{
+			printf("( IN : (");
+			for(int i = 0; i < expr->expr_list_size; i++)
+			{
+				if(i != 0)
+					printf(" , ");
+				print_sql_expr(expr->expr_list[i]);
+			}
+			printf(") )");
+			break;
+		}
+
+		case SQL_CONST :
+		{
+			printf_dstring(&(expr->value));
+			break;
+		}
+		case SQL_VAR :
+		{
+			printf("\"");
+			print_dstring(&(expr->value));
+			printf("\"");
+			break;
+		}
+	}
 }
 
 void delete_sql_expr(sql_expression* expr)
