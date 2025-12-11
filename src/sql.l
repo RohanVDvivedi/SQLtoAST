@@ -22,6 +22,9 @@
 
 [ \t\n\r]+      		{;}
 
+"("						{return OPEN_BRACKET;}
+")"						{return CLOSE_BRACKET;}
+
 "-" 					{return NEG;}
 "~" 					{return B_NOT;}
 (?i:NOT) 				{return L_NOT;}
