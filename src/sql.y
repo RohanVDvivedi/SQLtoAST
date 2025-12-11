@@ -101,7 +101,7 @@
 /* Highest: unary operators */
 %right L_NOT
 %right B_NOT
-%right UMINUS
+%right UMINUS UPLUS
 
 %%
 
@@ -112,7 +112,7 @@ expr:		  VAR 						{$$ = $1;}
 
 			| B_NOT expr 				{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
 			| NEG expr %prec UMINUS		{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
-			| ADD expr 					{$$ = $2;}
+			| ADD expr %prec UPLUS		{$$ = $2;}
 			| L_NOT expr 				{$$.expr = new_unary_sql_expr(SQL_LOGNOT, $2.expr); $$.type = SQL_EXPR;}
 
 			| expr MUL expr 			{$$.expr = new_binary_sql_expr(SQL_MUL, $1.expr, $3.expr); $$.type = SQL_EXPR;}
