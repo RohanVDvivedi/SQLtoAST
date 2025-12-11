@@ -237,10 +237,12 @@ void print_sql_expr(const sql_expression* expr)
 		case SQL_BTWN :
 		{
 			printf("( ");
+			print_sql_expr(expr->input);
+			printf(" BETWEEN [ ");
 			print_sql_expr(expr->bounds[0]);
-			printf(" BETWEEN ");
+			printf(" , ");
 			print_sql_expr(expr->bounds[1]);
-			printf(" )");
+			printf(" ] )");
 			break;
 		}
 
