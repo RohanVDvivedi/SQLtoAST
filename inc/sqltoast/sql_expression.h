@@ -74,6 +74,7 @@ struct sql_expression
 		// for between operator
 		struct
 		{
+			sql_expression* input;
 			sql_expression* bounds[2];
 		};
 
@@ -93,7 +94,7 @@ sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* una
 
 sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* left, sql_expression* right);
 
-sql_expression* new_between_sql_expr(sql_expression* bounds0, sql_expression* bounds1);
+sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1);
 
 sql_expression* new_in_sql_expr();
 

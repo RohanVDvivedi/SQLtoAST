@@ -137,7 +137,7 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 		{$$ = $2;}
 			| expr LT expr 							{$$.expr = new_binary_sql_expr(SQL_LT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr LTE expr 						{$$.expr = new_binary_sql_expr(SQL_LTE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
-			| BETWEEN expr L_AND expr 				{$$.expr = new_between_sql_expr($2.expr, $4.expr); $$.type = SQL_EXPR;}
+			| expr BETWEEN expr L_AND expr 			{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
 
 			| expr L_AND expr 						{$$.expr = new_binary_sql_expr(SQL_LOGAND, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr L_OR expr 						{$$.expr = new_binary_sql_expr(SQL_LOGOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}

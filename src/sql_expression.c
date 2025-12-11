@@ -20,10 +20,11 @@ sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* le
 	return expr;
 }
 
-sql_expression* new_between_sql_expr(sql_expression* bounds0, sql_expression* bounds1)
+sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = SQL_BTWN;
+	expr->input = input;
 	expr->bounds[0] = bounds0;
 	expr->bounds[1] = bounds1;
 	return expr;
