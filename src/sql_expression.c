@@ -107,8 +107,8 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			if(expr->unary_of->type == expr->type)
 			{
 				sql_expression* flat_expr = expr->unary_of->unary_of;
-				free(expr);
 				free(expr->unary_of);
+				free(expr);
 				return flat_expr;
 			}
 			else
