@@ -3,6 +3,8 @@
 
 #include<cutlery/dstring.h>
 
+#include<cutlery/value_arraylist.h>
+
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
 {
@@ -14,9 +16,9 @@ enum sql_expression_type
 
 	// all operators above are unary operators
 
-	SQL_ADD,
+	SQL_ADD,	SQL_ADD_FLAT,
 	SQL_SUB,
-	SQL_MUL,
+	SQL_MUL,	SQL_MUL_FLAT,
 	SQL_DIV,
 	SQL_MOD,
 
@@ -31,9 +33,9 @@ enum sql_expression_type
 	SQL_BITOR,
 	SQL_BITXOR, // bitwise operators
 
-	SQL_LOGAND,
-	SQL_LOGOR,
-	SQL_LOGXOR, // logical operators
+	SQL_LOGAND,		SQL_LOGAND_FLAT,
+	SQL_LOGOR,		SQL_LOGOR_FLAT,
+	SQL_LOGXOR,		SQL_LOGXOR_FLAT, // logical operators
 
 	// all operators above are binary operators
 
@@ -55,6 +57,9 @@ enum sql_expression_type
 };
 
 typedef struct sql_expression sql_expression;
+
+data_definitions_value_arraylist(sql_expression_list, sql_expression*)
+
 struct sql_expression
 {
 	sql_expression_type type;
@@ -78,12 +83,8 @@ struct sql_expression
 			sql_expression* bounds[2];
 		};
 
-		// for in operator
-		struct
-		{
-			int expr_list_size;
-			sql_expression** expr_list;
-		};
+		// for in operator and SQL_*_FLAT types
+		sql_expression_list expr_list;
 
 		// for constant or variable
 		dstring value;
@@ -96,9 +97,9 @@ sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* le
 
 sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1);
 
-sql_expression* new_in_sql_expr();
+sql_expression* new_flat_sql_expr(sql_expression_type type);
 
-void insert_expr_to_in_sql_expr(sql_expression* in_expr, sql_expression* from_val);
+void insert_expr_to_flat_sql_expr(sql_expression* expr, sql_expression* from_val);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
