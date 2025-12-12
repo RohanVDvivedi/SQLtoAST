@@ -51,7 +51,8 @@ void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* fr
 void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
 {
 	expr->type = SQL_IN;
-	memory_move(&(expr->in_expr_list), &(expr->expr_list), sizeof(arraylist));
+	arraylist temp = expr->expr_list;
+	expr->in_expr_list = temp;
 	expr->in_input = input;
 }
 
