@@ -110,6 +110,9 @@ void convert_flat_to_in_sql_expr(sql_expression* expr, const sql_expression* inp
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
+// the below function destroys the old tree and returns a new one
+sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expression* expr);
+
 void print_sql_expr(const sql_expression* expr);
 
 void delete_sql_expr(sql_expression* expr);
