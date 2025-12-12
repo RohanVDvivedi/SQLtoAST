@@ -321,7 +321,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->in_input);
 			printf(" IN (");
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
 			{
 				if(i != 0)
 					printf(" , ");
