@@ -100,6 +100,8 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		}
 
 		case SQL_NEG :
+		case SQL_BITNOT :
+		case SQL_LOGNOT :
 		{
 			expr->unary_of = flatten_similar_associative_operators_in_sql_expression(expr->unary_of);
 			if(expr->unary_of->type == SQL_NEG)
@@ -111,13 +113,6 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			}
 			else
 				return expr;
-		}
-
-		case SQL_BITNOT :
-		case SQL_LOGNOT :
-		{
-			expr->unary_of = flatten_similar_associative_operators_in_sql_expression(expr->unary_of);
-			return expr;
 		}
 
 		case SQL_SUB :
