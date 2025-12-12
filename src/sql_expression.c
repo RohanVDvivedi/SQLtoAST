@@ -248,6 +248,66 @@ void print_sql_expr(const sql_expression* expr)
 			break;
 		}
 
+		case SQL_ADD_FLAT :
+		{
+			printf("(");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" + ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+			}
+			printf(")");
+			break;
+		}
+		case SQL_MUL_FLAT :
+		{
+			printf("(");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" * ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+			}
+			printf(")");
+			break;
+		}
+		case SQL_LOGAND_FLAT :
+		{
+			printf("(");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" AND ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+			}
+			printf(")");
+			break;
+		}
+		case SQL_LOGOR_FLAT :
+		{
+			printf("(");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" OR ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+			}
+			printf(")");
+			break;
+		}
+		case SQL_LOGXOR_FLAT :
+		{
+			printf("(");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" XOR ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+			}
+			printf(")");
+			break;
+		}
 		case SQL_IN :
 		{
 			printf("( IN : (");
