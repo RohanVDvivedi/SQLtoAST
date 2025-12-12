@@ -57,7 +57,7 @@
 										yylval->val.type = SQL_EXPR;
 										return NUMBER;}
 
-'.+'									{yylval->val.expr = new_valued_sql_expr(SQL_STR, new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2));
+'[^']*'									{yylval->val.expr = new_valued_sql_expr(SQL_STR, new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2));
 										yylval->val.type = SQL_EXPR;
 										return STRING;}
 
