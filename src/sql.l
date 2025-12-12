@@ -51,10 +51,9 @@
 (?i:OR) 				{return L_OR;}
 (?i:XOR) 				{return L_XOR;}
 
-<BETWEEN_SC>(?i:AND)      			{BEGIN(INITIAL);return BTWN_AND;}
-
-
 (?i:BETWEEN) 			{BEGIN(BETWEEN_SC);return BETWEEN;}
+<BETWEEN_SC>(?i:AND) 	{BEGIN(INITIAL);return BTWN_AND;}
+<BETWEEN_SC>. 			{BEGIN(INITIAL);yyless(0);}
 
 (?i:IN) 				{return IN;}
 
