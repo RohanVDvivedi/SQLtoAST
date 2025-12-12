@@ -1,9 +1,10 @@
 * SQL EXPRESSION
  * add '' token for strings in lexer
- * add || operator for concatenation of strings
- * add SUBSTRING operator
  * add logic for in operator, with a collective expr_list bison rule
  * add logic for flattening and, or, xor, + (with -b for negatives) and * operators
+ * add || operator for concatenation of strings
+ * add SUBSTRING operator
+ * logic to flatten the || concatenation operator
 
 
  * read about SQL ANSI standard
