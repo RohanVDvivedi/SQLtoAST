@@ -17,7 +17,10 @@ int main()
 	if(sqlast)
 	{
 		print_sql_expr(sqlast->expr);
-		printf("\n");
+		printf("\n\n");
+		sqlast->expr = flatten_similar_associative_operators_in_sql_expression(sqlast->expr);
+		print_sql_expr(sqlast->expr);
+		printf("\n\n");
 		printf("error = %d\n", error);
 		destroysql(sqlast);
 	}
