@@ -3,10 +3,6 @@
 #include<stdlib.h>
 #include<stdio.h>
 
-declarations_value_arraylist(sql_expression_list, sql_expression*, static inline)
-#define EXPANSION_FACTOR 1.5
-function_definitions_value_arraylist(sql_expression_list, sql_expression*, static inline)
-
 sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_of)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
@@ -38,18 +34,18 @@ sql_expression* new_flat_sql_expr(sql_expression_type type)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
-	initialize_sql_expression_list(&(expr->expr_list), 5);
+	initialize_arraylist(&(expr->expr_list), 5);
 	return expr;
 }
 
-void insert_expr_to_flat_sql_expr(sql_expression* expr, sql_expression* from_val)
+void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* from_val)
 {
-	if(is_full_sql_expression_list(&(expr->expr_list)) && !expand_sql_expression_list(&(expr->expr_list)))
+	if(is_full_arraylist(&(expr->expr_list)) && !expand_arraylist(&(expr->expr_list)))
 	{
 		printf("failed to insert back in expression list for flat operator\n");
 		exit(-1);
 	}
-	push_back_in_sql_expression_list(&(expr->expr_list), &from_val);
+	push_back_to_arraylist(&(expr->expr_list), &from_val);
 }
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
@@ -126,7 +122,7 @@ void print_sql_expr(const sql_expression* expr)
 		{
 			printf("( ");
 			print_sql_expr(expr->left);
-			printf(" % ");
+			printf(" %% ");
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -255,11 +251,11 @@ void print_sql_expr(const sql_expression* expr)
 		case SQL_IN :
 		{
 			printf("( IN : (");
-			for(cy_uint i = 0; i < get_element_count_for_sql_expression_list(&(expr->expr_list)); i++)
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
 					printf(" , ");
-				print_sql_expr(get_element_from_sql_expression_list(&(expr->expr_list), i));
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
 			}
 			printf(") )");
 			break;
@@ -322,11 +318,16 @@ void delete_sql_expr(sql_expression* expr)
 			break;
 		}
 
+		case SQL_ADD_FLAT :
+		case SQL_MUL_FLAT :
+		case SQL_LOGAND_FLAT :
+		case SQL_LOGOR_FLAT :
+		case SQL_LOGXOR_FLAT :
 		case SQL_IN :
 		{
-			for(cy_uint i = 0; i < get_element_count_for_sql_expression_list(&(expr->expr_list)); i++)
-				delete_sql_expr(get_element_from_sql_expression_list(&(expr->expr_list), i));
-			deinitialize_sql_expression_list(&(expr->expr_list));
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->expr_list), i));
+			deinitialize_arraylist(&(expr->expr_list));
 			break;
 		}
 

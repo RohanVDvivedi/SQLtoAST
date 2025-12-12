@@ -3,7 +3,7 @@
 
 #include<cutlery/dstring.h>
 
-#include<cutlery/value_arraylist.h>
+#include<cutlery/arraylist.h>
 
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
@@ -57,9 +57,6 @@ enum sql_expression_type
 };
 
 typedef struct sql_expression sql_expression;
-
-data_definitions_value_arraylist(sql_expression_list, sql_expression*)
-
 struct sql_expression
 {
 	sql_expression_type type;
@@ -84,7 +81,7 @@ struct sql_expression
 		};
 
 		// for in operator and SQL_*_FLAT types
-		sql_expression_list expr_list;
+		arraylist expr_list;
 
 		// for constant or variable
 		dstring value;
@@ -99,7 +96,7 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 
 sql_expression* new_flat_sql_expr(sql_expression_type type);
 
-void insert_expr_to_flat_sql_expr(sql_expression* expr, sql_expression* from_val);
+void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* from_val);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
