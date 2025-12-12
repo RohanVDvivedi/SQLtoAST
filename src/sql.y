@@ -156,7 +156,7 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 						{$$ = $2;}
 
 
 expr_list : 	  expr 												{$$.expr = new_flat_sql_expr(SQL_IN); insert_expr_to_flat_sql_expr($$.expr, $1.expr); $$.type = SQL_EXPR;}
-				| expr_list COMMA expr 								{insert_expr_to_flat_sql_expr($1.expr, $3.expr); $$ = $1;}
+				| expr_list COMMA expr 								{insert_expr_to_flat_sql_expr($1.expr, $3.expr); $$ = $1;  $$.type = SQL_EXPR;}
 
 %%
 
