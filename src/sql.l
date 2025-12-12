@@ -53,9 +53,9 @@
 
 (?i:IN) 				{return IN;}
 
-[-+]?[0-9]+(\.[0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_CONST, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
-							yylval->val.type = SQL_EXPR;
-							return CONST;}
+[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_CONST, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
+										yylval->val.type = SQL_EXPR;
+										return CONST;}
 
 [a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*		{yylval->val.expr = new_valued_sql_expr(SQL_VAR, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 														yylval->val.type = SQL_EXPR;
