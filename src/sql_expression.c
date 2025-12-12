@@ -98,11 +98,68 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 
 			return flat_expr;
 		}
-		default :
+
+		case SQL_NEG :
+		case SQL_BITNOT :
+		case SQL_LOGNOT :
+		{
+			expr->unary_of = flatten_similar_associative_operators_in_sql_expression(expr->unary_of);
+			return expr;
+		}
+
+		case SQL_SUB :
+		case SQL_DIV :
+		case SQL_MOD :
+		case SQL_GT :
+		case SQL_GTE :
+		case SQL_LT :
+		case SQL_LTE :
+		case SQL_EQ :
+		case SQL_NEQ :
+		case SQL_BITAND :
+		case SQL_BITOR :
+		case SQL_BITXOR :
+		{
+			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
+			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+			return expr;
+		}
+
+		case SQL_BTWN :
+		{
+			expr->btwn_input = flatten_similar_associative_operators_in_sql_expression(expr->btwn_input);
+			expr->bounds[0] = flatten_similar_associative_operators_in_sql_expression(expr->bounds[0]);
+			expr->bounds[1] = flatten_similar_associative_operators_in_sql_expression(expr->bounds[1]);
+			return expr;
+		}
+
+		// they are already flatenned
+		case SQL_ADD_FLAT :
+		case SQL_MUL_FLAT :
+		case SQL_LOGAND_FLAT :
+		case SQL_LOGOR_FLAT :
+		case SQL_LOGXOR_FLAT :
+		{
+			return expr;
+		}
+
+		case SQL_IN :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
+				set_from_front_in_arraylist(&(expr->in_expr_list), flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i)), i);
+			expr->in_input = flatten_similar_associative_operators_in_sql_expression(expr->in_input);
+			return expr;
+		}
+
+		case SQL_NUM :
+		case SQL_STR :
+		case SQL_VAR :
 		{
 			return expr;
 		}
 	}
+
+	return NULL;
 }
 
 void print_sql_expr(const sql_expression* expr)
