@@ -18,8 +18,6 @@
 
 %option extra-type="stream *"
 
-%x BETWEEN_SC
-
 %%
 
 [ \t\n\r]+      		{;}
@@ -51,9 +49,7 @@
 (?i:OR) 				{return L_OR;}
 (?i:XOR) 				{return L_XOR;}
 
-(?i:BETWEEN) 			{BEGIN(BETWEEN_SC);return BETWEEN;}
-<BETWEEN_SC>(?i:AND) 	{BEGIN(INITIAL);return BTWN_AND;}
-<BETWEEN_SC>. 			{BEGIN(INITIAL);yyless(0);}
+(?i:BETWEEN) 			{return BETWEEN;}
 
 (?i:IN) 				{return IN;}
 
