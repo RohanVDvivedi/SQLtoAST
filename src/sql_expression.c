@@ -64,6 +64,47 @@ sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 	return expr;
 }
 
+sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expression* expr)
+{
+	switch(expr->type)
+	{
+		case SQL_ADD :
+		case SQL_MUL :
+		case SQL_LOGAND :
+		case SQL_LOGOR :
+		case SQL_LOGXOR :
+		{
+			sql_expression* left = flatten_similar_associative_operators_in_sql_expression(expr->left);
+			sql_expression* right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+
+			sql_expression* flat_expr = new_flat_sql_expr(expr->type + 1); // the next type is always the flattenned operator
+
+			// free up the, memory for the old binary version of this operator
+			free(expr);
+
+			// only similar flat expression types can be made flat
+			if(left->type == flat_expr->type)
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(left->expr_list)); i++)
+					insert_expr_to_flat_sql_expr(flat_expr, get_from_front_of_arraylist(&(left->expr_list), i));
+			else // else insert left as is
+				insert_expr_to_flat_sql_expr(flat_expr, left);
+
+			// only similar flat expression types can be made flat
+			if(right->type == flat_expr->type)
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(right->expr_list)); i++)
+					insert_expr_to_flat_sql_expr(flat_expr, get_from_front_of_arraylist(&(right->expr_list), i));
+			else // else insert right as is
+				insert_expr_to_flat_sql_expr(flat_expr, right);
+
+			return flat_expr;
+		}
+		default :
+		{
+			return expr;
+		}
+	}
+}
+
 void print_sql_expr(const sql_expression* expr)
 {
 	switch(expr->type)
