@@ -18,6 +18,8 @@
 
 %option extra-type="stream *"
 
+%x BETWEEN_SC
+
 %%
 
 [ \t\n\r]+      		{;}
@@ -49,16 +51,23 @@
 (?i:OR) 				{return L_OR;}
 (?i:XOR) 				{return L_XOR;}
 
-(?i:BETWEEN) 			{return BETWEEN;}
+<BETWEEN_SC>(?i:AND)      			{BEGIN(INITIAL);return BTWN_AND;}
+
+
+(?i:BETWEEN) 			{BEGIN(BETWEEN_SC);return BETWEEN;}
 
 (?i:IN) 				{return IN;}
 
-[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_CONST, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
+[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_NUM, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 										yylval->val.type = SQL_EXPR;
-										return CONST;}
+										return NUMBER;}
+
+'.+'									{yylval->val.expr = new_valued_sql_expr(SQL_STR, new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2));
+										yylval->val.type = SQL_EXPR;
+										return STRING;}
 
 [a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*		{yylval->val.expr = new_valued_sql_expr(SQL_VAR, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 														yylval->val.type = SQL_EXPR;
-														return VAR;}
+														return IDENTIFIER;}
 
 %%

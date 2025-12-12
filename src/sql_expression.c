@@ -321,7 +321,14 @@ void print_sql_expr(const sql_expression* expr)
 			break;
 		}
 
-		case SQL_CONST :
+		case SQL_STR :
+		{
+			printf("'");
+			printf_dstring(&(expr->value));
+			printf("'");
+			break;
+		}
+		case SQL_NUM :
 		{
 			printf_dstring(&(expr->value));
 			break;
@@ -391,7 +398,8 @@ void delete_sql_expr(sql_expression* expr)
 			break;
 		}
 
-		case SQL_CONST :
+		case SQL_NUM :
+		case SQL_STR :
 		case SQL_VAR :
 		{
 			deinit_dstring(&(expr->value));

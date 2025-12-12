@@ -56,7 +56,7 @@ OBJECTS=$(patsubst ${SRC_DIR}/%.c, ${OBJ_DIR}/%.o, ${SOURCES})
 
 # bison rule
 $(YACC_C) $(YACC_H): $(YACC_SRC)
-	$(BISON) -d -o $(YACC_C) $(YACC_SRC)
+	$(BISON) -Wcounterexamples -d -o $(YACC_C) $(YACC_SRC)
 
 # flex rule
 $(LEX_C) $(LEX_H): $(LEX_SRC) $(YACC_H)

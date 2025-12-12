@@ -47,7 +47,8 @@ enum sql_expression_type
 
 	// all operators above take expression list as input
 
-	SQL_CONST,
+	SQL_NUM,
+	SQL_STR,
 
 	// reflects a constant
 
