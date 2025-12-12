@@ -57,6 +57,10 @@ enum sql_expression_type
 	// reflects a variable, or a table accessible value
 };
 
+/*
+	int the above enum, please make sure that the next of the binary is always possibly it's flattenned version
+*/
+
 typedef struct sql_expression sql_expression;
 struct sql_expression
 {
