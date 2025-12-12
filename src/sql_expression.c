@@ -48,7 +48,7 @@ void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* fr
 	push_back_to_arraylist(&(expr->expr_list), &from_val);
 }
 
-void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
+void convert_flat_to_in_sql_expr(sql_expression* expr, const sql_expression* input)
 {
 	expr->type = SQL_IN;
 	arraylist temp = expr->expr_list;
