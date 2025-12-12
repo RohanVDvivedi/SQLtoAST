@@ -77,11 +77,18 @@ struct sql_expression
 		// for between operator
 		struct
 		{
-			sql_expression* input;
+			sql_expression* btwn_input;
 			sql_expression* bounds[2];
 		};
 
-		// for in operator and SQL_*_FLAT types
+		// for in operator
+		struct
+		{
+			sql_expression* in_input;
+			arraylist in_expr_list;
+		};
+
+		// for SQL_*_FLAT types
 		arraylist expr_list;
 
 		// for constant or variable
@@ -98,6 +105,8 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 sql_expression* new_flat_sql_expr(sql_expression_type type);
 
 void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* from_val);
+
+void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 

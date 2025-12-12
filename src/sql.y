@@ -49,6 +49,7 @@
 %type <val> root
 
 %type <val> expr
+%type <val> expr_list
 
 %token <val> IDENTIFIER
 %token <val> NUMBER
@@ -84,6 +85,7 @@
 %token BETWEEN
 
 %token IN
+%token COMMA
 
 /* Precedence + Associativity */
 
@@ -95,6 +97,8 @@
 %left L_AND
 
 %nonassoc BETWEEN_PREC
+
+%nonassoc IN_PREC
 
 %left EQ NEQ GT GTE LT LTE
 
@@ -142,11 +146,17 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 						{$$ = $2;}
 			| expr LT expr 											{$$.expr = new_binary_sql_expr(SQL_LT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr LTE expr 										{$$.expr = new_binary_sql_expr(SQL_LTE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
+			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET 			{convert_flat_to_in_sql_expr($4.expr, $1.expr); $$ = $4; $$.type = SQL_EXPR;}
+
 			| expr BETWEEN expr L_AND expr %prec BETWEEN_PREC		{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
 
 			| expr L_AND expr 										{$$.expr = new_binary_sql_expr(SQL_LOGAND, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr L_OR expr 										{$$.expr = new_binary_sql_expr(SQL_LOGOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr L_XOR expr 										{$$.expr = new_binary_sql_expr(SQL_LOGXOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+
+
+expr_list : 	  expr 												{$$.expr = new_flat_sql_expr(SQL_IN); insert_expr_to_flat_sql_expr($$.expr, $1.expr); $$.type = SQL_EXPR;}
+				| expr_list COMMA expr 								{insert_expr_to_flat_sql_expr($1.expr, $3.expr); $$ = $1;}
 
 %%
 

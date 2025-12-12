@@ -52,6 +52,7 @@
 (?i:BETWEEN) 			{return BETWEEN;}
 
 (?i:IN) 				{return IN;}
+","						{return COMMA;}
 
 [-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_NUM, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 										yylval->val.type = SQL_EXPR;

@@ -24,7 +24,7 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = SQL_BTWN;
-	expr->input = input;
+	expr->btwn_input = input;
 	expr->bounds[0] = bounds0;
 	expr->bounds[1] = bounds1;
 	return expr;
@@ -46,6 +46,13 @@ void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* fr
 		exit(-1);
 	}
 	push_back_to_arraylist(&(expr->expr_list), &from_val);
+}
+
+void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
+{
+	expr->type = SQL_IN;
+	expr->in_expr_list = expr->expr_list;
+	expr->in_input = input;
 }
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
@@ -239,7 +246,7 @@ void print_sql_expr(const sql_expression* expr)
 		case SQL_BTWN :
 		{
 			printf("( ");
-			print_sql_expr(expr->input);
+			print_sql_expr(expr->btwn_input);
 			printf(" BETWEEN [ ");
 			print_sql_expr(expr->bounds[0]);
 			printf(" , ");
@@ -310,12 +317,14 @@ void print_sql_expr(const sql_expression* expr)
 		}
 		case SQL_IN :
 		{
-			printf("( IN : (");
+			printf("( ");
+			print_sql_expr(expr->in_input);
+			printf(" IN (");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
 					printf(" , ");
-				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				print_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i));
 			}
 			printf(") )");
 			break;
@@ -390,11 +399,19 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_LOGAND_FLAT :
 		case SQL_LOGOR_FLAT :
 		case SQL_LOGXOR_FLAT :
-		case SQL_IN :
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->expr_list), i));
 			deinitialize_arraylist(&(expr->expr_list));
+			break;
+		}
+
+		case SQL_IN :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
+				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i));
+			delete_sql_expr(expr->in_input);
+			deinitialize_arraylist(&(expr->in_expr_list));
 			break;
 		}
 
