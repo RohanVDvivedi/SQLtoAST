@@ -51,7 +51,7 @@ void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* fr
 void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
 {
 	expr->type = SQL_IN;
-	expr->in_expr_list = expr->expr_list;
+	memory_move(&(expr->in_expr_list), &(expr->expr_list), sizeof(arraylist));
 	expr->in_input = input;
 }
 
@@ -389,6 +389,7 @@ void delete_sql_expr(sql_expression* expr)
 
 		case SQL_BTWN :
 		{
+			delete_sql_expr(expr->btwn_input);
 			delete_sql_expr(expr->bounds[0]);
 			delete_sql_expr(expr->bounds[1]);
 			break;
