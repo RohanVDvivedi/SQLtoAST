@@ -1,5 +1,4 @@
 * SQL EXPRESSION
- * add true, false and unknown as lexemes
  * add is true, is false and is unknown
  * support like and not like operators
  * implement ALL ANY and SOME operators
