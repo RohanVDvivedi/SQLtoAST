@@ -1,5 +1,6 @@
 * SQL EXPRESSION
  * add || operator for concatenation of strings
+ * add is NULL and is not NULL operators
  * add SUBSTRING operator
  * logic to flatten the || concatenation operator
 
