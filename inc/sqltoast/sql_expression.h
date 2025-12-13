@@ -37,6 +37,11 @@ enum sql_expression_type
 	SQL_LOGOR,		SQL_LOGOR_FLAT,
 	SQL_LOGXOR,		SQL_LOGXOR_FLAT, // logical operators
 
+	SQL_LSHIFT,
+	SQL_RSHIFT, // left shift and right shift on integers
+
+	SQL_CONCAT, SQL_CONCAT_FLAT,// concatenate strings
+
 	// all operators above are binary operators
 
 	SQL_BTWN, // between operator in sql

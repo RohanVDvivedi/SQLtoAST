@@ -73,6 +73,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_LOGAND :
 		case SQL_LOGOR :
 		case SQL_LOGXOR :
+		case SQL_CONCAT :
 		{
 			sql_expression* left = flatten_similar_associative_operators_in_sql_expression(expr->left);
 			sql_expression* right = flatten_similar_associative_operators_in_sql_expression(expr->right);
@@ -147,6 +148,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_LOGAND_FLAT :
 		case SQL_LOGOR_FLAT :
 		case SQL_LOGXOR_FLAT :
+		case SQL_CONCAT_FLAT :
 		{
 			return expr;
 		}
@@ -349,6 +351,33 @@ void print_sql_expr(const sql_expression* expr)
 			printf(" )");
 			break;
 		}
+		case SQL_LSHIFT :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" AND ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_RSHIFT :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" OR ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
+		case SQL_CONCAT :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" XOR ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
 
 		case SQL_BTWN :
 		{
@@ -422,6 +451,18 @@ void print_sql_expr(const sql_expression* expr)
 			printf(" )");
 			break;
 		}
+		case SQL_CONCAT_FLAT :
+		{
+			printf("( ");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" || ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+			}
+			printf(" )");
+			break;
+		}
 		case SQL_IN :
 		{
 			printf("( ");
@@ -488,6 +529,9 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_LOGAND :
 		case SQL_LOGOR :
 		case SQL_LOGXOR :
+		case SQL_LSHIFT :
+		case SQL_RSHIFT :
+		case SQL_CONCAT :
 		{
 			delete_sql_expr(expr->left);
 			delete_sql_expr(expr->right);
@@ -507,6 +551,7 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_LOGAND_FLAT :
 		case SQL_LOGOR_FLAT :
 		case SQL_LOGXOR_FLAT :
+		case SQL_CONCAT_FLAT :
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->expr_list), i));
