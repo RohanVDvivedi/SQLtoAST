@@ -128,6 +128,8 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_BITAND :
 		case SQL_BITOR :
 		case SQL_BITXOR :
+		case SQL_LSHIFT :
+		case SQL_RSHIFT :
 		{
 			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
 			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
