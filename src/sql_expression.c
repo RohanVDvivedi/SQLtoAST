@@ -355,7 +355,7 @@ void print_sql_expr(const sql_expression* expr)
 		{
 			printf("( ");
 			print_sql_expr(expr->left);
-			printf(" AND ");
+			printf(" << ");
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -364,7 +364,7 @@ void print_sql_expr(const sql_expression* expr)
 		{
 			printf("( ");
 			print_sql_expr(expr->left);
-			printf(" OR ");
+			printf(" >> ");
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -373,7 +373,7 @@ void print_sql_expr(const sql_expression* expr)
 		{
 			printf("( ");
 			print_sql_expr(expr->left);
-			printf(" XOR ");
+			printf(" || ");
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
