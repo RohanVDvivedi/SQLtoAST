@@ -92,15 +92,27 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 
 			// only similar flat expression types can be made flat
 			if(left->type == flat_expr->type)
+			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(left->expr_list)); i++)
 					insert_expr_to_flat_sql_expr(flat_expr, get_from_front_of_arraylist(&(left->expr_list), i));
+
+				// destroy just the left child
+				deinitialize_arraylist(&(left->expr_list));
+				free(left);
+			}
 			else // else insert left as is
 				insert_expr_to_flat_sql_expr(flat_expr, left);
 
 			// only similar flat expression types can be made flat
 			if(right->type == flat_expr->type)
+			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(right->expr_list)); i++)
 					insert_expr_to_flat_sql_expr(flat_expr, get_from_front_of_arraylist(&(right->expr_list), i));
+
+				// destroy just the left child
+				deinitialize_arraylist(&(right->expr_list));
+				free(right);
+			}
 			else // else insert right as is
 				insert_expr_to_flat_sql_expr(flat_expr, right);
 
