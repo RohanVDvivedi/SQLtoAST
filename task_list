@@ -1,14 +1,10 @@
 * SQL EXPRESSION
  * add true, false and unknown as lexemes
  * add is true, is false and is unknown
- * support != same as <>
  * support like and not like operators
  * implement ALL ANY and SOME operators
- * implement bitwise operations << and >>
- * add || operator for concatenation of strings
  * add is NULL and is not NULL operators
  * add SUBSTRING operator
- * logic to flatten the || concatenation operator
 
 
  * read about SQL ANSI standard
