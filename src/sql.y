@@ -54,6 +54,8 @@
 %token <val> IDENTIFIER
 %token <val> NUMBER
 %token <val> STRING
+%token <val> TRUE
+%token <val> FALSE
 
 %token OPEN_BRACKET
 %token CLOSE_BRACKET
@@ -130,6 +132,8 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 						{$$ = $2;}
 			| NUMBER												{$$ = $1;}
 			| STRING												{$$ = $1;}
 			| IDENTIFIER											{$$ = $1;}
+			| TRUE													{$$ = $1;}
+			| FALSE													{$$ = $1;}
 
 			| B_NOT expr 											{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
 			| NEG expr %prec UMINUS									{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}

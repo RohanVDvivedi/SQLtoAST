@@ -59,6 +59,13 @@
 (?i:IN) 				{return IN;}
 ","						{return COMMA;}
 
+(?i:TRUE)				{yylval->val.expr = new_const_bool_valued_sql_expr(SQL_TRUE);
+						yylval->val.type = SQL_EXPR;
+						return TRUE;}
+(?i:FALSE)				{yylval->val.expr = new_const_bool_valued_sql_expr(SQL_FALSE);
+						yylval->val.type = SQL_EXPR;
+						return FALSE;}
+
 [-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_NUM, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 										yylval->val.type = SQL_EXPR;
 										return NUMBER;}
