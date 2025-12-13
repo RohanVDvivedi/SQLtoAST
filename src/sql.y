@@ -82,6 +82,10 @@
 %token L_OR
 %token L_XOR
 
+%token L_SHIFT
+%token R_SHIFT
+%token CONCAT
+
 %token BETWEEN
 
 %token IN
@@ -105,6 +109,10 @@
 %left B_OR
 %left B_XOR
 %left B_AND
+
+%left L_SHIFT R_SHIFT
+
+%left CONCAT
 
 %left ADD NEG
 %left MUL DIV MOD
@@ -145,6 +153,10 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 						{$$ = $2;}
 			| expr GTE expr 										{$$.expr = new_binary_sql_expr(SQL_GTE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr LT expr 											{$$.expr = new_binary_sql_expr(SQL_LT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr LTE expr 										{$$.expr = new_binary_sql_expr(SQL_LTE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+
+			| expr L_SHIFT expr 										{$$.expr = new_binary_sql_expr(SQL_LSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| expr R_SHIFT expr 									{$$.expr = new_binary_sql_expr(SQL_RSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| expr CONCAT expr 										{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
 			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET 			{convert_flat_to_in_sql_expr($4.expr, $1.expr); $$ = $4;}
 
