@@ -40,6 +40,7 @@
 "<=" 					{return LTE;}
 "=" 					{return EQ;}
 "<>" 					{return NEQ;}
+"!=" 					{return NEQ;}
 
 "&" 					{return B_AND;}
 "|" 					{return B_OR;}
