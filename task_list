@@ -1,10 +1,25 @@
 * SQL EXPRESSION
- * add is true, is false and is unknown
- * support like and not like operators
- * implement ALL ANY and SOME operators
- * add is NULL and is not NULL operators
- * add SUBSTRING operator
+ * add is true, is false and is unknown -> read what is standard, is it = or is necesary?
+ * support like and not like operators "expr like expr" -> read what they actually do?
+ * add is NULL and is not NULL operators -> why not use = NULL instead?
+ * add SUBSTRING operator -> read what is standard grammar?
+ * add cast operation to a type -> readh about its grammar?
+ * check if there is an operator to get type of a variable -> very good point
+ * implement ALL ANY and SOME operators -> what are they even?
 
+* SQL QUERY
+DQL (select) and then DML (insert update delete)
+ * start with select query
+ * where, order by, from, join, group by, having clauses, decalre them in the order they appear in the generic unoptimized execution plan
+ * any of these clause can point to a expression or a sub query
+ * in operator can also point to a sub query
+ * same pieces can also be used in insert, update and delete queries
+DDL (create alter drop)
+ * start with create table, database and index queries
+ * start with alter table, database and index querires
+ * start with drop table, database and index queries
+
+--------
 
  * read about SQL ANSI standard
  * keep AST and logical query plan separate
