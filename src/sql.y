@@ -49,7 +49,7 @@
 
 %union {
 	value val;
-	int64_t ival;
+	dstring sval; // for any other lexeme
 }
 
 %type <val> root
@@ -62,7 +62,7 @@
 %type <val> type
 %type <val> type_name
 %type <val> type_specs
-%type <ival> type_spec
+%type <sval> type_spec
 %type <val> type_with_or_without_timezone
 
 %token <val> IDENTIFIER
