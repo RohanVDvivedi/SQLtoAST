@@ -147,7 +147,11 @@ any_expr :
 bool_expr :
 			OPEN_BRACKET bool_expr CLOSE_BRACKET 											{$$ = $2;}
 
-			| value_expr 																	{$$ = $1;}
+			| IDENTIFIER																	{$$ = $1;}
+			| TRUE																			{$$ = $1;}
+			| FALSE																			{$$ = $1;}
+			| _NULL_																		{$$ = $1;}
+			| UNKNOWN																		{$$ = $1;}
 
 			| L_NOT bool_expr 																{$$.expr = new_unary_sql_expr(SQL_LOGNOT, $2.expr); $$.type = SQL_EXPR;}
 
