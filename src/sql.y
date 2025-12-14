@@ -15,6 +15,7 @@
 	{
 		SQL_ROOT,
 		SQL_EXPR,
+		SQL_EXPR_LIST,
 	};
 
 	typedef struct value value;
@@ -25,6 +26,7 @@
 		{
 			sql* root;
 			sql_expression* expr;
+			arraylist expr_list;
 		};
 	};
 }
@@ -165,8 +167,8 @@ bool_expr :
 			| value_expr LIKE value_expr %prec LIKE_PREC									{$$.expr = new_binary_sql_expr(SQL_LIKE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| value_expr L_NOT LIKE value_expr %prec LIKE_PREC								{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1.expr, $4.expr)); $$.type = SQL_EXPR;}
 
-			| value_expr IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC		{convert_flat_to_in_sql_expr($4.expr, $1.expr); $$.expr = $4.expr; $$.type = SQL_EXPR;}
-			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{convert_flat_to_in_sql_expr($5.expr, $1.expr); $$.expr = new_unary_sql_expr(SQL_LOGNOT, $5.expr); $$.type = SQL_EXPR;}
+			| value_expr IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC		{$$.expr = new_in_sql_expr($1.expr, $4.expr_list); $$.type = SQL_EXPR;}
+			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1.expr, $5.expr_list)); $$.type = SQL_EXPR;}
 
 			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
 			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1.expr, $4.expr, $6.expr)); $$.type = SQL_EXPR;}
@@ -214,11 +216,11 @@ value_expr :
 
 			| value_expr CONCAT value_expr 											{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
-			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{convert_flat_to_func_sql_expr($3.expr, $1.expr->value); $$.expr = $3.expr; free($1.expr); $$.type = SQL_EXPR;}
+			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$.expr = new_func_sql_expr($1.expr->value, $3.expr_list); free($1.expr); $$.type = SQL_EXPR;}
 
 value_expr_list :
-			value_expr 																{$$.expr = new_flat_sql_expr(SQL_IN); insert_expr_to_flat_sql_expr($$.expr, $1.expr); $$.type = SQL_EXPR;}
-			| value_expr_list COMMA value_expr 										{insert_expr_to_flat_sql_expr($1.expr, $3.expr); $$ = $1;  $$.type = SQL_EXPR;}
+			value_expr 																{initialize_expr_list(&($$.expr_list)); insert_in_expr_list(&($$.expr_list), $1.expr); $$.type = SQL_EXPR_LIST;}
+			| value_expr_list COMMA value_expr 										{insert_in_expr_list(&($1.expr_list), $3.expr); $$ = $1; $$.type = SQL_EXPR_LIST;}
 
 %%
 
