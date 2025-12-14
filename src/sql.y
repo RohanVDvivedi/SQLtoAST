@@ -9,6 +9,7 @@
 %code requires {
 	#include<sqltoast/sqltoast.h>
 	#include<sqltoast/sql_expression.h>
+	#include<sqltoast/sql_type.h>
 
 	typedef enum value_type value_type;
 	enum value_type
@@ -27,6 +28,7 @@
 			sql* root;
 			sql_expression* expr;
 			arraylist expr_list;
+			sql_type type;
 		};
 	};
 }
@@ -55,6 +57,7 @@
 %type <val> bool_literal
 %type <val> value_expr
 %type <val> value_expr_list
+%type <val> type
 
 %token <val> IDENTIFIER
 %token <val> NUMBER
@@ -103,6 +106,9 @@
 
 %token IN
 %token COMMA
+
+%token CAST
+%token AS
 
 /* Precedence + Associativity */
 
@@ -217,6 +223,8 @@ value_expr :
 			| value_expr CONCAT value_expr 											{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
 			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$.expr = new_func_sql_expr($1.expr->value, $3.expr_list); free($1.expr); $$.type = SQL_EXPR;}
+
+			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$.expr = new_cast_sql_expr($3.expr, $4.type); $$.type = SQL_EXPR;}
 
 value_expr_list :
 			value_expr 																{initialize_expr_list(&($$.expr_list)); insert_in_expr_list(&($$.expr_list), $1.expr); $$.type = SQL_EXPR_LIST;}

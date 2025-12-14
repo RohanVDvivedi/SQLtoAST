@@ -63,6 +63,9 @@
 (?i:IN) 				{return IN;}
 ","						{return COMMA;}
 
+(?i:CAST)				{return CAST;}
+(?i:AS)					{return AS;}
+
 (?i:TRUE)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_TRUE);
 						yylval->val.type = SQL_EXPR;
 						return TRUE;}
