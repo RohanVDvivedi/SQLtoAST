@@ -140,10 +140,11 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 
 sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list);
 
-sql_expression* new_in_sql_expr(sql_expression* expr, sql_expression* input, arraylist in_expr_list);
+sql_expression* new_in_sql_expr(sql_expression* in_input, arraylist in_expr_list);
 
-sql_expression* new_func_sql_expr(sql_expression* expr, dstring func_name, arraylist param_expr_list);
+sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list);
 
+// for NUM, STR and VAR
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
 // for unknown, true, false and null

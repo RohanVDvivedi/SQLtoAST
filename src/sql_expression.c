@@ -5,7 +5,7 @@
 
 void initialize_expr_list(arraylist* expr_list)
 {
-	if(!initialize_arraylist(&(expr->expr_list), 5))
+	if(!initialize_arraylist(expr_list, 5))
 	{
 		printf("failed to initialize expression list\n");
 		exit(-1);
@@ -49,7 +49,7 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 	return expr;
 }
 
-sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list);
+sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
@@ -57,18 +57,22 @@ sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list)
 	return expr;
 }
 
-sql_expression* new_in_sql_expr(sql_expression* expr, sql_expression* input, arraylist in_expr_list);
+sql_expression* new_in_sql_expr(sql_expression* in_input, arraylist in_expr_list)
 {
+	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = SQL_IN;
-	expr->in_input = input;
+	expr->in_input = in_input;
 	expr->in_expr_list = in_expr_list;
+	return expr;
 }
 
-sql_expression* new_func_sql_expr(sql_expression* expr, dstring func_name, arraylist param_expr_list);
+sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list)
 {
+	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = SQL_FUNCTION;
 	expr->func_name = func_name;
 	expr->param_expr_list = param_expr_list;
+	return expr;
 }
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
@@ -100,38 +104,42 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			sql_expression* left = flatten_similar_associative_operators_in_sql_expression(expr->left);
 			sql_expression* right = flatten_similar_associative_operators_in_sql_expression(expr->right);
 
-			sql_expression* flat_expr = new_flat_sql_expr(expr->type + 1); // the next type is always the flattenned operator
+			// the next type is always the flattenned operator
+			sql_expression_type flat_type = expr->type + 1;
+
+			arraylist expr_list;
+			initialize_expr_list(&expr_list);
 
 			// free up the, memory for the old binary version of this operator
 			free(expr);
 
 			// only similar flat expression types can be made flat
-			if(left->type == flat_expr->type)
+			if(left->type == flat_type)
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(left->expr_list)); i++)
-					insert_expr_to_flat_sql_expr(flat_expr, (sql_expression*) get_from_front_of_arraylist(&(left->expr_list), i));
+					insert_in_expr_list(&expr_list, (sql_expression*) get_from_front_of_arraylist(&(left->expr_list), i));
 
 				// destroy just the left child
 				deinitialize_arraylist(&(left->expr_list));
 				free(left);
 			}
 			else // else insert left as is
-				insert_expr_to_flat_sql_expr(flat_expr, left);
+				insert_in_expr_list(&expr_list, left);
 
 			// only similar flat expression types can be made flat
-			if(right->type == flat_expr->type)
+			if(right->type == flat_type)
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(right->expr_list)); i++)
-					insert_expr_to_flat_sql_expr(flat_expr, (sql_expression*) get_from_front_of_arraylist(&(right->expr_list), i));
+					insert_in_expr_list(&expr_list, (sql_expression*) get_from_front_of_arraylist(&(right->expr_list), i));
 
 				// destroy just the left child
 				deinitialize_arraylist(&(right->expr_list));
 				free(right);
 			}
 			else // else insert right as is
-				insert_expr_to_flat_sql_expr(flat_expr, right);
+				insert_in_expr_list(&expr_list, right);
 
-			return flat_expr;
+			return new_flat_sql_expr(flat_type, expr_list);
 		}
 
 		case SQL_NEG :
