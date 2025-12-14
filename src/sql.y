@@ -171,7 +171,7 @@ bool_expr :
 			| bool_expr L_XOR bool_expr 													{$$.expr = new_binary_sql_expr(SQL_LOGXOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
 bool_literal:
-			| TRUE																	{$$ = $1;}
+			TRUE																	{$$ = $1;}
 			| FALSE																	{$$ = $1;}
 			| _NULL_																{$$ = $1;}
 			| UNKNOWN																{$$ = $1;}
