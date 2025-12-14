@@ -42,7 +42,9 @@ enum sql_expression_type
 
 	SQL_CONCAT, SQL_CONCAT_FLAT,// concatenate strings
 
-	// all operators above are binary operators
+	SQL_LIKE,
+
+	// all operators above are binary operators (except their flat counter parts)
 
 	SQL_BTWN, // between operator in sql
 

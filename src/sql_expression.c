@@ -149,6 +149,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_BITXOR :
 		case SQL_LSHIFT :
 		case SQL_RSHIFT :
+		case SQL_LIKE :
 		{
 			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
 			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
@@ -401,6 +402,15 @@ void print_sql_expr(const sql_expression* expr)
 			printf(" )");
 			break;
 		}
+		case SQL_LIKE :
+		{
+			printf("( ");
+			print_sql_expr(expr->left);
+			printf(" LIKE ");
+			print_sql_expr(expr->right);
+			printf(" )");
+			break;
+		}
 
 		case SQL_BTWN :
 		{
@@ -566,6 +576,7 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_LSHIFT :
 		case SQL_RSHIFT :
 		case SQL_CONCAT :
+		case SQL_LIKE :
 		{
 			delete_sql_expr(expr->left);
 			delete_sql_expr(expr->right);
