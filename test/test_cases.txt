@@ -28,3 +28,7 @@ a BETWEEN b AND c AND d BETWEEN e AND f OR g
 a LIKE b AND c OR d LIKE e AND f OR g
 NOT a OR b AND NOT c BETWEEN d AND e
 a IN (b, c) AND d OR e IN (f || g, h)
+a || b between c and d || e
+a || b not between c || e and d
+a || b in (c,  d || e)
+a || b not in (c || e,  d || f, g, h)
