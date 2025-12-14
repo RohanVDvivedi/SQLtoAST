@@ -272,7 +272,7 @@ value_expr_list :
 			value_expr 																{initialize_expr_list(&($$.expr_list)); insert_in_expr_list(&($$.expr_list), $1.expr); $$.type = SQL_EXPR_LIST;}
 			| value_expr_list COMMA value_expr 										{insert_in_expr_list(&($1.expr_list), $3.expr); $$ = $1; $$.type = SQL_EXPR_LIST;}
 
-type : type_name type_specs type_with_or_without_timezone							{$$.data_type = $1.data_type; $$.data_type.spec_size = $2.data_type.spec_size; memcpy($$.data_type.spec, $2.data_type.spec, sizeof($$.data_type.spec)); $$.data_type.with_time_zone = $$.data_type.with_time_zone; $$.type = SQL_TYPE;}
+type : type_name type_specs type_with_or_without_timezone							{$$.data_type = $1.data_type; $$.data_type.spec_size = $2.data_type.spec_size; memcpy($$.data_type.spec, $2.data_type.spec, sizeof($$.data_type.spec)); $$.data_type.with_time_zone = $3.data_type.with_time_zone; $$.type = SQL_TYPE;}
 
 type_name : 	BOOL 					{$$.data_type.type_name = SQL_BOOL; $$.type = SQL_TYPE;}
 				| BIT 					{$$.data_type.type_name = SQL_BIT; $$.type = SQL_TYPE;}
