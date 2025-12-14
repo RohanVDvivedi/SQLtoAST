@@ -44,6 +44,8 @@ enum sql_expression_type
 
 	SQL_LIKE,
 
+	SQL_IS,
+
 	// all operators above are binary operators (except their flat counter parts)
 
 	SQL_BTWN, // between operator in sql
