@@ -56,6 +56,14 @@ void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
 	expr->in_input = input;
 }
 
+void convert_flat_to_func_sql_expr(sql_expression* expr, dstring func_name)
+{
+	expr->type = SQL_FUNCTION;
+	arraylist temp = expr->expr_list;
+	expr->param_expr_list = temp;
+	expr->func_name = func_name;
+}
+
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
@@ -192,6 +200,13 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_UNKNOWN :
 		case SQL_NULL :
 		{
+			return expr;
+		}
+
+		case SQL_FUNCTION :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
+				set_from_front_in_arraylist(&(expr->param_expr_list), (sql_expression*) flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i)), i);
 			return expr;
 		}
 	}
@@ -563,6 +578,20 @@ void print_sql_expr(const sql_expression* expr)
 			printf("null");
 			break;
 		}
+
+		case SQL_FUNCTION :
+		{
+			printf("( ");
+			printf_dstring(&(expr->func_name));
+			printf("( ");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
+			{
+				if(i != 0)
+					printf(" , ");
+				print_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i));
+			}
+			printf(" ) )");
+		}
 	}
 }
 
@@ -650,6 +679,14 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_NULL :
 		{
 			break;
+		}
+
+		case SQL_FUNCTION :
+		{
+			deinit_dstring(&(expr->func_name));
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
+				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i));
+			deinitialize_arraylist(&(expr->param_expr_list));
 		}
 	}
 	free(expr);

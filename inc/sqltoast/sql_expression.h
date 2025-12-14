@@ -74,6 +74,8 @@ enum sql_expression_type
 
 	SQL_NULL,
 	// null node
+
+	SQL_FUNCTION,
 };
 
 /*
@@ -116,6 +118,13 @@ struct sql_expression
 
 		// for constant or variable
 		dstring value;
+
+		// for sql_function
+		struct
+		{
+			dstring func_name; // name of the function
+			arraylist param_expr_list;
+		};
 	};
 };
 
@@ -130,6 +139,9 @@ sql_expression* new_flat_sql_expr(sql_expression_type type);
 void insert_expr_to_flat_sql_expr(sql_expression* expr, sql_expression* from_val);
 
 void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input);
+
+// this func_name here, is a name of the function
+void convert_flat_to_func_sql_expr(sql_expression* expr, dstring func_name);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
