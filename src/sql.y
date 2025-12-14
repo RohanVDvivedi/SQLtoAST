@@ -1,6 +1,7 @@
 %{
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 #include<sqltoast/sqltoast.h>
 #include<sqltoast/sql_expression.h>
@@ -49,6 +50,8 @@
 
 %union {
 	value val;
+	uint64_t uval;
+	int64_t ival;
 	dstring sval; // for any other lexeme
 }
 
@@ -62,7 +65,7 @@
 %type <val> type
 %type <val> type_name
 %type <val> type_specs
-%type <sval> type_spec
+%type <uval> type_spec
 %type <val> type_with_or_without_timezone
 
 %token <sval> IDENTIFIER
@@ -261,15 +264,15 @@ value_expr :
 
 			| value_expr CONCAT value_expr 											{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
-			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$.expr = new_func_sql_expr($1.expr->value, $3.expr_list); free($1.expr); $$.type = SQL_EXPR;}
+			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$.expr = new_func_sql_expr($1, $3.expr_list); $$.type = SQL_EXPR;}
 
-			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$.expr = new_cast_sql_expr($3.expr, $4.type); $$.type = SQL_EXPR;}
+			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$.expr = new_cast_sql_expr($3.expr, $5.data_type); $$.type = SQL_EXPR;}
 
 value_expr_list :
 			value_expr 																{initialize_expr_list(&($$.expr_list)); insert_in_expr_list(&($$.expr_list), $1.expr); $$.type = SQL_EXPR_LIST;}
 			| value_expr_list COMMA value_expr 										{insert_in_expr_list(&($1.expr_list), $3.expr); $$ = $1; $$.type = SQL_EXPR_LIST;}
 
-type : type_name type_specs type_with_or_without_timezone							{$$.data_type = $1.data_type; $$.data_type.specs_size = $2.data_type.specs_size; memcpy($$.data_type.specs, $2.data_type.specs, sizeof($$.data_type.specs)); $$.data_type.with_time_zone = $$.data_type.with_time_zone; $$.type = SQL_TYPE;}
+type : type_name type_specs type_with_or_without_timezone							{$$.data_type = $1.data_type; $$.data_type.spec_size = $2.data_type.spec_size; memcpy($$.data_type.spec, $2.data_type.spec, sizeof($$.data_type.spec)); $$.data_type.with_time_zone = $$.data_type.with_time_zone; $$.type = SQL_TYPE;}
 
 type_name : 	BOOL 					{$$.data_type.type_name = SQL_BOOL; $$.type = SQL_TYPE;}
 				| BIT 					{$$.data_type.type_name = SQL_BIT; $$.type = SQL_TYPE;}
@@ -281,7 +284,7 @@ type_name : 	BOOL 					{$$.data_type.type_name = SQL_BOOL; $$.type = SQL_TYPE;}
 				| FLOAT 				{$$.data_type.type_name = SQL_FLOAT; $$.type = SQL_TYPE;}
 				| DECIMAL 				{$$.data_type.type_name = SQL_DECIMAL; $$.type = SQL_TYPE;}
 				| NUMERIC 				{$$.data_type.type_name = SQL_NUMERIC; $$.type = SQL_TYPE;}
-				| TEXT 					{$$.data_type.type_name = SQL_TEST; $$.type = SQL_TYPE;}
+				| TEXT 					{$$.data_type.type_name = SQL_TEXT; $$.type = SQL_TYPE;}
 				| CHAR 					{$$.data_type.type_name = SQL_CHAR; $$.type = SQL_TYPE;}
 				| VARCHAR 				{$$.data_type.type_name = SQL_VARCHAR; $$.type = SQL_TYPE;}
 				| CLOB 					{$$.data_type.type_name = SQL_CLOB; $$.type = SQL_TYPE;}
@@ -290,12 +293,14 @@ type_name : 	BOOL 					{$$.data_type.type_name = SQL_BOOL; $$.type = SQL_TYPE;}
 				| TIME 					{$$.data_type.type_name = SQL_TIME; $$.type = SQL_TYPE;}
 				| TIMESTAMP 			{$$.data_type.type_name = SQL_TIMESTAMP; $$.type = SQL_TYPE;}
 
-type_specs : 																						{$$.data_type.specs_size = 0; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET spec CLOSE_BRACKET 													{$$.data_type.specs[0] = $1; $$.data_type.specs_size = 1; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET spec COMMA spec CLOSE_BRACKET 										{$$.data_type.specs[0] = $1; $$.data_type.specs[1] = $1; $$.data_type.specs_size = 2; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET spec COMMA spec COMMA spec CLOSE_BRACKET 							{$$.data_type.specs[0] = $1; $$.data_type.specs[1] = $1; $$.data_type.specs[2] = $1; $$.data_type.specs_size = 3; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET spec COMMA spec COMMA spec COMMA spec CLOSE_BRACKET 					{$$.data_type.specs[0] = $1; $$.data_type.specs[1] = $1; $$.data_type.specs[2] = $1; $$.data_type.specs[3] = $1; $$.data_type.specs_size = 4; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET spec COMMA spec COMMA spec COMMA spec COMMA spec CLOSE_BRACKET 		{$$.data_type.specs[0] = $1; $$.data_type.specs[1] = $1; $$.data_type.specs[2] = $1; $$.data_type.specs[3] = $1; $$.data_type.specs[4] = $1; $$.data_type.specs_size = 5; $$.type = SQL_TYPE;}
+type_specs : 																												{$$.data_type.spec_size = 0; $$.type = SQL_TYPE;}
+				| OPEN_BRACKET type_spec CLOSE_BRACKET 																		{$$.data_type.spec[0] = $2; $$.data_type.spec_size = 1; $$.type = SQL_TYPE;}
+				| OPEN_BRACKET type_spec COMMA type_spec CLOSE_BRACKET 														{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec_size = 2; $$.type = SQL_TYPE;}
+				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 										{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec[2] = $6; $$.data_type.spec_size = 3; $$.type = SQL_TYPE;}
+				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 						{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec[2] = $6; $$.data_type.spec[3] = $8; $$.data_type.spec_size = 4; $$.type = SQL_TYPE;}
+				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 		{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec[2] = $6; $$.data_type.spec[3] = $8; $$.data_type.spec[4] = $10; $$.data_type.spec_size = 5; $$.type = SQL_TYPE;}
+
+type_spec : INTEGER  			{unsigned long long int res = 0; get_unsigned_long_long_int_from_dstring(&($1), 10, &res); $$ = res; deinit_dstring(&($1));}
 
 type_with_or_without_timezone : 						{$$.data_type.with_time_zone = 0; $$.type = SQL_TYPE;}
 									| WITH_TZ 			{$$.data_type.with_time_zone = 1; $$.type = SQL_TYPE;}

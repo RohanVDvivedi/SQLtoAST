@@ -39,6 +39,6 @@ struct sql_type
 
 sql_type new_sql_type(sql_type_name type_name);
 
-void print_sql_type(sql_type* t);
+void print_sql_type(const sql_type* t);
 
 #endif

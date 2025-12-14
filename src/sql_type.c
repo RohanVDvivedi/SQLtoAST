@@ -30,7 +30,7 @@ sql_type new_sql_type(sql_type_name type_name)
 	return t;
 }
 
-void print_sql_type(sql_type* t)
+void print_sql_type(const sql_type* t)
 {
 	printf("%s", type_names[t->type_name]);
 	if(t->spec_size > 0)
