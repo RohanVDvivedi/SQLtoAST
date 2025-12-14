@@ -119,9 +119,9 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 
 sql_expression* new_flat_sql_expr(sql_expression_type type);
 
-void insert_expr_to_flat_sql_expr(sql_expression* expr, const sql_expression* from_val);
+void insert_expr_to_flat_sql_expr(sql_expression* expr, sql_expression* from_val);
 
-void convert_flat_to_in_sql_expr(sql_expression* expr, const sql_expression* input);
+void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
