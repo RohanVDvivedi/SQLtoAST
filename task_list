@@ -1,6 +1,6 @@
 * SQL EXPRESSION
- * add is true, is false and is unknown -> read what is standard, is it = or is necesary?
  * support like and not like operators "expr like expr" -> read what they actually do?
+ * add is true, is false and is unknown -> read what is standard, is it = or is necesary?
  * add is NULL and is not NULL operators -> why not use = NULL instead?
  * add SUBSTRING operator -> read what is standard grammar?
  * add cast operation to a type -> readh about its grammar?
