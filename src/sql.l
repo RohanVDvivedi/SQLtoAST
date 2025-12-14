@@ -79,6 +79,31 @@
 						yylval->val.type = SQL_EXPR;
 						return _NULL_;}
 
+(?i:BOOL)				{return BOOL;}
+(?i:BOOLEAN)			{return BOOL;}
+(?i:BIT)				{return BIT;}
+(?i:SMALLINT)			{return SMALLINT;}
+(?i:INT)				{return INT;}
+(?i:INTEGER)			{return INT;}
+(?i:BIGINT)				{return BIGINT;}
+(?i:REAL)				{return REAL;}
+(?i:DOUBLE)				{return DOUBLE;}
+(?i:FLOAT)				{return FLOAT;}
+(?i:DECIMAL)			{return DECIMAL;}
+(?i:NUMERIC)			{return NUMERIC;}
+(?i:TEXT)				{return TEXT;}
+(?i:CHAR)				{return CHAR;}
+(?i:CHARACTER)			{return CHAR;}
+(?i:VARCHAR)			{return VARCHAR;}
+(?i:CLOB)				{return CLOB;}
+(?i:BLOB)				{return BLOB;}
+(?i:DATE)				{return DATE;}
+(?i:TIME)				{return TIME;}
+(?i:TIMESTAMP)			{return TIMESTAMP;}
+
+(?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
+(?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
+
 [-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_NUM, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 										yylval->val.type = SQL_EXPR;
 										return NUMBER;}
