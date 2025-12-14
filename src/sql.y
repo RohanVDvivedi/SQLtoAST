@@ -164,10 +164,12 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 										{$$ = $2;}
 			| expr R_SHIFT expr 													{$$.expr = new_binary_sql_expr(SQL_RSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
 			| expr CONCAT expr 														{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+
 			| expr LIKE expr %prec LIKE_PREC										{$$.expr = new_binary_sql_expr(SQL_LIKE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr L_NOT LIKE expr %prec LIKE_PREC									{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1.expr, $4.expr)); $$.type = SQL_EXPR;}
 
-			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC			{convert_flat_to_in_sql_expr($4.expr, $1.expr); $$ = $4;}
+			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC			{convert_flat_to_in_sql_expr($4.expr, $1.expr); $$.expr = $4.expr; $$.type = SQL_EXPR;}
+			| expr L_NOT IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC		{convert_flat_to_in_sql_expr($5.expr, $1.expr); $$.expr = new_unary_sql_expr(SQL_LOGNOT, $5.expr); $$.type = SQL_EXPR;}
 
 			| expr BETWEEN expr L_AND expr %prec BETWEEN_PREC						{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
 
