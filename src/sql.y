@@ -214,6 +214,7 @@ value_expr :
 
 			| value_expr CONCAT value_expr 											{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
+			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{convert_flat_to_func_sql_expr($3.expr, $1.expr->value); $$.expr = $3.expr; free($1.expr); $$.type = SQL_EXPR;}
 
 value_expr_list :
 			value_expr 																{$$.expr = new_flat_sql_expr(SQL_IN); insert_expr_to_flat_sql_expr($$.expr, $1.expr); $$.type = SQL_EXPR;}
