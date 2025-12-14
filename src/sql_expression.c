@@ -64,7 +64,7 @@ sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 	return expr;
 }
 
-sql_expression* new_const_bool_valued_sql_expr(sql_expression_type type)
+sql_expression* new_const_non_valued_sql_expr(sql_expression_type type)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
@@ -188,6 +188,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_VAR :
 		case SQL_TRUE :
 		case SQL_FALSE :
+		case SQL_NULL :
 		{
 			return expr;
 		}
@@ -541,6 +542,11 @@ void print_sql_expr(const sql_expression* expr)
 			printf("false");
 			break;
 		}
+		case SQL_NULL :
+		{
+			printf("null");
+			break;
+		}
 	}
 }
 
@@ -623,6 +629,7 @@ void delete_sql_expr(sql_expression* expr)
 
 		case SQL_TRUE :
 		case SQL_FALSE :
+		case SQL_NULL :
 		{
 			break;
 		}

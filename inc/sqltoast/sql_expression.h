@@ -66,6 +66,9 @@ enum sql_expression_type
 	SQL_TRUE,
 	SQL_FALSE,
 	// boolean sql tree nodes
+
+	SQL_NULL,
+	// null node
 };
 
 /*
@@ -125,7 +128,8 @@ void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
-sql_expression* new_const_bool_valued_sql_expr(sql_expression_type type);
+// for true, false and null
+sql_expression* new_const_non_valued_sql_expr(sql_expression_type type);
 
 // the below function destroys the old tree and returns a new one
 sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expression* expr);
