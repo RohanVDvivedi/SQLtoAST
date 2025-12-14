@@ -136,6 +136,8 @@ root:
 bool_expr :
 			OPEN_BRACKET bool_expr CLOSE_BRACKET 											{$$ = $2;}
 
+			| value_expr 																	{$$ = $1;}
+
 			| L_NOT bool_expr 																{$$.expr = new_unary_sql_expr(SQL_LOGNOT, $2.expr); $$.type = SQL_EXPR;}
 
 			| value_expr EQ value_expr														{$$.expr = new_binary_sql_expr(SQL_EQ, $1.expr, $3.expr); $$.type = SQL_EXPR;}
