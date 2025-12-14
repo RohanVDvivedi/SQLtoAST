@@ -164,7 +164,6 @@ value_expr :
 			| IDENTIFIER															{$$ = $1;}
 			| TRUE																	{$$ = $1;}
 			| FALSE																	{$$ = $1;}
-			| bool_expr																{$$ = $1;}
 
 			| B_NOT value_expr 														{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
 			| NEG value_expr %prec UMINUS											{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
