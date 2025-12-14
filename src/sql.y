@@ -86,7 +86,9 @@
 
 %token L_SHIFT
 %token R_SHIFT
+
 %token CONCAT
+%token LIKE
 
 %token BETWEEN
 
@@ -160,7 +162,10 @@ expr:		OPEN_BRACKET expr CLOSE_BRACKET 						{$$ = $2;}
 
 			| expr L_SHIFT expr 									{$$.expr = new_binary_sql_expr(SQL_LSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| expr R_SHIFT expr 									{$$.expr = new_binary_sql_expr(SQL_RSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+
 			| expr CONCAT expr 										{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| expr LIKE expr 										{$$.expr = new_binary_sql_expr(SQL_LIKE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| expr L_NOT LIKE expr 									{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1.expr, $4.expr)); $$.type = SQL_EXPR;}
 
 			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET 			{convert_flat_to_in_sql_expr($4.expr, $1.expr); $$ = $4;}
 

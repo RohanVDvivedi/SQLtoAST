@@ -48,7 +48,9 @@
 
 "<<" 					{return L_SHIFT;}
 ">>" 					{return R_SHIFT;}
+
 "||" 					{return CONCAT;}
+(?i:LIKE) 				{return LIKE;}
 
 (?i:AND) 				{return L_AND;}
 (?i:OR) 				{return L_OR;}
