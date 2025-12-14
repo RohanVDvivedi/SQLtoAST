@@ -66,6 +66,7 @@
 %type <val> type_with_or_without_timezone
 
 %token <sval> IDENTIFIER
+%token <sval> INTEGER
 %token <sval> NUMBER
 %token <sval> STRING
 
@@ -231,6 +232,7 @@ bool_literal:
 
 value_expr :
 			OPEN_BRACKET value_expr CLOSE_BRACKET 									{$$ = $2;}
+			| INTEGER 																{$$.expr = new_valued_sql_expr(SQL_NUM, $1); $$.type = SQL_EXPR;}
 			| NUMBER																{$$.expr = new_valued_sql_expr(SQL_NUM, $1); $$.type = SQL_EXPR;}
 			| STRING																{$$.expr = new_valued_sql_expr(SQL_STR, $1); $$.type = SQL_EXPR;}
 			| IDENTIFIER															{$$.expr = new_valued_sql_expr(SQL_VAR, $1); $$.type = SQL_EXPR;}
