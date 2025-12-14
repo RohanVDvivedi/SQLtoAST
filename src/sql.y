@@ -108,7 +108,7 @@
 
 %nonassoc IN_PREC
 
-%left EQ NEQ GT GTE LT LTE
+%left EQ NEQ GT GTE LT LTE LIKE
 
 %left B_OR
 %left B_XOR
