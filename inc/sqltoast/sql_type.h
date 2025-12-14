@@ -15,6 +15,8 @@ enum sql_type_name
 	SQL_DATE, SQL_TIME, SQL_TIMESTAMP,
 };
 
+extern char const * const type_names[];
+
 typedef struct sql_type sql_type;
 struct sql_type
 {
@@ -25,7 +27,7 @@ struct sql_type
 	int64_t spec[8]; // 8 here is definitely an overkill
 	uint8_t spec_size;
 
-	// for date and time
+	// valid only for time and timestamp
 	int with_time_zone:1;
 };
 
