@@ -66,18 +66,10 @@
 (?i:CAST)				{return CAST;}
 (?i:AS)					{return AS;}
 
-(?i:TRUE)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_TRUE);
-						yylval->val.type = SQL_EXPR;
-						return TRUE;}
-(?i:FALSE)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_FALSE);
-						yylval->val.type = SQL_EXPR;
-						return FALSE;}
-(?i:UNKNOWN)			{yylval->val.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN);
-						yylval->val.type = SQL_EXPR;
-						return UNKNOWN;}
-(?i:NULL)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_NULL);
-						yylval->val.type = SQL_EXPR;
-						return _NULL_;}
+(?i:TRUE)				{return TRUE;}
+(?i:FALSE)				{return FALSE;}
+(?i:UNKNOWN)			{return UNKNOWN;}
+(?i:NULL)				{return _NULL_;}
 
 (?i:BOOL)				{return BOOL;}
 (?i:BOOLEAN)			{return BOOL;}
@@ -104,16 +96,10 @@
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 
-[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_NUM, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
-										yylval->val.type = SQL_EXPR;
-										return NUMBER;}
+[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?						{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return NUMBER;}
 
-'[^']*'									{yylval->val.expr = new_valued_sql_expr(SQL_STR, new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2));
-										yylval->val.type = SQL_EXPR;
-										return STRING;}
+'[^']*'													{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2); return STRING;}
 
-[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*		{yylval->val.expr = new_valued_sql_expr(SQL_VAR, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
-														yylval->val.type = SQL_EXPR;
-														return IDENTIFIER;}
+[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*		{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return IDENTIFIER;}
 
 %%

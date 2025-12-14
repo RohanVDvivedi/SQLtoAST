@@ -65,13 +65,14 @@
 %type <sval> type_spec
 %type <val> type_with_or_without_timezone
 
-%token <val> IDENTIFIER
-%token <val> NUMBER
-%token <val> STRING
-%token <val> TRUE
-%token <val> FALSE
-%token <val> UNKNOWN
-%token <val> _NULL_
+%token <sval> IDENTIFIER
+%token <sval> NUMBER
+%token <sval> STRING
+
+%token TRUE
+%token FALSE
+%token UNKNOWN
+%token _NULL_
 
 %token OPEN_BRACKET
 %token CLOSE_BRACKET
@@ -191,11 +192,11 @@ any_expr :
 bool_expr :
 			OPEN_BRACKET bool_expr CLOSE_BRACKET 											{$$ = $2;}
 
-			| IDENTIFIER																	{$$ = $1;}
-			| TRUE																			{$$ = $1;}
-			| FALSE																			{$$ = $1;}
-			| _NULL_																		{$$ = $1;}
-			| UNKNOWN																		{$$ = $1;}
+			| IDENTIFIER																	{$$.expr = new_valued_sql_expr(SQL_VAR, $1); $$.type = SQL_EXPR;}
+			| TRUE																			{$$.expr = new_const_non_valued_sql_expr(SQL_TRUE); $$.type = SQL_EXPR;}
+			| FALSE																			{$$.expr = new_const_non_valued_sql_expr(SQL_FALSE); $$.type = SQL_EXPR;}
+			| _NULL_																		{$$.expr = new_const_non_valued_sql_expr(SQL_NULL); $$.type = SQL_EXPR;}
+			| UNKNOWN																		{$$.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN); $$.type = SQL_EXPR;}
 
 			| L_NOT bool_expr 																{$$.expr = new_unary_sql_expr(SQL_LOGNOT, $2.expr); $$.type = SQL_EXPR;}
 
@@ -223,20 +224,20 @@ bool_expr :
 			| bool_expr L_XOR bool_expr 													{$$.expr = new_binary_sql_expr(SQL_LOGXOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 
 bool_literal:
-			TRUE																	{$$ = $1;}
-			| FALSE																	{$$ = $1;}
-			| _NULL_																{$$ = $1;}
-			| UNKNOWN																{$$ = $1;}
+			TRUE				{$$.expr = new_const_non_valued_sql_expr(SQL_TRUE); $$.type = SQL_EXPR;}
+			| FALSE				{$$.expr = new_const_non_valued_sql_expr(SQL_FALSE); $$.type = SQL_EXPR;}
+			| _NULL_			{$$.expr = new_const_non_valued_sql_expr(SQL_NULL); $$.type = SQL_EXPR;}
+			| UNKNOWN			{$$.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN); $$.type = SQL_EXPR;}
 
 value_expr :
 			OPEN_BRACKET value_expr CLOSE_BRACKET 									{$$ = $2;}
-			| NUMBER																{$$ = $1;}
-			| STRING																{$$ = $1;}
-			| IDENTIFIER															{$$ = $1;}
-			| TRUE																	{$$ = $1;}
-			| FALSE																	{$$ = $1;}
-			| _NULL_																{$$ = $1;}
-			| UNKNOWN																{$$ = $1;}
+			| NUMBER																{$$.expr = new_valued_sql_expr(SQL_NUM, $1); $$.type = SQL_EXPR;}
+			| STRING																{$$.expr = new_valued_sql_expr(SQL_STR, $1); $$.type = SQL_EXPR;}
+			| IDENTIFIER															{$$.expr = new_valued_sql_expr(SQL_VAR, $1); $$.type = SQL_EXPR;}
+			| TRUE																	{$$.expr = new_const_non_valued_sql_expr(SQL_TRUE); $$.type = SQL_EXPR;}
+			| FALSE																	{$$.expr = new_const_non_valued_sql_expr(SQL_FALSE); $$.type = SQL_EXPR;}
+			| _NULL_																{$$.expr = new_const_non_valued_sql_expr(SQL_NULL); $$.type = SQL_EXPR;}
+			| UNKNOWN																{$$.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN); $$.type = SQL_EXPR;}
 
 			| B_NOT value_expr 														{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
 			| NEG value_expr %prec UMINUS											{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
