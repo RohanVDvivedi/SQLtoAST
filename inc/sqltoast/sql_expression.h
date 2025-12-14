@@ -2,8 +2,9 @@
 #define SQL_EXPRESSION_H
 
 #include<cutlery/dstring.h>
-
 #include<cutlery/arraylist.h>
+
+#include<sqltoast/sql_type.h>
 
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
