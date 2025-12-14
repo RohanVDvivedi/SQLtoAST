@@ -1,6 +1,4 @@
 * SQL EXPRESSION
- * add is true, is false and is unknown -> read what is standard, is it = or is necesary?
- * add is NULL and is not NULL operators -> why not use = NULL instead?
  * add SUBSTRING operator -> read what is standard grammar?
  * add cast operation to a type -> readh about its grammar?
  * check if there is an operator to get type of a variable -> very good point
