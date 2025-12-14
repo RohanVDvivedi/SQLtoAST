@@ -59,7 +59,7 @@ SUBSTRING(TRIM('x', field1), 2, CHAR_LENGTH(field2) - 1) || '-' || COALESCE(fiel
 ((a + b * c) / (d - e) > 10 AND f % 2 = 0) OR g || h = 'xyz'
 username IN ('alice', 'bob', 'carol') AND age BETWEEN 18 AND 30 AND email LIKE '%@example.com' OR nickname NOT IN ('admin', 'root')
 CAST(price * quantity AS DECIMAL(10,2)) BETWEEN CAST(discount AS DECIMAL(10,2)) AND CAST(discount + tax AS DECIMAL(10,2)) IS NOT FALSE
-NOT ( CAST(TRIM(BOTH ' ' FROM first_name) || ' ' || last_name AS VARCHAR(100)) LIKE '%admin%')
+NOT ( CAST(TRIM(' ' ,first_name) || ' ' || last_name AS VARCHAR(100)) LIKE '%admin%')
 CAST(score + bonus AS INTEGER) IN ( CAST(min_score AS INTEGER), CAST(avg_score * 1.1 AS INTEGER),CAST(max_score AS INTEGER))IS TRUE
 (CAST(a + b * c AS BIGINT) > CAST(d / e AS BIGINT)    AND CAST(flag AS BOOLEAN)) OR CAST(status AS BOOLEAN) IS UNKNOWN
 NOT (    CAST(        SUBSTRING(            COALESCE(code, 'X123'),            1,    CAST(LENGTH(prefix) AS INTEGER) + 2) AS CHAR(10)) = CAST(expected_code AS CHAR(10))    AND CAST(is_active AS BOOLEAN) IS TRUE)
