@@ -93,6 +93,8 @@
 %token CONCAT
 %token LIKE
 
+%token IS
+
 %token BETWEEN
 
 %token IN

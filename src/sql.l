@@ -56,6 +56,8 @@
 (?i:OR) 				{return L_OR;}
 (?i:XOR) 				{return L_XOR;}
 
+(?i:IS) 				{return IS;}
+
 (?i:BETWEEN) 			{return BETWEEN;}
 
 (?i:IN) 				{return IN;}
