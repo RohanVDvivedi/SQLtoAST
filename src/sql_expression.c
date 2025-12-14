@@ -188,6 +188,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_VAR :
 		case SQL_TRUE :
 		case SQL_FALSE :
+		case SQL_UNKNOWN :
 		case SQL_NULL :
 		{
 			return expr;
@@ -542,6 +543,11 @@ void print_sql_expr(const sql_expression* expr)
 			printf("false");
 			break;
 		}
+		case SQL_UNKNOWN :
+		{
+			printf("unknown");
+			break;
+		}
 		case SQL_NULL :
 		{
 			printf("null");
@@ -629,6 +635,7 @@ void delete_sql_expr(sql_expression* expr)
 
 		case SQL_TRUE :
 		case SQL_FALSE :
+		case SQL_UNKNOWN :
 		case SQL_NULL :
 		{
 			break;

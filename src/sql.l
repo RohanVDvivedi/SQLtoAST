@@ -67,6 +67,9 @@
 (?i:FALSE)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_FALSE);
 						yylval->val.type = SQL_EXPR;
 						return FALSE;}
+(?i:UNKNOWN)			{yylval->val.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN);
+						yylval->val.type = SQL_EXPR;
+						return UNKNOWN;}
 (?i:NULL)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_NULL);
 						yylval->val.type = SQL_EXPR;
 						return _NULL_;}

@@ -67,6 +67,9 @@ enum sql_expression_type
 	SQL_FALSE,
 	// boolean sql tree nodes
 
+	SQL_UNKNOWN,
+	// unknown node
+
 	SQL_NULL,
 	// null node
 };
@@ -128,7 +131,7 @@ void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input);
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
-// for true, false and null
+// for unknown, true, false and null
 sql_expression* new_const_non_valued_sql_expr(sql_expression_type type);
 
 // the below function destroys the old tree and returns a new one

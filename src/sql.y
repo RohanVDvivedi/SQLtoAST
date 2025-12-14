@@ -57,6 +57,7 @@
 %token <val> STRING
 %token <val> TRUE
 %token <val> FALSE
+%token <val> UNKNOWN
 %token <val> _NULL_
 
 %token OPEN_BRACKET
