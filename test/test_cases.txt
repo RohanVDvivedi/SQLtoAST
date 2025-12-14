@@ -32,3 +32,9 @@ a || b between c and d || e
 a || b not between c || e and d
 a || b in (c,  d || e)
 a || b not in (c || e,  d || f, g, h)
+a IS NULL OR b IS NOT NULL AND c = 10
+NOT (a IS TRUE) AND (b IS FALSE OR c IS UNKNOWN)
+(a + b) IS NOT NULL AND (c BETWEEN d AND e) IS TRUE
+a IS NULL OR b IS TRUE AND NOT (c IS FALSE)
+((a > b) AND (c < d)) IS TRUE OR e IS NOT UNKNOWN
+NOT (a IS NULL OR b IS UNKNOWN) AND (c = d) IS FALSE
