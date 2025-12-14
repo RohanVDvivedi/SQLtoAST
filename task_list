@@ -1,6 +1,6 @@
 * SQL EXPRESSION
  * add SUBSTRING operator -> read what is standard grammar?
- * add cast operation to a type -> readh about its grammar?
+ * add cast operation to a type -> read about its grammar?
  * check if there is an operator to get type of a variable -> very good point
  * implement ALL ANY and SOME operators -> what are they even?
 
