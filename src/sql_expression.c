@@ -49,28 +49,26 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 	return expr;
 }
 
-sql_expression* new_flat_sql_expr(sql_expression_type type)
+sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list);
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
-	initialize_arraylist(&(expr->expr_list), 5);
+	expr->expr_list = expr_list;
 	return expr;
 }
 
-void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
+sql_expression* new_in_sql_expr(sql_expression* expr, sql_expression* input, arraylist in_expr_list);
 {
 	expr->type = SQL_IN;
-	arraylist temp = expr->expr_list;
-	expr->in_expr_list = temp;
 	expr->in_input = input;
+	expr->in_expr_list = in_expr_list;
 }
 
-void convert_flat_to_func_sql_expr(sql_expression* expr, dstring func_name)
+sql_expression* new_func_sql_expr(sql_expression* expr, dstring func_name, arraylist param_expr_list);
 {
 	expr->type = SQL_FUNCTION;
-	arraylist temp = expr->expr_list;
-	expr->param_expr_list = temp;
 	expr->func_name = func_name;
+	expr->param_expr_list = param_expr_list;
 }
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
