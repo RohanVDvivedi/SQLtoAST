@@ -77,6 +77,8 @@ enum sql_expression_type
 	// null node
 
 	SQL_FUNCTION,
+
+	SQL_CAST,
 };
 
 /*
@@ -126,6 +128,13 @@ struct sql_expression
 			dstring func_name; // name of the function
 			arraylist param_expr_list;
 		};
+
+		// for sql_cast
+		struct
+		{
+			sql_expression* cast_expr;
+			sql_type cast_type;
+		};
 	};
 };
 
@@ -143,6 +152,8 @@ sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list)
 sql_expression* new_in_sql_expr(sql_expression* in_input, arraylist in_expr_list);
 
 sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list);
+
+sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type);
 
 // for NUM, STR and VAR
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);

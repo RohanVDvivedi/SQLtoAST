@@ -75,6 +75,15 @@ sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list)
 	return expr;
 }
 
+sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type)
+{
+	sql_expression* expr = malloc(sizeof(sql_expression));
+	expr->type = SQL_CAST;
+	expr->cast_expr = cast_expr;
+	expr->cast_type = cast_type;
+	return expr;
+}
+
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
@@ -222,6 +231,12 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 				set_from_front_in_arraylist(&(expr->param_expr_list), (sql_expression*) flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i)), i);
+			return expr;
+		}
+
+		case SQL_CAST :
+		{
+			expr->cast_expr = flatten_similar_associative_operators_in_sql_expression(expr->cast_expr);
 			return expr;
 		}
 	}
@@ -606,6 +621,17 @@ void print_sql_expr(const sql_expression* expr)
 				print_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i));
 			}
 			printf(" ) )");
+			break;
+		}
+
+		case SQL_CAST :
+		{
+			printf("( CAST ( ");
+			print_sql_expr(expr->cast_expr);
+			printf(" ) AS ( ");
+			print_sql_type(&(expr->cast_type));
+			printf(" ) )");
+			break;
 		}
 	}
 }
@@ -702,6 +728,13 @@ void delete_sql_expr(sql_expression* expr)
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i));
 			deinitialize_arraylist(&(expr->param_expr_list));
+			break;
+		}
+
+		case SQL_CAST :
+		{
+			delete_sql_expr(expr->cast_expr);
+			break;
 		}
 	}
 	free(expr);
