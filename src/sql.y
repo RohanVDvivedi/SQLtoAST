@@ -170,6 +170,7 @@ value_expr :
 			| TRUE																	{$$ = $1;}
 			| FALSE																	{$$ = $1;}
 			| _NULL_																{$$ = $1;}
+			| UNKNOWN																{$$ = $1;}
 
 			| B_NOT value_expr 														{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
 			| NEG value_expr %prec UMINUS											{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
