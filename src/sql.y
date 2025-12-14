@@ -110,6 +110,36 @@
 %token CAST
 %token AS
 
+/* sql type names and needed tokens */
+
+%token BOOL
+
+%token BIT
+
+%token SMALLINT
+%token INT
+%token BIGINT
+
+%token REAL
+%token DOUBLE
+%token FLOAT
+
+%token DECIMAL
+%token NUMERIC
+
+%token TEXT
+%token CHAR
+%token VARCHAR
+%token CLOB
+%token BLOB
+
+%token DATE
+%token TIME
+%token TIMESTAMP
+
+%token WITH_TZ
+%token WITHOUT_TZ
+
 /* Precedence + Associativity */
 
 

@@ -6,11 +6,17 @@
 typedef enum sql_type_name sql_type_name;
 enum sql_type_name
 {
-	SQL_SMALLINT, SQL_INT, SQL_BIGINT,
+	SQL_BOOL, // true or false
 
-	SQL_REAL, SQL_DECIMAL, SQL_NUMERIC,
+	SQL_BIT, // collection of n number of bits as a column
 
-	SQL_TEXT, SQL_CHAR, SQL_VARCHAR, SQL_CLOB,
+	SQL_SMALLINT, SQL_INT, SQL_BIGINT, // integers
+
+	SQL_REAL, SQL_DOUBLE, SQL_FLOAT, // approximate numeric types
+
+	SQL_DECIMAL, SQL_NUMERIC, // exact numeric types
+
+	SQL_TEXT, SQL_CHAR, SQL_VARCHAR, SQL_CLOB, SQL_BLOB,
 
 	SQL_DATE, SQL_TIME, SQL_TIMESTAMP,
 };

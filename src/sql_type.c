@@ -6,11 +6,17 @@
 #include<stdio.h>
 
 char const * const type_names[] = {
+	[SQL_BOOL] = "BOOL",
+
+	[SQL_BIT] = "BIT",
+
 	[SQL_SMALLINT] = "SMALLINT", [SQL_INT] = "INT", [SQL_BIGINT] = "BIGINT",
 
-	[SQL_REAL] = "REAL", [SQL_DECIMAL] = "DECIMAL", [SQL_NUMERIC] = "NUMERIC",
+	[SQL_REAL] = "REAL", [SQL_DOUBLE] = "DOUBLE", [SQL_FLOAT] = "FLOAT",
 
-	[SQL_TEXT] = "TEXT", [SQL_CHAR] = "CHAR", [SQL_VARCHAR] = "VARCHAR", [SQL_CLOB] = "CLOB",
+	[SQL_DECIMAL] = "DECIMAL", [SQL_NUMERIC] = "NUMERIC",
+
+	[SQL_TEXT] = "TEXT", [SQL_CHAR] = "CHAR", [SQL_VARCHAR] = "VARCHAR", [SQL_CLOB] = "CLOB", [SQL_BLOB] = "BLOB",
 
 	[SQL_DATE] = "DATE", [SQL_TIME] = "TIME", [SQL_TIMESTAMP] = "TIMESTAMP",
 };
