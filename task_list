@@ -1,6 +1,5 @@
 * SQL EXPRESSION
  * add operator CAST(a AS INT) type operator
- * implement ALL ANY and SOME operators -> what are they even?
 
 * SQL QUERY
 DQL (select) and then DML (insert update delete)
@@ -13,6 +12,13 @@ DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
  * start with drop table, database and index queries
+
+*SQL EXPRESSIONS that work with sub queries
+ * ANY, SOME, ALL :::::           a < ANY (select score from students)
+ * IN / NOT INT ::::::            a in (select id from students where passed = true)
+ * EXISTS / NOT EXISTS :::::::
+ * UNIQUE ::::
+ etc (check for all operators like these)
 
 --------
 
