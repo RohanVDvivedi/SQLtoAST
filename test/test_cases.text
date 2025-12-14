@@ -1,0 +1,30 @@
+a AND b OR c AND d OR e
+NOT a AND b OR c
+a = b OR c = d AND e = f
+a BETWEEN b AND c OR d BETWEEN e AND f
+a BETWEEN b AND c AND d
+a NOT BETWEEN b AND c OR d
+a IN (b, c AND d, e)
+a NOT IN (b, c, d OR e)
+a LIKE b OR c NOT LIKE d AND e
+NOT a LIKE b OR c
+a || b IN (c || d, e)
+a = b AND c IN (d, e) OR f
+a AND b AND c OR d AND e
+a BETWEEN b AND c AND d < e OR f
+NOT (a AND b OR c) AND d IN (e, f || g)
+a OR b AND c BETWEEN d AND e OR f
+NOT a BETWEEN b AND c AND d OR e
+a IN (b, c, d) AND e OR f BETWEEN g AND h
+a LIKE b AND NOT c LIKE d OR e
+a || b || c IN (d || e, f) AND g
+a AND b OR c IN (d, e AND f, g)
+a BETWEEN b AND c OR d AND e BETWEEN f AND g
+NOT a AND b BETWEEN c AND d OR e AND f
+a IN (b, c, d) OR e || f = g || h AND i
+NOT (a BETWEEN b AND c OR d) AND e
+a AND NOT b IN (c, d) OR e
+a BETWEEN b AND c AND d BETWEEN e AND f OR g
+a LIKE b AND c OR d LIKE e AND f OR g
+NOT a OR b AND NOT c BETWEEN d AND e
+a IN (b, c) AND d OR e IN (f || g, h)
