@@ -22,8 +22,8 @@ struct sql_type
 
 	// for length of char and varchar types
 	// for precision and scale of real, decimal and numeric
-	// the first unused spec will always be set to -1
-	int64_t spec[5];
+	int64_t spec[8]; // 8 here is definitely an overkill
+	uint8_t spec_size;
 
 	// for date and time
 	int with_time_zone:1;
