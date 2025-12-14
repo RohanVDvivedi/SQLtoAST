@@ -114,6 +114,8 @@
 
 %nonassoc IN_PREC
 
+%nonassoc IS_PREC
+
 %left EQ NEQ GT GTE LT LTE LIKE_PREC
 
 %left B_OR
@@ -161,8 +163,8 @@ bool_expr :
 			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
 			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1.expr, $4.expr, $6.expr)); $$.type = SQL_EXPR;}
 
-			| value_expr IS bool_literal 													{$$.expr = new_binary_sql_expr(SQL_EQ, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr IS L_NOT bool_literal 												{$$.expr = new_binary_sql_expr(SQL_NEQ, $1.expr, $4.expr); $$.type = SQL_EXPR;}
+			| value_expr IS bool_literal %prec IS_PREC										{$$.expr = new_binary_sql_expr(SQL_EQ, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr IS L_NOT bool_literal %prec IS_PREC 								{$$.expr = new_binary_sql_expr(SQL_NEQ, $1.expr, $4.expr); $$.type = SQL_EXPR;}
 
 			| bool_expr L_AND bool_expr 													{$$.expr = new_binary_sql_expr(SQL_LOGAND, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| bool_expr L_OR bool_expr 														{$$.expr = new_binary_sql_expr(SQL_LOGOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
