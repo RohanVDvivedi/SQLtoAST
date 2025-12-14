@@ -94,7 +94,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			if(left->type == flat_expr->type)
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(left->expr_list)); i++)
-					insert_expr_to_flat_sql_expr(flat_expr, get_from_front_of_arraylist(&(left->expr_list), i));
+					insert_expr_to_flat_sql_expr(flat_expr, (sql_expression*) get_from_front_of_arraylist(&(left->expr_list), i));
 
 				// destroy just the left child
 				deinitialize_arraylist(&(left->expr_list));
@@ -107,7 +107,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			if(right->type == flat_expr->type)
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(right->expr_list)); i++)
-					insert_expr_to_flat_sql_expr(flat_expr, get_from_front_of_arraylist(&(right->expr_list), i));
+					insert_expr_to_flat_sql_expr(flat_expr, (sql_expression*) get_from_front_of_arraylist(&(right->expr_list), i));
 
 				// destroy just the left child
 				deinitialize_arraylist(&(right->expr_list));
@@ -178,7 +178,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_IN :
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
-				set_from_front_in_arraylist(&(expr->in_expr_list), flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i)), i);
+				set_from_front_in_arraylist(&(expr->in_expr_list), (sql_expression*) flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i)), i);
 			expr->in_input = flatten_similar_associative_operators_in_sql_expression(expr->in_input);
 			return expr;
 		}

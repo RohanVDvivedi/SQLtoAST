@@ -69,7 +69,7 @@
 						return FALSE;}
 (?i:NULL)				{yylval->val.expr = new_const_non_valued_sql_expr(SQL_NULL);
 						yylval->val.type = SQL_EXPR;
-						return NULL;}
+						return _NULL_;}
 
 [-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?		{yylval->val.expr = new_valued_sql_expr(SQL_NUM, new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))));
 										yylval->val.type = SQL_EXPR;
