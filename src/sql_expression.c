@@ -3,6 +3,25 @@
 #include<stdlib.h>
 #include<stdio.h>
 
+void initialize_expr_list(arraylist* expr_list)
+{
+	if(!initialize_arraylist(&(expr->expr_list), 5))
+	{
+		printf("failed to initialize expression list\n");
+		exit(-1);
+	}
+}
+
+void insert_in_expr_list(arraylist* expr_list, sql_expression* expr)
+{
+	if(is_full_arraylist(expr_list) && !expand_arraylist(expr_list))
+	{
+		printf("failed to insert back in expression list\n");
+		exit(-1);
+	}
+	push_back_to_arraylist(expr_list, expr);
+}
+
 sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_of)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
@@ -36,16 +55,6 @@ sql_expression* new_flat_sql_expr(sql_expression_type type)
 	expr->type = type;
 	initialize_arraylist(&(expr->expr_list), 5);
 	return expr;
-}
-
-void insert_expr_to_flat_sql_expr(sql_expression* expr, sql_expression* from_val)
-{
-	if(is_full_arraylist(&(expr->expr_list)) && !expand_arraylist(&(expr->expr_list)))
-	{
-		printf("failed to insert back in expression list for flat operator\n");
-		exit(-1);
-	}
-	push_back_to_arraylist(&(expr->expr_list), from_val);
 }
 
 void convert_flat_to_in_sql_expr(sql_expression* expr, sql_expression* input)
