@@ -1,7 +1,4 @@
 
-* SQL EXPRESSION
- * add operator CAST(a AS INT) type operator
-
 * SQL QUERY
 DQL (select) and then DML (insert update delete)
  * start with select query
