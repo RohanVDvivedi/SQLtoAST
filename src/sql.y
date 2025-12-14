@@ -154,7 +154,7 @@ bool_expr :
 			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{convert_flat_to_in_sql_expr($5.expr, $1.expr); $$.expr = new_unary_sql_expr(SQL_LOGNOT, $5.expr); $$.type = SQL_EXPR;}
 
 			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
-			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
+			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1.expr, $4.expr, $6.expr)); $$.type = SQL_EXPR;}
 
 			| bool_expr L_AND bool_expr 													{$$.expr = new_binary_sql_expr(SQL_LOGAND, $1.expr, $3.expr); $$.type = SQL_EXPR;}
 			| bool_expr L_OR bool_expr 														{$$.expr = new_binary_sql_expr(SQL_LOGOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
