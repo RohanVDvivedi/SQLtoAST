@@ -3,12 +3,32 @@
 
 #include<cutlery/stream.h>
 
-#include<sqltoast/sql_expression.h>
+#include<sqltoast/sql_dql.h>
+#include<sqltoast/sql_dml.h>
+#include<sqltoast/sql_ddl.h>
+#include<sqltoast/sql_tcl.h>
+
+typedef struct sql_query_type sql_query_type;
+enum sql_query_type
+{
+	DQL,
+	DML,
+	DDL,
+	TCL,
+};
 
 typedef struct sql sql;
 struct sql
 {
-	sql_expression* expr;
+	sql_query_type type;
+
+	union
+	{
+		sql_dql dql_query;
+		sql_dml dml_query;
+		sql_ddl ddl_query;
+		sql_tcl tcl_query;
+	};
 };
 
 sql* parsesql(stream* strm, int* error);
