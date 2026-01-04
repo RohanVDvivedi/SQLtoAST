@@ -1,5 +1,5 @@
-#ifndef SQL_DQL_H
-#define SQL_DQL_H
+#ifndef SQL_TCL_H
+#define SQL_TCL_H
 
 typedef enum sql_tcl_type sql_tcl_type;
 enum sql_tcl_type
@@ -14,5 +14,7 @@ struct sql_tcl
 {
 	sql_tcl_type type;
 };
+
+void destroytcl(sql_tcl* tcl);
 
 #endif

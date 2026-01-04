@@ -1,5 +1,5 @@
-#ifndef SQL_DQL_H
-#define SQL_DQL_H
+#ifndef SQL_DML_H
+#define SQL_DML_H
 
 #include<sqltoast/sql_expression.h>
 
@@ -19,5 +19,7 @@ struct sql_dml
 	// where clause
 	sql_expression* where_expr;
 };
+
+void destroydml(sql_dml* dml);
 
 #endif

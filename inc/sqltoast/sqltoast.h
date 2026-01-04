@@ -8,7 +8,7 @@
 #include<sqltoast/sql_ddl.h>
 #include<sqltoast/sql_tcl.h>
 
-typedef struct sql_query_type sql_query_type;
+typedef enum sql_query_type sql_query_type;
 enum sql_query_type
 {
 	DQL,

@@ -1,5 +1,5 @@
-#ifndef SQL_DQL_H
-#define SQL_DQL_H
+#ifndef SQL_DDL_H
+#define SQL_DDL_H
 
 #include<sqltoast/sql_expression.h>
 
@@ -17,5 +17,7 @@ struct sql_ddl
 {
 	sql_ddl_type type;
 };
+
+void destroyddl(sql_ddl* ddl);
 
 #endif

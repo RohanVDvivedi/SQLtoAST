@@ -27,6 +27,28 @@ sql* parsesql(stream* strm, int* error)
 
 void destroysql(sql* sqlast)
 {
-	delete_sql_expr(sqlast->expr);
+	switch(sqlast->type)
+	{
+		case DQL :
+		{
+			destroydql(&(sqlast->dql_query));
+			break;
+		}
+		case DML :
+		{
+			destroydml(&(sqlast->dml_query));
+			break;
+		}
+		case DDL :
+		{
+			destroyddl(&(sqlast->ddl_query));
+			break;
+		}
+		case TCL :
+		{
+			destroytcl(&(sqlast->tcl_query));
+			break;
+		}
+	}
 	free(sqlast);
 }

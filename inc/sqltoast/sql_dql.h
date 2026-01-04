@@ -18,4 +18,6 @@ struct sql_dql
 	sql_expression* where_expr;
 };
 
+void destroydql(sql_dql* dql);
+
 #endif
