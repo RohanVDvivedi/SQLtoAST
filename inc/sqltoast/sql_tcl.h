@@ -31,9 +31,9 @@ enum sql_isolation_level
 typedef enum sql_tx_access_mode sql_tx_access_mode;
 enum sql_tx_access_mode
 {
-	ACC_RW_UNSPECIFIED,
-	ACC_RW_READ_ONLY,
-	ACC_RW_READ_WRITE,
+	TX_ACC_RW_UNSPECIFIED,
+	TX_ACC_RW_READ_ONLY,
+	TX_ACC_RW_READ_WRITE,
 };
 
 typedef struct sql_tcl sql_tcl;
