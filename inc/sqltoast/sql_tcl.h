@@ -18,6 +18,24 @@ enum sql_tcl_type
 	SET_TX_CHARST_QUERY, // set transaction characteristics
 };
 
+typedef enum sql_isolation_level sql_isolation_level;
+enum sql_isolation_level
+{
+	ISO_UNSPECIFIED,
+	ISO_READ_UNCOMMITTED,
+	ISO_READ_COMMITTED,
+	ISO_REPEATABLE_READ,
+	ISO_SERIALIZABLE,
+};
+
+typedef enum sql_tx_access_mode sql_tx_access_mode;
+enum sql_tx_access_mode
+{
+	ACC_RW_UNSPECIFIED,
+	ACC_RW_READ_ONLY,
+	ACC_RW_READ_WRITE,
+};
+
 typedef struct sql_tcl sql_tcl;
 struct sql_tcl
 {
@@ -28,11 +46,11 @@ struct sql_tcl
 		// required only for SAVEPOINT_QUERY, ROLLBACK_TO_SAVEPOINT_QUERY and RELEASE_SAVEPOINT_QUERY
 		dstring savepoint_name;
 
-		// required only for SET_TX_QUERY and SET_TX_CHARST_QUERY
+		// required only for BEGIN, SET_TX_QUERY and SET_TX_CHARST_QUERY
 		struct
 		{
-			dstring isolation_level;
-			int read_only;
+			sql_isolation_level isolation_level;
+			sql_tx_access_mode mode;
 		};
 	};
 };
