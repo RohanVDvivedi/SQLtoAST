@@ -222,6 +222,8 @@ bool_expr :
 			| bool_expr L_OR bool_expr 														{$$ = new_binary_sql_expr(SQL_LOGOR, $1, $3);}
 			| bool_expr L_XOR bool_expr 													{$$ = new_binary_sql_expr(SQL_LOGXOR, $1, $3);}
 
+			| CAST OPEN_BRACKET value_expr AS BOOL CLOSE_BRACKET 							{$$ = new_cast_sql_expr($3, new_sql_type(SQL_BOOL));}
+
 bool_literal:
 			TRUE				{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
 			| FALSE				{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
