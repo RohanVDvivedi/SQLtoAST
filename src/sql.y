@@ -45,12 +45,15 @@
 /* SELECT query */
 %type <dql_query> dql_query
 
+
+/* SQL EXPRESSION */
 %type <expr> expr
 %type <expr> bool_expr
 %type <expr> bool_literal
 %type <expr> value_expr
 %type <ptr_list> value_expr_list
 
+/* SQL DATA TYPE */
 %type <data_type> type
 %type <data_type> type_name
 %type <data_type> type_specs
