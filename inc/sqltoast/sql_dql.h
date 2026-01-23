@@ -119,6 +119,10 @@ struct sql_dql
 
 sql_dql* new_dql();
 
+#define new_relation_input(relation_name)                             ((relation_input){.type = RELATION, .relation_name = relation_name})
+#define new_sub_query_relation_input(sub_query)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query})
+#define new_function_call_relation_input(function_call)               ((relation_input){.type = FUNCTION, .function_call = function_call})
+
 void printdql(const sql_dql* dql);
 
 void destroydql(sql_dql* dql);
