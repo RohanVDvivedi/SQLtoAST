@@ -45,6 +45,17 @@
 /* SELECT query */
 %type <dql_query> dql_query
 
+%token SELECT
+%token FROM
+%token JOIN
+%token ON
+%token WHERE
+%token GROUP
+%token BY
+%token HAVING
+%token ORDER
+%token LIMIT
+%token OFFSET
 
 /* SQL EXPRESSION */
 %type <expr> expr

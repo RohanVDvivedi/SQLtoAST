@@ -93,6 +93,18 @@
 (?i:TIME)				{return TIME;}
 (?i:TIMESTAMP)			{return TIMESTAMP;}
 
+(?i:SELECT)				{return SELECT;}
+(?i:FROM)				{return FROM;}
+(?i:JOIN)				{return JOIN;}
+(?i:ON)					{return ON;}
+(?i:WHERE)				{return WHERE;}
+(?i:GROUP)				{return GROUP;}
+(?i:BY)					{return BY;}
+(?i:HAVING)				{return HAVING;}
+(?i:ORDER)				{return ORDER;}
+(?i:LIMIT)				{return LIMIT;}
+(?i:OFFSET)				{return OFFSET;}
+
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 
