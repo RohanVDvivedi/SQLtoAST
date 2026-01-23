@@ -49,24 +49,34 @@
 %start root
 
 %union {
-	value val;
+	sql* root;
+
+	sql_dql* dql;
+
+	sql_expression* expr;
+
+	arraylist ptr_list;
+
+	sql_type data_type;
+
 	uint64_t uval;
 	int64_t ival;
+
 	dstring sval; // for any other lexeme
 }
 
 %type <val> root
 
-%type <val> expr
-%type <val> bool_expr
-%type <val> bool_literal
-%type <val> value_expr
-%type <val> value_expr_list
-%type <val> type
-%type <val> type_name
-%type <val> type_specs
+%type <expr> expr
+%type <ptr_list> bool_expr
+%type <expr> bool_literal
+%type <expr> value_expr
+%type <expr> value_expr_list
+%type <data_type> type
+%type <data_type> type_name
+%type <data_type> type_specs
 %type <uval> type_spec
-%type <val> type_with_or_without_timezone
+%type <data_type> type_with_or_without_timezone
 
 %token <sval> IDENTIFIER
 %token <sval> INTEGER
@@ -196,115 +206,115 @@ expr :
 bool_expr :
 			OPEN_BRACKET bool_expr CLOSE_BRACKET 											{$$ = $2;}
 
-			| IDENTIFIER																	{$$.expr = new_valued_sql_expr(SQL_VAR, $1); $$.type = SQL_EXPR;}
-			| TRUE																			{$$.expr = new_const_non_valued_sql_expr(SQL_TRUE); $$.type = SQL_EXPR;}
-			| FALSE																			{$$.expr = new_const_non_valued_sql_expr(SQL_FALSE); $$.type = SQL_EXPR;}
-			| _NULL_																		{$$.expr = new_const_non_valued_sql_expr(SQL_NULL); $$.type = SQL_EXPR;}
-			| UNKNOWN																		{$$.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN); $$.type = SQL_EXPR;}
+			| IDENTIFIER																	{$$ = new_valued_sql_expr(SQL_VAR, $1);}
+			| TRUE																			{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
+			| FALSE																			{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
+			| _NULL_																		{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
+			| UNKNOWN																		{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
-			| L_NOT bool_expr 																{$$.expr = new_unary_sql_expr(SQL_LOGNOT, $2.expr); $$.type = SQL_EXPR;}
+			| L_NOT bool_expr 																{$$ = new_unary_sql_expr(SQL_LOGNOT, $2.expr);}
 
-			| value_expr EQ value_expr														{$$.expr = new_binary_sql_expr(SQL_EQ, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr NEQ value_expr 													{$$.expr = new_binary_sql_expr(SQL_NEQ, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr GT value_expr 														{$$.expr = new_binary_sql_expr(SQL_GT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr GTE value_expr 													{$$.expr = new_binary_sql_expr(SQL_GTE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr LT value_expr 														{$$.expr = new_binary_sql_expr(SQL_LT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr LTE value_expr 													{$$.expr = new_binary_sql_expr(SQL_LTE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr EQ value_expr														{$$ = new_binary_sql_expr(SQL_EQ, $1, $3);}
+			| value_expr NEQ value_expr 													{$$ = new_binary_sql_expr(SQL_NEQ, $1, $3);}
+			| value_expr GT value_expr 														{$$ = new_binary_sql_expr(SQL_GT, $1, $3);}
+			| value_expr GTE value_expr 													{$$ = new_binary_sql_expr(SQL_GTE, $1, $3);}
+			| value_expr LT value_expr 														{$$ = new_binary_sql_expr(SQL_LT, $1, $3);}
+			| value_expr LTE value_expr 													{$$ = new_binary_sql_expr(SQL_LTE, $1, $3);}
 
-			| value_expr LIKE value_expr %prec LIKE_PREC									{$$.expr = new_binary_sql_expr(SQL_LIKE, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr L_NOT LIKE value_expr %prec LIKE_PREC								{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1.expr, $4.expr)); $$.type = SQL_EXPR;}
+			| value_expr LIKE value_expr %prec LIKE_PREC									{$$ = new_binary_sql_expr(SQL_LIKE, $1, $3);}
+			| value_expr L_NOT LIKE value_expr %prec LIKE_PREC								{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1, $4));}
 
-			| value_expr IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC		{$$.expr = new_in_sql_expr($1.expr, $4.expr_list); $$.type = SQL_EXPR;}
-			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1.expr, $5.expr_list)); $$.type = SQL_EXPR;}
+			| value_expr IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC		{$$ = new_in_sql_expr($1, $4);}
+			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{$$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5));}
 
-			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$.expr = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
-			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1.expr, $4.expr, $6.expr)); $$.type = SQL_EXPR;}
+			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$ = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
+			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1.expr, $4.expr, $6.expr)); $$.type = SQL_EXPR;}
 
-			| expr IS bool_literal %prec IS_PREC											{$$.expr = new_binary_sql_expr(SQL_IS, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| expr IS L_NOT bool_literal %prec IS_PREC 										{$$.expr = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_IS, $1.expr, $4.expr)); $$.type = SQL_EXPR;}
+			| expr IS bool_literal %prec IS_PREC											{$$ = new_binary_sql_expr(SQL_IS, $1, $3);}
+			| expr IS L_NOT bool_literal %prec IS_PREC 										{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_IS, $1, $4));}
 
-			| bool_expr L_AND bool_expr 													{$$.expr = new_binary_sql_expr(SQL_LOGAND, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| bool_expr L_OR bool_expr 														{$$.expr = new_binary_sql_expr(SQL_LOGOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| bool_expr L_XOR bool_expr 													{$$.expr = new_binary_sql_expr(SQL_LOGXOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| bool_expr L_AND bool_expr 													{$$ = new_binary_sql_expr(SQL_LOGAND, $1, $3);}
+			| bool_expr L_OR bool_expr 														{$$ = new_binary_sql_expr(SQL_LOGOR, $1, $3);}
+			| bool_expr L_XOR bool_expr 													{$$ = new_binary_sql_expr(SQL_LOGXOR, $1, $3);}
 
 bool_literal:
-			TRUE				{$$.expr = new_const_non_valued_sql_expr(SQL_TRUE); $$.type = SQL_EXPR;}
-			| FALSE				{$$.expr = new_const_non_valued_sql_expr(SQL_FALSE); $$.type = SQL_EXPR;}
-			| _NULL_			{$$.expr = new_const_non_valued_sql_expr(SQL_NULL); $$.type = SQL_EXPR;}
-			| UNKNOWN			{$$.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN); $$.type = SQL_EXPR;}
+			TRUE				{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
+			| FALSE				{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
+			| _NULL_			{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
+			| UNKNOWN			{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
 value_expr :
 			OPEN_BRACKET value_expr CLOSE_BRACKET 									{$$ = $2;}
-			| INTEGER 																{$$.expr = new_valued_sql_expr(SQL_NUM, $1); $$.type = SQL_EXPR;}
-			| NUMBER																{$$.expr = new_valued_sql_expr(SQL_NUM, $1); $$.type = SQL_EXPR;}
-			| STRING																{$$.expr = new_valued_sql_expr(SQL_STR, $1); $$.type = SQL_EXPR;}
-			| IDENTIFIER															{$$.expr = new_valued_sql_expr(SQL_VAR, $1); $$.type = SQL_EXPR;}
-			| TRUE																	{$$.expr = new_const_non_valued_sql_expr(SQL_TRUE); $$.type = SQL_EXPR;}
-			| FALSE																	{$$.expr = new_const_non_valued_sql_expr(SQL_FALSE); $$.type = SQL_EXPR;}
-			| _NULL_																{$$.expr = new_const_non_valued_sql_expr(SQL_NULL); $$.type = SQL_EXPR;}
-			| UNKNOWN																{$$.expr = new_const_non_valued_sql_expr(SQL_UNKNOWN); $$.type = SQL_EXPR;}
+			| INTEGER 																{$$ = new_valued_sql_expr(SQL_NUM, $1);}
+			| NUMBER																{$$ = new_valued_sql_expr(SQL_NUM, $1);}
+			| STRING																{$$ = new_valued_sql_expr(SQL_STR, $1);}
+			| IDENTIFIER															{$$ = new_valued_sql_expr(SQL_VAR, $1);}
+			| TRUE																	{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
+			| FALSE																	{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
+			| _NULL_																{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
+			| UNKNOWN																{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
-			| B_NOT value_expr 														{$$.expr = new_unary_sql_expr(SQL_BITNOT, $2.expr); $$.type = SQL_EXPR;}
-			| NEG value_expr %prec UMINUS											{$$.expr = new_unary_sql_expr(SQL_NEG, $2.expr); $$.type = SQL_EXPR;}
+			| B_NOT value_expr 														{$$ = new_unary_sql_expr(SQL_BITNOT, $2);}
+			| NEG value_expr %prec UMINUS											{$$ = new_unary_sql_expr(SQL_NEG, $2);}
 			| ADD value_expr %prec UPLUS											{$$ = $2;}
 
-			| value_expr MUL value_expr 											{$$.expr = new_binary_sql_expr(SQL_MUL, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr DIV value_expr 											{$$.expr = new_binary_sql_expr(SQL_DIV, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr MOD value_expr 											{$$.expr = new_binary_sql_expr(SQL_MOD, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr MUL value_expr 											{$$ = new_binary_sql_expr(SQL_MUL, $1, $3);}
+			| value_expr DIV value_expr 											{$$ = new_binary_sql_expr(SQL_DIV, $1, $3);}
+			| value_expr MOD value_expr 											{$$ = new_binary_sql_expr(SQL_MOD, $1, $3);}
 
-			| value_expr ADD value_expr 											{$$.expr = new_binary_sql_expr(SQL_ADD, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr NEG value_expr 											{$$.expr = new_binary_sql_expr(SQL_SUB, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr ADD value_expr 											{$$ = new_binary_sql_expr(SQL_ADD, $1, $3);}
+			| value_expr NEG value_expr 											{$$ = new_binary_sql_expr(SQL_SUB, $1, $3);}
 
-			| value_expr B_AND value_expr 											{$$.expr = new_binary_sql_expr(SQL_BITAND, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr B_OR value_expr 											{$$.expr = new_binary_sql_expr(SQL_BITOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr B_XOR value_expr 											{$$.expr = new_binary_sql_expr(SQL_BITXOR, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr B_AND value_expr 											{$$ = new_binary_sql_expr(SQL_BITAND, $1, $3);}
+			| value_expr B_OR value_expr 											{$$ = new_binary_sql_expr(SQL_BITOR, $1, $3);}
+			| value_expr B_XOR value_expr 											{$$ = new_binary_sql_expr(SQL_BITXOR, $1, $3);}
 
-			| value_expr L_SHIFT value_expr 										{$$.expr = new_binary_sql_expr(SQL_LSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
-			| value_expr R_SHIFT value_expr 										{$$.expr = new_binary_sql_expr(SQL_RSHIFT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr L_SHIFT value_expr 										{$$ = new_binary_sql_expr(SQL_LSHIFT, $1, $3);}
+			| value_expr R_SHIFT value_expr 										{$$ = new_binary_sql_expr(SQL_RSHIFT, $1, $3);}
 
-			| value_expr CONCAT value_expr 											{$$.expr = new_binary_sql_expr(SQL_CONCAT, $1.expr, $3.expr); $$.type = SQL_EXPR;}
+			| value_expr CONCAT value_expr 											{$$ = new_binary_sql_expr(SQL_CONCAT, $1, $3);}
 
-			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$.expr = new_func_sql_expr($1, $3.expr_list); $$.type = SQL_EXPR;}
+			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
-			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$.expr = new_cast_sql_expr($3.expr, $5.data_type); $$.type = SQL_EXPR;}
+			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$ = new_cast_sql_expr($3, $5);}
 
 value_expr_list :
-			value_expr 																{initialize_expr_list(&($$.expr_list)); insert_in_expr_list(&($$.expr_list), $1.expr); $$.type = SQL_EXPR_LIST;}
-			| value_expr_list COMMA value_expr 										{insert_in_expr_list(&($1.expr_list), $3.expr); $$ = $1; $$.type = SQL_EXPR_LIST;}
+			value_expr 																{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
+			| value_expr_list COMMA value_expr 										{insert_in_expr_list(&($1), $3); $$ = $1;}
 
-type : type_name type_specs type_with_or_without_timezone							{$$.data_type = $1.data_type; $$.data_type.spec_size = $2.data_type.spec_size; memcpy($$.data_type.spec, $2.data_type.spec, sizeof($$.data_type.spec)); $$.data_type.with_time_zone = $3.data_type.with_time_zone; $$.type = SQL_TYPE;}
+type : type_name type_specs type_with_or_without_timezone							{$$ = $1; $$.spec_size = $2.spec_size; memcpy($$.spec, $2.spec, sizeof($$.spec)); $$.with_time_zone = $3.with_time_zone;}
 
-type_name : 	BOOL 					{$$.data_type.type_name = SQL_BOOL; $$.type = SQL_TYPE;}
-				| BIT 					{$$.data_type.type_name = SQL_BIT; $$.type = SQL_TYPE;}
-				| SMALLINT 				{$$.data_type.type_name = SQL_SMALLINT; $$.type = SQL_TYPE;}
-				| INT 					{$$.data_type.type_name = SQL_INT; $$.type = SQL_TYPE;}
-				| BIGINT 				{$$.data_type.type_name = SQL_BIGINT; $$.type = SQL_TYPE;}
-				| REAL 					{$$.data_type.type_name = SQL_REAL; $$.type = SQL_TYPE;}
-				| DOUBLE 				{$$.data_type.type_name = SQL_DOUBLE; $$.type = SQL_TYPE;}
-				| FLOAT 				{$$.data_type.type_name = SQL_FLOAT; $$.type = SQL_TYPE;}
-				| DECIMAL 				{$$.data_type.type_name = SQL_DECIMAL; $$.type = SQL_TYPE;}
-				| NUMERIC 				{$$.data_type.type_name = SQL_NUMERIC; $$.type = SQL_TYPE;}
-				| TEXT 					{$$.data_type.type_name = SQL_TEXT; $$.type = SQL_TYPE;}
-				| CHAR 					{$$.data_type.type_name = SQL_CHAR; $$.type = SQL_TYPE;}
-				| VARCHAR 				{$$.data_type.type_name = SQL_VARCHAR; $$.type = SQL_TYPE;}
-				| CLOB 					{$$.data_type.type_name = SQL_CLOB; $$.type = SQL_TYPE;}
-				| BLOB 					{$$.data_type.type_name = SQL_BLOB; $$.type = SQL_TYPE;}
-				| DATE 					{$$.data_type.type_name = SQL_DATE; $$.type = SQL_TYPE;}
-				| TIME 					{$$.data_type.type_name = SQL_TIME; $$.type = SQL_TYPE;}
-				| TIMESTAMP 			{$$.data_type.type_name = SQL_TIMESTAMP; $$.type = SQL_TYPE;}
+type_name : 	BOOL 					{$$.type_name = SQL_BOOL;}
+				| BIT 					{$$.type_name = SQL_BIT;}
+				| SMALLINT 				{$$.type_name = SQL_SMALLINT;}
+				| INT 					{$$.type_name = SQL_INT;}
+				| BIGINT 				{$$.type_name = SQL_BIGINT;}
+				| REAL 					{$$.type_name = SQL_REAL;}
+				| DOUBLE 				{$$.type_name = SQL_DOUBLE;}
+				| FLOAT 				{$$.type_name = SQL_FLOAT;}
+				| DECIMAL 				{$$.type_name = SQL_DECIMAL;}
+				| NUMERIC 				{$$.type_name = SQL_NUMERIC;}
+				| TEXT 					{$$.type_name = SQL_TEXT;}
+				| CHAR 					{$$.type_name = SQL_CHAR;}
+				| VARCHAR 				{$$.type_name = SQL_VARCHAR;}
+				| CLOB 					{$$.type_name = SQL_CLOB;}
+				| BLOB 					{$$.type_name = SQL_BLOB;}
+				| DATE 					{$$.type_name = SQL_DATE;}
+				| TIME 					{$$.type_name = SQL_TIME;}
+				| TIMESTAMP 			{$$.type_name = SQL_TIMESTAMP;}
 
-type_specs : 																												{$$.data_type.spec_size = 0; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET type_spec CLOSE_BRACKET 																		{$$.data_type.spec[0] = $2; $$.data_type.spec_size = 1; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET type_spec COMMA type_spec CLOSE_BRACKET 														{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec_size = 2; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 										{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec[2] = $6; $$.data_type.spec_size = 3; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 						{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec[2] = $6; $$.data_type.spec[3] = $8; $$.data_type.spec_size = 4; $$.type = SQL_TYPE;}
-				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 		{$$.data_type.spec[0] = $2; $$.data_type.spec[1] = $4; $$.data_type.spec[2] = $6; $$.data_type.spec[3] = $8; $$.data_type.spec[4] = $10; $$.data_type.spec_size = 5; $$.type = SQL_TYPE;}
+type_specs : 																												{$$.spec_size = 0;}
+				| OPEN_BRACKET type_spec CLOSE_BRACKET 																		{$$.spec[0] = $2; $$.spec_size = 1;}
+				| OPEN_BRACKET type_spec COMMA type_spec CLOSE_BRACKET 														{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec_size = 2;}
+				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 										{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec[2] = $6; $$.spec_size = 3;}
+				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 						{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec[2] = $6; $$.spec[3] = $8; $$.spec_size = 4;}
+				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 		{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec[2] = $6; $$.spec[3] = $8; $$.spec[4] = $10; $$.spec_size = 5;}
 
 type_spec : INTEGER  			{unsigned long long int res = 0; get_unsigned_long_long_int_from_dstring(&($1), 10, &res); $$ = res; deinit_dstring(&($1));}
 
-type_with_or_without_timezone : 						{$$.data_type.with_time_zone = 0; $$.type = SQL_TYPE;}
-									| WITH_TZ 			{$$.data_type.with_time_zone = 1; $$.type = SQL_TYPE;}
-									| WITHOUT_TZ 		{$$.data_type.with_time_zone = 0; $$.type = SQL_TYPE;}
+type_with_or_without_timezone : 						{$$.with_time_zone = 0;}
+									| WITH_TZ 			{$$.with_time_zone = 1;}
+									| WITHOUT_TZ 		{$$.with_time_zone = 0;}
 
 %%
 
