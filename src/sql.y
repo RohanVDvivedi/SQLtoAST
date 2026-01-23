@@ -65,7 +65,10 @@
 	dstring sval; // for any other lexeme
 }
 
-%type <val> root
+%type <root> root
+
+/* SELECT query */
+%type <dql> dql
 
 %type <expr> expr
 %type <ptr_list> bool_expr
