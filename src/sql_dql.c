@@ -21,25 +21,31 @@ sql_dql* new_dql()
 	return dql;
 }
 
-static void print_relation_input(const relation_input* ri_p)
+static void print_tabs(int tabs)
+{
+	while(tabs--)
+		printf("\t");
+}
+
+static void print_relation_input(const relation_input* ri_p, int tabs)
 {
 	switch(ri_p->type)
 	{
 		case RELATION :
 		{
-			printf("( relation : ( ");
+			print_tabs(tabs);printf("( relation : ( ");
 			printf_dstring(&(ri_p->relation_name));
 			break;
 		}
 		case SUB_QUERY :
 		{
-			printf("( sub_query : ( ");
-			print_dql(ri_p->sub_query);
+			print_tabs(tabs);printf("( sub_query : ( ");
+			print_dql(ri_p->sub_query, tabs + 1);
 			break;
 		}
 		case FUNCTION :
 		{
-			printf("( function_call : ( ");
+			print_tabs(tabs);printf("( function_call : ( ");
 			print_sql_expr(ri_p->function_call);
 			break;
 		}
@@ -49,40 +55,45 @@ static void print_relation_input(const relation_input* ri_p)
 	printf(")");
 }
 
-void print_dql(const sql_dql* dql)
+void print_dql(const sql_dql* dql, int tabs)
 {
-	printf("\nSELECT : \n");
+	print_tabs(tabs);printf("SELECT : \n");
 
-	printf("\nFROM : \n\t");
-	print_relation_input(&(dql->base_input));
+	print_tabs(tabs);printf("FROM : \n");
+	print_relation_input(&(dql->base_input), tabs+1);
+	printf("\n\n");
 
-	printf("\nWHERE : \n\t");
+	print_tabs(tabs);printf("WHERE : \n");
+	print_tabs(tabs+1);
 	if(dql->where_expr)
 		print_sql_expr(dql->where_expr);
 	else
 		printf("NULL");
-	printf("\n");
+	printf("\n\n");
 
-	printf("\nHAVING : \n\t");
+	print_tabs(tabs);printf("HAVING : \n");
+	print_tabs(tabs+1);
 	if(dql->having_expr)
 		print_sql_expr(dql->having_expr);
 	else
 		printf("NULL");
-	printf("\n");
+	printf("\n\n");
 
-	printf("\nOFFSET : \n\t");
+	print_tabs(tabs);printf("OFFSET : \n");
+	print_tabs(tabs+1);
 	if(dql->offset_expr)
 		print_sql_expr(dql->offset_expr);
 	else
 		printf("NULL");
-	printf("\n");
+	printf("\n\n");
 
-	printf("\nLIMIT : \n\t");
+	print_tabs(tabs);printf("LIMIT : \n");
+	print_tabs(tabs+1);
 	if(dql->limit_expr)
 		print_sql_expr(dql->limit_expr);
 	else
 		printf("NULL");
-	printf("\n");
+	printf("\n\n");
 }
 
 static void destroy_relation_input(relation_input* ri_p)

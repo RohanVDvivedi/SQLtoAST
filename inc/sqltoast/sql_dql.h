@@ -123,7 +123,7 @@ sql_dql* new_dql();
 #define new_sub_query_relation_input(sub_query_, as_)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query_, .as = as_})
 #define new_function_call_relation_input(function_call_, as_)               ((relation_input){.type = FUNCTION, .function_call = function_call_, .as = as_})
 
-void print_dql(const sql_dql* dql);
+void print_dql(const sql_dql* dql, int tabs);
 
 void delete_dql(sql_dql* dql);
 

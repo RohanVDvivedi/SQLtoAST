@@ -31,7 +31,7 @@ void print_sql(const sql* sqlast)
 	{
 		case DQL :
 		{
-			print_dql(sqlast->dql_query);
+			print_dql(sqlast->dql_query, 0);
 			break;
 		}
 		case DML :
