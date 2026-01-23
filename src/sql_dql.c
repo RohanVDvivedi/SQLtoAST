@@ -25,25 +25,29 @@ void printdql(const sql_dql* dql)
 	if(dql->where_expr)
 		print_sql_expr(dql->where_expr);
 	else
-		printf("NULL\n");
+		printf("NULL");
+	printf("\n");
 
 	printf("\nHAVING : \n\t");
 	if(dql->having_expr)
 		print_sql_expr(dql->having_expr);
 	else
-		printf("NULL\n");
+		printf("NULL");
+	printf("\n");
 
 	printf("\nOFFSET : \n\t");
 	if(dql->offset_expr)
 		print_sql_expr(dql->offset_expr);
 	else
-		printf("NULL\n");
+		printf("NULL");
+	printf("\n");
 
 	printf("\nLIMIT : \n\t");
 	if(dql->limit_expr)
 		print_sql_expr(dql->limit_expr);
 	else
-		printf("NULL\n");
+		printf("NULL");
+	printf("\n");
 }
 
 void destroydql(sql_dql* dql)
