@@ -12,7 +12,7 @@ int main()
 	initialize_stream_for_fd(&ws, 1);
 
 	int error = 0;
-	sql* sqlast = parsesql(&rs, &error);
+	sql* sqlast = parse_sql(&rs, &error);
 
 	if(sqlast)
 	{
