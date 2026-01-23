@@ -57,14 +57,16 @@ static void print_relation_input(const relation_input* ri_p, int tabs)
 
 void print_dql(const sql_dql* dql, int tabs)
 {
-	print_tabs(tabs);printf("SELECT : \n");
+	print_tabs(tabs);printf("SELECT : \n\n");
 
 	print_tabs(tabs);printf("PROJECTION_LIST : \n");
 	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->projections)); i++)
 	{
 		projection* p = (projection*) get_from_front_of_arraylist(&(dql->projections), i);
 		print_tabs(tabs+1);print_sql_expr(p->projection_expr);printf(" AS ");printf_dstring(&(p->as));printf(")");
+		printf("\n");
 	}
+	printf("\n");
 
 	print_tabs(tabs);printf("FROM : \n");
 	print_relation_input(&(dql->base_input), tabs+1);
