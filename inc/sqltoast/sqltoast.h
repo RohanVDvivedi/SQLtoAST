@@ -33,6 +33,8 @@ struct sql
 
 sql* parsesql(stream* strm, int* error);
 
+void printsql(const sql* sqlast);
+
 void destroysql(sql* sqlast);
 
 #endif

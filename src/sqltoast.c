@@ -25,6 +25,33 @@ sql* parsesql(stream* strm, int* error)
 	}
 }
 
+void printsql(const sql* sqlast)
+{
+	switch(sqlast->type)
+	{
+		case DQL :
+		{
+			printdql(sqlast->dql_query);
+			break;
+		}
+		case DML :
+		{
+			//printdml(sqlast->dml_query);
+			break;
+		}
+		case DDL :
+		{
+			//printddl(sqlast->ddl_query);
+			break;
+		}
+		case TCL :
+		{
+			//printtcl(sqlast->tcl_query);
+			break;
+		}
+	}
+}
+
 void destroysql(sql* sqlast)
 {
 	switch(sqlast->type)

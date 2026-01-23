@@ -119,6 +119,8 @@ struct sql_dql
 
 sql_dql* new_dql();
 
+void printdql(const sql_dql* dql);
+
 void destroydql(sql_dql* dql);
 
 #endif
