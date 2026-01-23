@@ -11,28 +11,6 @@
 	#include<sqltoast/sqltoast.h>
 	#include<sqltoast/sql_expression.h>
 	#include<sqltoast/sql_type.h>
-
-	typedef enum value_type value_type;
-	enum value_type
-	{
-		SQL_ROOT,
-		SQL_EXPR,
-		SQL_EXPR_LIST,
-		SQL_TYPE,
-	};
-
-	typedef struct value value;
-	struct value
-	{
-		value_type type;
-		union
-		{
-			sql* root;
-			sql_expression* expr;
-			arraylist expr_list;
-			sql_type data_type;
-		};
-	};
 }
 
 /* Enable reentrant parser */
@@ -46,12 +24,12 @@
 %parse-param { void* scanner }
 %parse-param { struct sql** sql_ast }
 
-%start root
+%start sql_query
 
 %union {
-	sql* root;
+	sql* sql_query;
 
-	sql_dql* dql;
+	sql_dql* dql_query;
 
 	sql_expression* expr;
 
@@ -65,16 +43,16 @@
 	dstring sval; // for any other lexeme
 }
 
-%type <root> root
+%type <sql_query> sql_query
 
 /* SELECT query */
-%type <dql> dql
+%type <dql_query> dql_query
 
 %type <expr> expr
-%type <ptr_list> bool_expr
+%type <expr> bool_expr
 %type <expr> bool_literal
 %type <expr> value_expr
-%type <expr> value_expr_list
+%type <ptr_list> value_expr_list
 
 %type <data_type> type
 %type <data_type> type_name
@@ -200,8 +178,11 @@
 
 %%
 
-root:
-			expr								{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->expr = $1.expr;}
+sql_query:
+			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
+
+dql_query:
+			expr 								{$$ = malloc(sizeof(sql_dql)); $$->type = SELECT_QUERY; $$->where_expr = $1;}
 
 expr :
 			bool_expr							{$$ = $1;}
@@ -216,7 +197,7 @@ bool_expr :
 			| _NULL_																		{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
 			| UNKNOWN																		{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
-			| L_NOT bool_expr 																{$$ = new_unary_sql_expr(SQL_LOGNOT, $2.expr);}
+			| L_NOT bool_expr 																{$$ = new_unary_sql_expr(SQL_LOGNOT, $2);}
 
 			| value_expr EQ value_expr														{$$ = new_binary_sql_expr(SQL_EQ, $1, $3);}
 			| value_expr NEQ value_expr 													{$$ = new_binary_sql_expr(SQL_NEQ, $1, $3);}
@@ -231,8 +212,8 @@ bool_expr :
 			| value_expr IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC		{$$ = new_in_sql_expr($1, $4);}
 			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{$$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5));}
 
-			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$ = new_between_sql_expr($1.expr, $3.expr, $5.expr); $$.type = SQL_EXPR;}
-			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1.expr, $4.expr, $6.expr)); $$.type = SQL_EXPR;}
+			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$ = new_between_sql_expr($1, $3, $5);}
+			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1, $4, $6));}
 
 			| expr IS bool_literal %prec IS_PREC											{$$ = new_binary_sql_expr(SQL_IS, $1, $3);}
 			| expr IS L_NOT bool_literal %prec IS_PREC 										{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_IS, $1, $4));}
