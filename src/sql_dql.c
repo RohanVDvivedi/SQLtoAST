@@ -39,7 +39,7 @@ static void print_relation_input(const relation_input* ri_p, int tabs)
 		}
 		case SUB_QUERY :
 		{
-			print_tabs(tabs);printf("( sub_query : ( ");
+			print_tabs(tabs);printf("( sub_query : ( \n");
 			print_dql(ri_p->sub_query, tabs + 1);
 			break;
 		}
