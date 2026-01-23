@@ -2,7 +2,7 @@
 
 #include<stdlib.h>
 
-void destroyddl(sql_ddl* ddl)
+void delete_ddl(sql_ddl* ddl)
 {
 	free(ddl);
 }

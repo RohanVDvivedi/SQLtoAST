@@ -4,7 +4,7 @@
 #define YYSTYPE SQLSTYPE
 #include<sql.yy.h>
 
-sql* parsesql(stream* strm, int* error)
+sql* parse_sql(stream* strm, int* error)
 {
 	sql* res = NULL;
 
@@ -25,55 +25,55 @@ sql* parsesql(stream* strm, int* error)
 	}
 }
 
-void printsql(const sql* sqlast)
+void print_sql(const sql* sqlast)
 {
 	switch(sqlast->type)
 	{
 		case DQL :
 		{
-			printdql(sqlast->dql_query);
+			print_dql(sqlast->dql_query);
 			break;
 		}
 		case DML :
 		{
-			//printdml(sqlast->dml_query);
+			//print_dml(sqlast->dml_query);
 			break;
 		}
 		case DDL :
 		{
-			//printddl(sqlast->ddl_query);
+			//print_ddl(sqlast->ddl_query);
 			break;
 		}
 		case TCL :
 		{
-			//printtcl(sqlast->tcl_query);
+			//print_tcl(sqlast->tcl_query);
 			break;
 		}
 	}
 }
 
-void destroysql(sql* sqlast)
+void delete_sql(sql* sqlast)
 {
 	switch(sqlast->type)
 	{
 		case DQL :
 		{
-			destroydql(sqlast->dql_query);
+			delete_dql(sqlast->dql_query);
 			break;
 		}
 		case DML :
 		{
-			destroydml(sqlast->dml_query);
+			delete_dml(sqlast->dml_query);
 			break;
 		}
 		case DDL :
 		{
-			destroyddl(sqlast->ddl_query);
+			delete_ddl(sqlast->ddl_query);
 			break;
 		}
 		case TCL :
 		{
-			destroytcl(sqlast->tcl_query);
+			delete_tcl(sqlast->tcl_query);
 			break;
 		}
 	}

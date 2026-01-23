@@ -20,6 +20,6 @@ struct sql_dml
 	sql_expression* where_expr;
 };
 
-void destroydml(sql_dml* dml);
+void delete_dml(sql_dml* dml);
 
 #endif

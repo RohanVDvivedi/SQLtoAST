@@ -4,6 +4,7 @@
 #include<sqltoast/sql_expression.h>
 
 #include<cutlery/arraylist.h>
+#include<cutlery/dstring.h>
 
 typedef enum sql_dql_type sql_dql_type;
 enum sql_dql_type
@@ -118,12 +119,12 @@ struct sql_dql
 
 sql_dql* new_dql();
 
-#define new_relation_input(relation_name, as)                             ((relation_input){.type = RELATION, .relation_name = relation_name, .as = as})
-#define new_sub_query_relation_input(sub_query, as)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query, .as = as})
-#define new_function_call_relation_input(function_call, as)               ((relation_input){.type = FUNCTION, .function_call = function_call, .as = as})
+#define new_relation_input(relation_name_, as_)                             ((relation_input){.type = RELATION, .relation_name = relation_name_, .as = as_})
+#define new_sub_query_relation_input(sub_query_, as_)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query_, .as = as_})
+#define new_function_call_relation_input(function_call_, as_)               ((relation_input){.type = FUNCTION, .function_call = function_call_, .as = as_})
 
-void printdql(const sql_dql* dql);
+void print_dql(const sql_dql* dql);
 
-void destroydql(sql_dql* dql);
+void delete_dql(sql_dql* dql);
 
 #endif

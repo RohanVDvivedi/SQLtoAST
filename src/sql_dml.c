@@ -2,7 +2,7 @@
 
 #include<stdlib.h>
 
-void destroydml(sql_dml* dml)
+void delete_dml(sql_dml* dml)
 {
 	delete_sql_expr(dml->where_expr);
 

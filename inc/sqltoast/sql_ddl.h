@@ -18,6 +18,6 @@ struct sql_ddl
 	sql_ddl_type type;
 };
 
-void destroyddl(sql_ddl* ddl);
+void delete_ddl(sql_ddl* ddl);
 
 #endif

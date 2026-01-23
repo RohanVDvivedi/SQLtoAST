@@ -9,6 +9,10 @@ sql_dql* new_dql()
 
 	dql->type = SELECT_QUERY;
 
+	dql->base_input = new_relation_input(new_copy_dstring(&get_dstring_pointing_to_cstring("")), new_copy_dstring(&get_dstring_pointing_to_cstring("")));
+
+	initialize_arraylist(&(dql->joins_with), 0);
+
 	dql->where_expr = NULL;
 	dql->having_expr = NULL;
 	dql->offset_expr = NULL;
@@ -17,9 +21,40 @@ sql_dql* new_dql()
 	return dql;
 }
 
-void printdql(const sql_dql* dql)
+static void print_relation_input(const relation_input* ri_p)
 {
-	printf("SELECT : \n");
+	switch(ri_p->type)
+	{
+		case RELATION :
+		{
+			printf("( relation : ( ");
+			printf_dstring(&(ri_p->relation_name));
+			break;
+		}
+		case SUB_QUERY :
+		{
+			printf("( sub_query : ( ");
+			print_dql(ri_p->sub_query);
+			break;
+		}
+		case FUNCTION :
+		{
+			printf("( function_call : ( ");
+			print_sql_expr(ri_p->function_call);
+			break;
+		}
+	}
+	printf(" ) AS ");
+	printf_dstring(&(ri_p->as));
+	printf(")");
+}
+
+void print_dql(const sql_dql* dql)
+{
+	printf("\nSELECT : \n");
+
+	printf("\nFROM : \n\t");
+	print_relation_input(&(dql->base_input));
 
 	printf("\nWHERE : \n\t");
 	if(dql->where_expr)
@@ -50,8 +85,43 @@ void printdql(const sql_dql* dql)
 	printf("\n");
 }
 
-void destroydql(sql_dql* dql)
+static void destroy_relation_input(relation_input* ri_p)
 {
+	switch(ri_p->type)
+	{
+		case RELATION :
+		{
+			deinit_dstring(&(ri_p->relation_name));
+			break;
+		}
+		case SUB_QUERY :
+		{
+			delete_dql(ri_p->sub_query);
+			break;
+		}
+		case FUNCTION :
+		{
+			delete_sql_expr(ri_p->function_call);
+			break;
+		}
+	}
+	deinit_dstring(&(ri_p->as));
+}
+
+void delete_dql(sql_dql* dql)
+{
+	destroy_relation_input(&(dql->base_input));
+
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
+	{
+		join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
+		destroy_relation_input(&(j->input));
+		if(j->on != NULL)
+			delete_sql_expr(j->on);
+		free(j);
+	}
+	deinitialize_arraylist(&(dql->joins_with));
+
 	if(dql->where_expr)
 		delete_sql_expr(dql->where_expr);
 

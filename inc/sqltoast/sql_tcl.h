@@ -55,6 +55,6 @@ struct sql_tcl
 	};
 };
 
-void destroytcl(sql_tcl* tcl);
+void delete_tcl(sql_tcl* tcl);
 
 #endif
