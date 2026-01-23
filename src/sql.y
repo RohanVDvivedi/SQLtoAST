@@ -4,13 +4,10 @@
 #include<string.h>
 
 #include<sqltoast/sqltoast.h>
-#include<sqltoast/sql_expression.h>
 %}
 
 %code requires {
 	#include<sqltoast/sqltoast.h>
-	#include<sqltoast/sql_expression.h>
-	#include<sqltoast/sql_type.h>
 }
 
 /* Enable reentrant parser */
