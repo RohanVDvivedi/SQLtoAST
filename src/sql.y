@@ -75,6 +75,7 @@
 %type <expr> bool_literal
 %type <expr> value_expr
 %type <expr> value_expr_list
+
 %type <data_type> type
 %type <data_type> type_name
 %type <data_type> type_specs
