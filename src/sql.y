@@ -72,6 +72,7 @@
 %type <expr> expr
 %type <expr> bool_expr
 %type <expr> bool_literal
+%type <expr> func_expr
 %type <expr> value_expr
 %type <ptr_list> value_expr_list
 
@@ -216,12 +217,12 @@ dql_query:
 projection_list : {}
 
 rel_input :
-			IDENTIFIER 									{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| IDENTIFIER AS IDENTIFIER					{$$ = new_relation_input($1, $3);}
-			| dql_query 								{$$ = new_sub_query_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| dql_query AS IDENTIFIER					{$$ = new_sub_query_relation_input($1, $3);}
-			| expr 										{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| expr AS IDENTIFIER						{$$ = new_function_call_relation_input($1, $3);}
+			IDENTIFIER 															{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| IDENTIFIER AS IDENTIFIER											{$$ = new_relation_input($1, $3);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET 								{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER				{$$ = new_sub_query_relation_input($2, $5);}
+			| func_expr 														{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| func_expr AS IDENTIFIER											{$$ = new_function_call_relation_input($1, $3);}
 
 join_clause : {}
 
@@ -322,9 +323,11 @@ value_expr :
 
 			| value_expr CONCAT value_expr 											{$$ = new_binary_sql_expr(SQL_CONCAT, $1, $3);}
 
-			| IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
+			| func_expr																{$$ = $1;}
 
 			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$ = new_cast_sql_expr($3, $5);}
+
+func_expr : IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
 value_expr_list :
 			value_expr 																{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
