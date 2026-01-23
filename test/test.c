@@ -20,10 +20,10 @@ int main()
 		//printf("\n\n");
 		//sqlast->dql_query->where_expr = flatten_similar_associative_operators_in_sql_expression(sqlast->dql_query->where_expr);
 		//print_sql_expr(sqlast->dql_query->where_expr);
-		printsql(sqlast);
+		print_sql(sqlast);
 		printf("\n\n");
 		printf("error = %d\n", error);
-		destroysql(sqlast);
+		delete_sql(sqlast);
 	}
 	else
 		printf("error = %d\n", error);
