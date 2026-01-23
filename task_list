@@ -10,6 +10,7 @@ DQL (select) and then DML (insert (need values as relation_input) update delete)
  * any of these clause can point to a expression or a sub query
  * in operator can also point to a sub query
  * same pieces can also be used in insert, update and delete queries
+ * make expressions in test_cases.txt be made into queries and passed according to the ansi sql expressions
 DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
