@@ -31,22 +31,22 @@ void destroysql(sql* sqlast)
 	{
 		case DQL :
 		{
-			destroydql(&(sqlast->dql_query));
+			destroydql(sqlast->dql_query);
 			break;
 		}
 		case DML :
 		{
-			destroydml(&(sqlast->dml_query));
+			destroydml(sqlast->dml_query);
 			break;
 		}
 		case DDL :
 		{
-			destroyddl(&(sqlast->ddl_query));
+			destroyddl(sqlast->ddl_query);
 			break;
 		}
 		case TCL :
 		{
-			destroytcl(&(sqlast->tcl_query));
+			destroytcl(sqlast->tcl_query);
 			break;
 		}
 	}

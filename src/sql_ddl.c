@@ -2,4 +2,5 @@
 
 void destroyddl(sql_ddl* ddl)
 {
+	free(ddl);
 }
