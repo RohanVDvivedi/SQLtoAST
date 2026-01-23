@@ -20,8 +20,8 @@ int main()
 		//printf("\n\n");
 		//sqlast->dql_query->where_expr = flatten_similar_associative_operators_in_sql_expression(sqlast->dql_query->where_expr);
 		//print_sql_expr(sqlast->dql_query->where_expr);
-		//printf("\n\n");
 		printsql(sqlast);
+		printf("\n\n");
 		printf("error = %d\n", error);
 		destroysql(sqlast);
 	}
