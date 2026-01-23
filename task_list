@@ -4,7 +4,7 @@ PICKED TASKS
  * subquery in the from and join clauses
 
 * SQL QUERY
-DQL (select) and then DML (insert update delete)
+DQL (select) and then DML (insert (need values as relation_input) update delete)
  * start with select query
  * where, order by, from, join, group by, having clauses, decalre them in the order they appear in the generic unoptimized execution plan
  * any of these clause can point to a expression or a sub query

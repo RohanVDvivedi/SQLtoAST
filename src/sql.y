@@ -32,6 +32,8 @@
 
 	arraylist ptr_list;
 
+	relation_input rel_input;
+
 	sql_type data_type;
 
 	uint64_t uval;
@@ -45,7 +47,7 @@
 /* SELECT query */
 %type <dql_query> dql_query
 %type <ptr_list> projection_list
-%type <expr> from_clause
+%type <rel_input> rel_input
 %type <ptr_list> join_clause
 %type <expr> where_clause
 %type <ptr_list> group_by_clause
@@ -202,17 +204,24 @@ sql_query:
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
 
 dql_query:
-			SELECT projection_list from_clause join_clause	where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
+			SELECT projection_list FROM rel_input join_clause where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
 				$$ = new_dql();
-				$$->where_expr = $5;
-				$$->having_expr = $7;
-				$$->offset_expr = $9;
-				$$->limit_expr = $10;
+				$$->base_input = $4;
+				$$->where_expr = $6;
+				$$->having_expr = $8;
+				$$->offset_expr = $10;
+				$$->limit_expr = $11;
 			}
 
 projection_list : {}
 
-from_clause : {}
+rel_input :
+			IDENTIFIER 									{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| IDENTIFIER AS IDENTIFIER					{$$ = new_relation_input($1, $3);}
+			| dql_query 								{$$ = new_sub_query_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| dql_query AS IDENTIFIER					{$$ = new_sub_query_relation_input($1, $3);}
+			| expr 										{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| expr AS IDENTIFIER						{$$ = new_function_call_relation_input($1, $3);}
 
 join_clause : {}
 
