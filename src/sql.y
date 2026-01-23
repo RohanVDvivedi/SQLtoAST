@@ -28,6 +28,8 @@
 
 	sql_dql* dql_query;
 
+	projection_alias* projection;
+
 	sql_expression* expr;
 
 	arraylist ptr_list;
@@ -47,6 +49,7 @@
 /* SELECT query */
 %type <dql_query> dql_query
 %type <ptr_list> projection_list
+%type <projection> projection
 %type <rel_input> rel_input
 %type <ptr_list> join_clause
 %type <expr> where_clause
@@ -214,7 +217,13 @@ dql_query:
 				$$->limit_expr = $11;
 			}
 
-projection_list : {}
+projection_list :
+					projection 											{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
+					| projection_list COMMA projection  				{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
+
+projection :
+					expr 												{$$ = malloc(sizeof(projection_alias)); (*$$) = (projection_alias){$1, new_copy_dstring(&get_dstring_pointing_to_cstring(""))};}
+					| expr AS IDENTIFIER 								{$$ = malloc(sizeof(projection_alias)); (*$$) = (projection_alias){$1, $3};}
 
 rel_input :
 			IDENTIFIER 															{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
