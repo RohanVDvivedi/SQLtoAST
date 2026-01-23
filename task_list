@@ -15,6 +15,7 @@ DDL (create alter drop)
  * start with alter table, database and index querires
  * start with drop table, database and index queries
 
+* subqueries can only be select queries
 *SQL EXPRESSIONS that work with sub queries
  * ANY, SOME, ALL :::::           a < ANY (select score from students)
  * IN / NOT INT ::::::            a in (select id from students where passed = true)
