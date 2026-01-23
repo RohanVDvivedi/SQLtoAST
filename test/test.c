@@ -16,10 +16,10 @@ int main()
 
 	if(sqlast)
 	{
-		print_sql_expr(sqlast->expr);
+		print_sql_expr(sqlast->dql_query->where_expr);
 		printf("\n\n");
-		sqlast->expr = flatten_similar_associative_operators_in_sql_expression(sqlast->expr);
-		print_sql_expr(sqlast->expr);
+		sqlast->dql_query->where_expr = flatten_similar_associative_operators_in_sql_expression(sqlast->dql_query->where_expr);
+		print_sql_expr(sqlast->dql_query->where_expr);
 		printf("\n\n");
 		printf("error = %d\n", error);
 		destroysql(sqlast);
