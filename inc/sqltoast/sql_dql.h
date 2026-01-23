@@ -43,6 +43,9 @@ struct relation_input
 
 		sql_expression* function_call;
 	};
+
+	// if empty, ignore
+	dstring as;
 };
 
 typedef enum join_type join_type;
@@ -61,9 +64,6 @@ struct join_with
 	join_type type;
 
 	relation_input input;
-
-	// if empty, ignore
-	dstring as;
 
 	sql_expression* on;
 };
@@ -93,7 +93,6 @@ struct sql_dql
 
 	// from clause
 	relation_input base_input;
-	dstring base_input_as; // if empty, ignore
 
 	// join tables (each strcut is join_with)
 	arraylist joins_with;
@@ -119,9 +118,9 @@ struct sql_dql
 
 sql_dql* new_dql();
 
-#define new_relation_input(relation_name)                             ((relation_input){.type = RELATION, .relation_name = relation_name})
-#define new_sub_query_relation_input(sub_query)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query})
-#define new_function_call_relation_input(function_call)               ((relation_input){.type = FUNCTION, .function_call = function_call})
+#define new_relation_input(relation_name, as)                             ((relation_input){.type = RELATION, .relation_name = relation_name, .as = as})
+#define new_sub_query_relation_input(sub_query, as)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query, .as = as})
+#define new_function_call_relation_input(function_call, as)               ((relation_input){.type = FUNCTION, .function_call = function_call, .as = as})
 
 void printdql(const sql_dql* dql);
 
