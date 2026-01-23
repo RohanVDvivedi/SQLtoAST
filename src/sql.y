@@ -210,6 +210,7 @@ sql_query:
 dql_query:
 			SELECT projection_list FROM rel_input join_clause where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
 				$$ = new_dql();
+				$$->projections = $2;
 				$$->base_input = $4;
 				$$->where_expr = $6;
 				$$->having_expr = $8;
