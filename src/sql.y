@@ -44,6 +44,15 @@
 
 /* SELECT query */
 %type <dql_query> dql_query
+%type <ptr_list> projection_list
+%type <expr> from_clause
+%type <ptr_list> join_clause
+%type <expr> where_clause
+%type <ptr_list> group_by_clause
+%type <expr> having_clause
+%type <ptr_list> order_by_clause
+%type <expr> offset_clause
+%type <expr> limit_clause
 
 %token SELECT
 %token FROM
@@ -193,7 +202,39 @@ sql_query:
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
 
 dql_query:
-			expr 								{$$ = malloc(sizeof(sql_dql)); $$->type = SELECT_QUERY; $$->where_expr = $1;}
+			SELECT projection_list from_clause join_clause	where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
+				$$ = new_dql();
+				$$->where_expr = $5;
+				$$->having_expr = $7;
+				$$->offset_expr = $9;
+				$$->limit_expr = $10;
+			}
+
+projection_list : {}
+
+from_clause : {}
+
+join_clause : {}
+
+where_clause :
+										{$$ = NULL;}
+				| WHERE expr 			{$$ = $2;}
+
+group_by_clause : {}
+
+having_clause :
+										{$$ = NULL;}
+				| HAVING expr 			{$$ = $2;}
+
+order_by_clause : {}
+
+offset_clause :
+										{$$ = NULL;}
+				| OFFSET expr 			{$$ = $2;}
+
+limit_clause :
+										{$$ = NULL;}
+				| LIMIT expr 			{$$ = $2;}
 
 expr :
 			bool_expr							{$$ = $1;}

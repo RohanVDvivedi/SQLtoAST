@@ -101,21 +101,23 @@ struct sql_dql
 	// where clause
 	sql_expression* where_expr;
 
-	// order by clauses (each struct is order_by)
-	arraylist ordered_by;
-
 	// expressions to group_by (each struct is sql_expression)
 	arraylist group_by;
 
 	// having clause
 	sql_expression* having_expr;
 
-	// limit clause
-	sql_expression* limit_expr;
+	// order by clauses (each struct is order_by)
+	arraylist ordered_by;
 
 	// offset clause
 	sql_expression* offset_expr;
+
+	// limit clause
+	sql_expression* limit_expr;
 };
+
+sql_dql* new_dql();
 
 void destroydql(sql_dql* dql);
 
