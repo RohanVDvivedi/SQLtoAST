@@ -109,6 +109,12 @@ struct sql_dql
 
 	// having clause
 	sql_expression* having_expr;
+
+	// limit clause
+	sql_expression* limit_expr;
+
+	// offset clause
+	sql_expression* offset_expr;
 };
 
 void destroydql(sql_dql* dql);
