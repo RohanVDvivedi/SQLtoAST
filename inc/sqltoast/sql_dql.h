@@ -14,8 +14,8 @@ enum sql_dql_type
 
 typedef struct sql_dql sql_dql;
 
-typedef struct projection_alias projection_alias;
-struct projection_alias
+typedef struct projection projection;
+struct projection
 {
 	sql_expression* projection_expr;
 
@@ -90,7 +90,7 @@ struct sql_dql
 	sql_dql_type type;
 
 	// result columns (each struct is result_alias)
-	arraylist projection_alias;
+	arraylist projections;
 
 	// from clause
 	relation_input base_input;
