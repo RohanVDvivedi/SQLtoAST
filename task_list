@@ -6,6 +6,8 @@ PICKED TASKS
  	* make expressions in test_cases.txt be made into queries and passed according to the ansi sql expressions
  	* ask chatgpt for more complex sql queries atleast 30 and add them to tests
 
+ * make ANY, SOME, ALL and IN operators accept in subqueries of select queries
+
 * SQL QUERY
 DQL (select) and then DML (insert (need values as relation_input) update delete)
  * order by, group by
@@ -15,6 +17,10 @@ DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
  * start with drop table, database and index queries
+
+* flatten a - b expression into a + (-b) as flat addition list, if either a or b is a constant, do that same for a/b
+* make a function to make queries flatten their operators in sql expressions
+* make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
 
 * subqueries can only be select queries
 *SQL EXPRESSIONS that work with sub queries
