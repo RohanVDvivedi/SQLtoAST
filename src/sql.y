@@ -32,6 +32,8 @@
 
 	join_with* join_with;
 
+	order_by* order_by;
+
 	sql_expression* expr;
 
 	arraylist ptr_list;
@@ -59,6 +61,8 @@
 %type <ptr_list> group_by_clause
 %type <expr> having_clause
 %type <ptr_list> order_by_clause
+%type <ptr_list> order_by_expr_and_dir_list
+%type <order_by> order_by_expr_and_dir
 %type <expr> offset_clause
 %type <expr> limit_clause
 
@@ -87,6 +91,9 @@
 %type <uval> lateral_opt
 %type <uval> join_type
 %type <ptr_list> identifier_list
+
+%token ASC
+%token DESC
 
 /* SQL EXPRESSION */
 %type <expr> expr
@@ -234,6 +241,7 @@ dql_query:
 				$$->where_expr = $6;
 				$$->group_by = $7;
 				$$->having_expr = $8;
+				$$->ordered_by = $9;
 				$$->offset_expr = $10;
 				$$->limit_expr = $11;
 			}
@@ -296,7 +304,18 @@ having_clause :
 										{$$ = NULL;}
 				| HAVING expr 			{$$ = $2;}
 
-order_by_clause : {}
+order_by_clause :
+															{initialize_arraylist(&($$), 0);}
+				| ORDER BY order_by_expr_and_dir_list 		{$$ = $3;}
+
+order_by_expr_and_dir_list :
+				order_by_expr_and_dir 											{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
+				| order_by_expr_and_dir_list COMMA order_by_expr_and_dir 		{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
+
+order_by_expr_and_dir :
+				expr 					{$$ = malloc(sizeof(order_by)); $$->ordering_expr = $1; $$->dir = ORDER_BY_ASC;}
+				| expr ASC 				{$$ = malloc(sizeof(order_by)); $$->ordering_expr = $1; $$->dir = ORDER_BY_ASC;}
+				| expr DESC 			{$$ = malloc(sizeof(order_by)); $$->ordering_expr = $1; $$->dir = ORDER_BY_DESC;}
 
 offset_clause :
 										{$$ = NULL;}

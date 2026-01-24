@@ -114,6 +114,9 @@
 (?i:LATERAL)			{return LATERAL;}
 (?i:NATURAL)			{return NATURAL;}
 
+(?i:ASC)				{return ASC;}
+(?i:DESC)				{return DESC;}
+
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 
