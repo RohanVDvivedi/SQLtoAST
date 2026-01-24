@@ -126,8 +126,6 @@
 
 '[^']*'													{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2); return STRING;}
 
-"\*" 													{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return IDENTIFIER;}
-
 [a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*		{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return IDENTIFIER;}
 
 %%
