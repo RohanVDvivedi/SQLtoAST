@@ -14,6 +14,7 @@ sql_dql* new_dql()
 	initialize_arraylist(&(dql->joins_with), 0);
 
 	dql->where_expr = NULL;
+	initialize_arraylist(&(dql->group_by), 0);
 	dql->having_expr = NULL;
 	dql->offset_expr = NULL;
 	dql->limit_expr = NULL;
@@ -130,6 +131,14 @@ void print_dql(const sql_dql* dql, int tabs)
 		printf("NULL");
 	printf("\n\n");
 
+	print_tabs(tabs);printf("GROUP_BY : \n");
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
+	{
+		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->joins_with), i);
+		print_tabs(tabs+1);print_sql_expr(grouping_expr);printf("\n");
+	}
+	printf("\n");
+
 	print_tabs(tabs);printf("HAVING : \n");
 	print_tabs(tabs+1);
 	if(dql->having_expr)
@@ -222,6 +231,13 @@ void delete_dql(sql_dql* dql)
 
 	if(dql->where_expr)
 		delete_sql_expr(dql->where_expr);
+
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
+	{
+		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->joins_with), i);
+		delete_sql_expr(grouping_expr);
+	}
+	deinitialize_arraylist(&(dql->group_by));
 
 	if(dql->having_expr)
 		delete_sql_expr(dql->having_expr);
