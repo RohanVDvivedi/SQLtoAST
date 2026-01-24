@@ -1,7 +1,7 @@
 
 PICKED TASKS
- * SELECT query remaining clauses
  * test
+    * remove extensive newlines and tabs from printing debug version od queries
  	* stream line outputs into linear queries with brackets, to easily pass them in chatgpt for verification
  	* make expressions in test_cases.txt be made into queries and passed according to the ansi sql expressions
  	* ask chatgpt for more complex sql queries atleast 30 and add them to tests
@@ -10,6 +10,7 @@ PICKED TASKS
 DQL (select) and then DML (insert (need values as relation_input) update delete)
  * order by, group by
  * where and select sub query can also be used in insert, update and delete queries
+TCL is very simple, do that right after DML parsing rules
 DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
