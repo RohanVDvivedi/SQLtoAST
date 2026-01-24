@@ -90,6 +90,7 @@
 
 /* SQL EXPRESSION */
 %type <expr> expr
+%type <ptr_list> expr_list
 %type <expr> bool_expr
 %type <expr> bool_literal
 %type <expr> func_expr
@@ -231,6 +232,7 @@ dql_query:
 				$$->base_input = $4;
 				$$->joins_with = $5;
 				$$->where_expr = $6;
+				$$->group_by = $7;
 				$$->having_expr = $8;
 				$$->offset_expr = $10;
 				$$->limit_expr = $11;
@@ -286,7 +288,9 @@ where_clause :
 										{$$ = NULL;}
 				| WHERE expr 			{$$ = $2;}
 
-group_by_clause : {}
+group_by_clause :
+										{initialize_arraylist(&($$), 0);}
+				| GROUP BY expr_list 	{$$ = $3;}
 
 having_clause :
 										{$$ = NULL;}
@@ -305,6 +309,10 @@ limit_clause :
 expr :
 			bool_expr							{$$ = $1;}
 			| value_expr						{$$ = $1;}
+
+expr_list :
+			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
+			| expr_list COMMA expr 				{insert_in_expr_list(&($1), $3); $$ = $1;}
 
 bool_expr :
 			OPEN_BRACKET bool_expr CLOSE_BRACKET 											{$$ = $2;}
