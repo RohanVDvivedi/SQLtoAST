@@ -120,12 +120,12 @@
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 
-[-+]?[0-9]+												{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return INTEGER;}
+[-+]?[0-9]+														{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return INTEGER;}
 
-[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?						{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return NUMBER;}
+[-+]?[0-9]+(\.[0-9]+)?([eE][0-9]+)?								{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return NUMBER;}
 
-'[^']*'													{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2); return STRING;}
+'[^']*'															{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, strlen(sqlget_text(yyscanner))-2); return STRING;}
 
-[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*		{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return IDENTIFIER;}
+[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*(\.\*)?		{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return IDENTIFIER;}
 
 %%
