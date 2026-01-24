@@ -1,16 +1,15 @@
 
 PICKED TASKS
  * SELECT query remaining clauses
- * subquery in the from and join clauses
+ * test
+ 	* stream line outputs into linear queries with brackets, to easily pass them in chatgpt for verification
+ 	* make expressions in test_cases.txt be made into queries and passed according to the ansi sql expressions
+ 	* ask chatgpt for more complex sql queries atleast 30 and add them to tests
 
 * SQL QUERY
 DQL (select) and then DML (insert (need values as relation_input) update delete)
- * start with select query
- * where, order by, from, join, group by, having clauses, decalre them in the order they appear in the generic unoptimized execution plan
- * any of these clause can point to a expression or a sub query
- * in operator can also point to a sub query
- * same pieces can also be used in insert, update and delete queries
- * make expressions in test_cases.txt be made into queries and passed according to the ansi sql expressions
+ * order by, group by
+ * where and select sub query can also be used in insert, update and delete queries
 DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
