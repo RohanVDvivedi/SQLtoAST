@@ -30,6 +30,8 @@
 
 	projection* projection;
 
+	join_with* join_with;
+
 	sql_expression* expr;
 
 	arraylist ptr_list;
@@ -51,7 +53,8 @@
 %type <ptr_list> projection_list
 %type <projection> projection
 %type <rel_input> rel_input
-%type <ptr_list> join_clause
+%type <ptr_list> join_clauses
+%type <join_with> join_clause
 %type <expr> where_clause
 %type <ptr_list> group_by_clause
 %type <expr> having_clause
@@ -70,6 +73,20 @@
 %token ORDER
 %token LIMIT
 %token OFFSET
+
+%token USING
+%token INNER
+%token OUTER
+%token LEFT
+%token RIGHT
+%token FULL
+%token CROSS
+%token LATERAL
+%token NATURAL
+
+%type <uval> lateral_opt
+%type <uval> join_type
+%type <ptr_list> identifier_list
 
 /* SQL EXPRESSION */
 %type <expr> expr
@@ -208,10 +225,11 @@ sql_query:
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
 
 dql_query:
-			SELECT projection_list FROM rel_input join_clause where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
+			SELECT projection_list FROM rel_input join_clauses where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
 				$$ = new_dql();
 				$$->projections = $2;
 				$$->base_input = $4;
+				$$->joins_with = $5;
 				$$->where_expr = $6;
 				$$->having_expr = $8;
 				$$->offset_expr = $10;
@@ -234,7 +252,35 @@ rel_input :
 			| func_expr 														{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
 			| func_expr AS IDENTIFIER											{$$ = new_function_call_relation_input($1, $3);}
 
-join_clause : {}
+join_clauses :
+												{initialize_arraylist(&($$), 0);}
+				| join_clause 					{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
+				| join_clauses join_clause 		{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $2); $$ = $1;}
+
+join_clause : 
+				join_type JOIN lateral_opt rel_input ON expr													{$$ = malloc(sizeof(join_with)); $$->type = $1; $$->is_lateral = $3; $$->input = $4; $$->condition_type = ON_EXPR_JOIN_CONDITION; $$->on_expr = $6;}
+				| join_type JOIN lateral_opt rel_input USING OPEN_BRACKET identifier_list CLOSE_BRACKET			{$$ = malloc(sizeof(join_with)); $$->type = $1; $$->is_lateral = $3; $$->input = $4; $$->condition_type = USING_JOIN_CONDITION; $$->using_cols = $7;}
+				| NATURAL join_type JOIN lateral_opt rel_input													{$$ = malloc(sizeof(join_with)); $$->type = $2; $$->is_lateral = $4; $$->input = $5; $$->condition_type = NATURAL_JOIN_CONDITION;}
+				| CROSS JOIN lateral_opt rel_input																{$$ = malloc(sizeof(join_with)); $$->type = CROSS_JOIN; $$->is_lateral = $3; $$->input = $4; $$->condition_type = NO_JOIN_CONDITION;}
+
+
+join_type :
+			INNER outer_opt 			{$$ = INNER_JOIN;}
+			| LEFT outer_opt 			{$$ = LEFT_JOIN;}
+			| RIGHT outer_opt 			{$$ = RIGHT_JOIN;}
+			| FULL outer_opt 			{$$ = FULL_JOIN;}
+
+outer_opt :
+							{}
+				| OUTER 	{}
+
+lateral_opt :
+							{$$ = 0;}
+				| LATERAL 	{$$ = 1;}
+
+identifier_list :
+				IDENTIFIER 								{dstring* t = malloc(sizeof(dstring)); (*t) = $1; initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), t);}
+				| identifier_list COMMA IDENTIFIER 		{dstring* t = malloc(sizeof(dstring)); (*t) = $3; if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), t); $$ = $1;}
 
 where_clause :
 										{$$ = NULL;}

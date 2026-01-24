@@ -59,14 +59,31 @@ enum join_type
 	CROSS_JOIN,
 };
 
+typedef enum join_condition_type join_condition_type;
+enum join_condition_type
+{
+	NO_JOIN_CONDITION, // used only for CROSS_JOIN
+	NATURAL_JOIN_CONDITION,
+	ON_EXPR_JOIN_CONDITION, // on_expr is present
+	USING_JOIN_CONDITION, // using_cols is present 
+};
+
 typedef struct join_with join_with;
 struct join_with
 {
 	join_type type;
 
+	int is_lateral;
+
 	relation_input input;
 
-	sql_expression* on;
+	join_condition_type condition_type;
+
+	union
+	{
+		sql_expression* on_expr;
+		arraylist using_cols;
+	};
 };
 
 typedef enum order_by_dir order_by_dir;

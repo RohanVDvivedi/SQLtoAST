@@ -105,6 +105,15 @@
 (?i:LIMIT)				{return LIMIT;}
 (?i:OFFSET)				{return OFFSET;}
 
+(?i:USING) 				{return USING;}
+(?i:INNER) 				{return INNER;}
+(?i:OUTER)				{return OUTER;}
+(?i:LEFT)				{return LEFT;}
+(?i:FULL)				{return FULL;}
+(?i:CROSS)				{return CROSS;}
+(?i:LATERAL)			{return LATERAL;}
+(?i:NATURAL)			{return NATURAL;}
+
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 

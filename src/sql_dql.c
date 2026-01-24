@@ -72,6 +72,56 @@ void print_dql(const sql_dql* dql, int tabs)
 	print_relation_input(&(dql->base_input), tabs+1);
 	printf("\n\n");
 
+	print_tabs(tabs);printf("JOINS : \n");
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
+	{
+		join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
+		print_tabs(tabs+1);
+		switch(j->type)
+		{
+			case INNER_JOIN : 		printf(" INNER "); 		break;
+			case LEFT_JOIN : 		printf(" LEFT "); 		break;
+			case RIGHT_JOIN : 		printf(" RIGHT "); 		break;
+			case FULL_JOIN : 		printf(" FULL "); 		break;
+			case CROSS_JOIN : 		printf(" CROSS "); 		break;
+		}
+		printf(" is_lateral = %d ", j->is_lateral);
+		print_relation_input(&(j->input), tabs+2);
+		switch(j->condition_type)
+		{
+			case NO_JOIN_CONDITION :
+			{
+				printf(" NO CONDITION ");
+				break;
+			}
+			case NATURAL_JOIN_CONDITION :
+			{
+				printf(" NATURAL CONDITION ");
+				break;
+			}
+			case ON_EXPR_JOIN_CONDITION :
+			{
+				printf(" ON CONDITION ");
+				print_sql_expr(j->on_expr);
+				break;
+			}
+			case USING_JOIN_CONDITION :
+			{
+				printf(" USING ( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+				{
+					if(i > 0)
+						printf(" , ");
+					printf_dstring((dstring*) get_from_front_of_arraylist(&(j->using_cols), i));
+				}
+				printf(" )");
+				break;
+			}
+		}
+		printf("\n");
+	}
+	printf("\n");
+
 	print_tabs(tabs);printf("WHERE : \n");
 	print_tabs(tabs+1);
 	if(dql->where_expr)
@@ -145,8 +195,27 @@ void delete_dql(sql_dql* dql)
 	{
 		join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
 		destroy_relation_input(&(j->input));
-		if(j->on != NULL)
-			delete_sql_expr(j->on);
+		switch(j->condition_type)
+		{
+			case ON_EXPR_JOIN_CONDITION :
+			{
+				delete_sql_expr(j->on_expr);
+				break;
+			}
+			case USING_JOIN_CONDITION :
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+				{
+					dstring* col = (dstring*) get_from_front_of_arraylist(&(j->using_cols), i);
+					deinit_dstring(col);
+					free(col);
+				}
+				deinitialize_arraylist(&(j->using_cols));
+				break;
+			}
+			default :
+				break;
+		}
 		free(j);
 	}
 	deinitialize_arraylist(&(dql->joins_with));
