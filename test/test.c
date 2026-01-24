@@ -16,11 +16,9 @@ int main()
 
 	if(sqlast)
 	{
-		//print_sql_expr(sqlast->dql_query->where_expr);
-		//printf("\n\n");
-		//sqlast->dql_query->where_expr = flatten_similar_associative_operators_in_sql_expression(sqlast->dql_query->where_expr);
-		//print_sql_expr(sqlast->dql_query->where_expr);
 		print_sql(sqlast);
+		// call flatten_similar_associative_operators_in_sql_expression on all sql expressions
+		//print_sql(sqlast);
 		printf("\n\n");
 		printf("error = %d\n", error);
 		delete_sql(sqlast);
