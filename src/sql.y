@@ -385,6 +385,7 @@ value_expr :
 			| NUMBER																{$$ = new_valued_sql_expr(SQL_NUM, $1);}
 			| STRING																{$$ = new_valued_sql_expr(SQL_STR, $1);}
 			| IDENTIFIER															{$$ = new_valued_sql_expr(SQL_VAR, $1);}
+			| MUL																	{$$ = new_valued_sql_expr(SQL_VAR, new_dstring("*", 1));}
 			| TRUE																	{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
 			| FALSE																	{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
 			| _NULL_																{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
