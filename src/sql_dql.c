@@ -16,6 +16,7 @@ sql_dql* new_dql()
 	dql->where_expr = NULL;
 	initialize_arraylist(&(dql->group_by), 0);
 	dql->having_expr = NULL;
+	initialize_arraylist(&(dql->ordered_by), 0);
 	dql->offset_expr = NULL;
 	dql->limit_expr = NULL;
 
@@ -147,6 +148,15 @@ void print_dql(const sql_dql* dql, int tabs)
 		printf("NULL");
 	printf("\n\n");
 
+	print_tabs(tabs);printf("ORDERED_BY : \n");
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
+	{
+		order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->ordered_by), i);
+		print_tabs(tabs+1);printf("(");print_sql_expr(o->ordering_expr);printf(" in %s order )", ((o->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
+		printf("\n");
+	}
+	printf("\n");
+
 	print_tabs(tabs);printf("OFFSET : \n");
 	print_tabs(tabs+1);
 	if(dql->offset_expr)
@@ -241,6 +251,14 @@ void delete_dql(sql_dql* dql)
 
 	if(dql->having_expr)
 		delete_sql_expr(dql->having_expr);
+
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
+	{
+		order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->ordered_by), i);
+		delete_sql_expr(o->ordering_expr);
+		free(o);
+	}
+	deinitialize_arraylist(&(dql->group_by));
 
 	if(dql->offset_expr)
 		delete_sql_expr(dql->offset_expr);
