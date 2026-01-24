@@ -134,7 +134,7 @@ void print_dql(const sql_dql* dql, int tabs)
 	print_tabs(tabs);printf("GROUP_BY : \n");
 	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
 	{
-		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->joins_with), i);
+		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->group_by), i);
 		print_tabs(tabs+1);print_sql_expr(grouping_expr);printf("\n");
 	}
 	printf("\n");
@@ -234,7 +234,7 @@ void delete_dql(sql_dql* dql)
 
 	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
 	{
-		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->joins_with), i);
+		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->group_by), i);
 		delete_sql_expr(grouping_expr);
 	}
 	deinitialize_arraylist(&(dql->group_by));
