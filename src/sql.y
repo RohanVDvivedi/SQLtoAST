@@ -251,16 +251,20 @@ projection_list :
 					| projection_list COMMA projection  				{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
 
 projection :
-					expr 												{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, new_copy_dstring(&get_dstring_pointing_to_cstring(""))};}
-					| expr AS IDENTIFIER 								{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, $3};}
+					expr 													{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, new_copy_dstring(&get_dstring_pointing_to_cstring(""))};}
+					| expr as_opt IDENTIFIER 								{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, $3};}
 
 rel_input :
-			IDENTIFIER 															{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| IDENTIFIER AS IDENTIFIER											{$$ = new_relation_input($1, $3);}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET 								{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER				{$$ = new_sub_query_relation_input($2, $5);}
-			| func_expr 														{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| func_expr AS IDENTIFIER											{$$ = new_function_call_relation_input($1, $3);}
+			IDENTIFIER 																{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| IDENTIFIER as_opt IDENTIFIER											{$$ = new_relation_input($1, $3);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET 									{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET as_opt IDENTIFIER				{$$ = new_sub_query_relation_input($2, $5);}
+			| func_expr 															{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| func_expr as_opt IDENTIFIER											{$$ = new_function_call_relation_input($1, $3);}
+
+as_opt :
+					{}
+			| AS 	{}
 
 join_clauses :
 												{initialize_arraylist(&($$), 0);}
