@@ -1,65 +1,65 @@
-a AND b OR c AND d OR e
-NOT a AND b OR c
-a = b OR c = d AND e = f
-a BETWEEN b AND c OR d BETWEEN e AND f
-a BETWEEN b AND c AND d
-a NOT BETWEEN b AND c OR d
-a IN (b, c AND d, e)
-a NOT IN (b, c, d OR e)
-a LIKE b OR c NOT LIKE d AND e
-NOT a LIKE b OR c
-a || b IN (c || d, e)
-a = b AND c IN (d, e) OR f
-a AND b AND c OR d AND e
-a BETWEEN b AND c AND d < e OR f
-NOT (a AND b OR c) AND d IN (e, f || g)
-a OR b AND c BETWEEN d AND e OR f
-NOT a BETWEEN b AND c AND d OR e
-a IN (b, c, d) AND e OR f BETWEEN g AND h
-a LIKE b AND NOT c LIKE d OR e
-a || b || c IN (d || e, f) AND g
-a AND b OR c IN (d, e AND f, g)
-a BETWEEN b AND c OR d AND e BETWEEN f AND g
-NOT a AND b BETWEEN c AND d OR e AND f
-a IN (b, c, d) OR e || f = g || h AND i
-NOT (a BETWEEN b AND c OR d) AND e
-a AND NOT b IN (c, d) OR e
-a BETWEEN b AND c AND d BETWEEN e AND f OR g
-a LIKE b AND c OR d LIKE e AND f OR g
-NOT a OR b AND NOT c BETWEEN d AND e
-a IN (b, c) AND d OR e IN (f || g, h)
-a || b between c and d || e
-a || b not between c || e and d
-a || b in (c,  d || e)
-a || b not in (c || e,  d || f, g, h)
-a IS NULL OR b IS NOT NULL AND c = 10
-NOT (a IS TRUE) AND (b IS FALSE OR c IS UNKNOWN)
-(a + b) IS NOT NULL AND (c BETWEEN d AND e) IS TRUE
-a IS NULL OR b IS TRUE AND NOT (c IS FALSE)
-((a > b) AND (c < d)) IS TRUE OR e IS NOT UNKNOWN
-NOT (a IS NULL OR b IS UNKNOWN) AND (c = d) IS FALSE
-(a + b * c) IS NOT NULL AND d IS TRUE OR e IS UNKNOWN
-NOT (a IN (b, c, d) OR e IS FALSE) AND (f || g) IS NOT NULL
-((a > b) OR (c < d AND e = f)) IS TRUE AND g IS NOT UNKNOWN
-a BETWEEN b AND c IS TRUE OR d AND e IS NULL
-NOT ((a || b) LIKE c) IS FALSE AND d IS NOT NULL
-(a IN (b, c) AND d BETWEEN e AND f) IS TRUE OR g IS FALSE
-NOT (a = b IS TRUE OR c = d IS FALSE) AND e IS UNKNOWN
-((a + b) > (c - d) AND e) IS NOT FALSE OR f IS NULL
-a IS TRUE OR b IS FALSE AND (c IS UNKNOWN OR d BETWEEN e AND f)
-NOT ((a IN (b, c, d) IS TRUE) AND (e || f) IS NOT NULL)
-NOT ((a || b) LIKE 'foo%' OR c BETWEEN 1 AND 10) AND CHAR_LENGTH(TRIM(name)) > 3 OR COALESCE(x, y, z) + SUBSTRING(description, 1, 5) * 2 <= 100 AND (status IS NOT NULL OR is_active = TRUE) OR ((id % 2 = 0 AND score >= 50) OR category IN ('A', 'B', 'C'))
-TRIM(' ', full_name) || '...'
-SUBSTRING(CONCAT(first_name, ' ', last_name), 1, CHAR_LENGTH(first_name) + 3) = 'John D'
-COALESCE(discount, 0) * price / (1 + tax_rate) >= 100
-(NOT status IN ('inactive', 'banned') AND last_login > '2025-01-01') OR is_admin = TRUE
-score BETWEEN 50 AND 100 AND level + bonus >= 75 OR rank IN (1, 2, 3)
-SUBSTRING(TRIM('x', field1), 2, CHAR_LENGTH(field2) - 1) || '-' || COALESCE(field3, 'NA')
-(a IS NULL OR b IS NOT TRUE) AND c IS UNKNOWN OR d IS FALSE
-((a + b * c) / (d - e) > 10 AND f % 2 = 0) OR g || h = 'xyz'
-username IN ('alice', 'bob', 'carol') AND age BETWEEN 18 AND 30 AND email LIKE '%@example.com' OR nickname NOT IN ('admin', 'root')
-CAST(price * quantity AS DECIMAL(10,2)) BETWEEN CAST(discount AS DECIMAL(10,2)) AND CAST(discount + tax AS DECIMAL(10,2)) IS NOT FALSE
-NOT ( CAST(TRIM(' ' ,first_name) || ' ' || last_name AS VARCHAR(100)) LIKE '%admin%')
-CAST(score + bonus AS INTEGER) IN ( CAST(min_score AS INTEGER), CAST(avg_score * 1.1 AS INTEGER),CAST(max_score AS INTEGER))IS TRUE
-(CAST(a + b * c AS BIGINT) > CAST(d / e AS BIGINT)    AND CAST(flag AS BOOLEAN)) OR CAST(status AS BOOLEAN) IS UNKNOWN
-NOT (    CAST(        SUBSTRING(            COALESCE(code, 'X123'),            1,    CAST(LENGTH(prefix) AS INTEGER) + 2) AS CHAR(10)) = CAST(expected_code AS CHAR(10))    AND CAST(is_active AS BOOLEAN) IS TRUE)
+select * from t where a AND b OR c AND d OR e
+select * from t where NOT a AND b OR c
+select * from t where a = b OR c = d AND e = f
+select * from t where a BETWEEN b AND c OR d BETWEEN e AND f
+select * from t where a BETWEEN b AND c AND d
+select * from t where a NOT BETWEEN b AND c OR d
+select * from t where a IN (b, c AND d, e)
+select * from t where a NOT IN (b, c, d OR e)
+select * from t where a LIKE b OR c NOT LIKE d AND e
+select * from t where NOT a LIKE b OR c
+select * from t where a || b IN (c || d, e)
+select * from t where a = b AND c IN (d, e) OR f
+select * from t where a AND b AND c OR d AND e
+select * from t where a BETWEEN b AND c AND d < e OR f
+select * from t where NOT (a AND b OR c) AND d IN (e, f || g)
+select * from t where a OR b AND c BETWEEN d AND e OR f
+select * from t where NOT a BETWEEN b AND c AND d OR e
+select * from t where a IN (b, c, d) AND e OR f BETWEEN g AND h
+select * from t where a LIKE b AND NOT c LIKE d OR e
+select * from t where a || b || c IN (d || e, f) AND g
+select * from t where a AND b OR c IN (d, e AND f, g)
+select * from t where a BETWEEN b AND c OR d AND e BETWEEN f AND g
+select * from t where NOT a AND b BETWEEN c AND d OR e AND f
+select * from t where a IN (b, c, d) OR e || f = g || h AND i
+select * from t where NOT (a BETWEEN b AND c OR d) AND e
+select * from t where a AND NOT b IN (c, d) OR e
+select * from t where a BETWEEN b AND c AND d BETWEEN e AND f OR g
+select * from t where a LIKE b AND c OR d LIKE e AND f OR g
+select * from t where NOT a OR b AND NOT c BETWEEN d AND e
+select * from t where a IN (b, c) AND d OR e IN (f || g, h)
+select * from t where a || b between c and d || e
+select * from t where a || b not between c || e and d
+select * from t where a || b in (c,  d || e)
+select * from t where a || b not in (c || e,  d || f, g, h)
+select * from t where a IS NULL OR b IS NOT NULL AND c = 10
+select * from t where NOT (a IS TRUE) AND (b IS FALSE OR c IS UNKNOWN)
+select * from t where (a + b) IS NOT NULL AND (c BETWEEN d AND e) IS TRUE
+select * from t where a IS NULL OR b IS TRUE AND NOT (c IS FALSE)
+select * from t where ((a > b) AND (c < d)) IS TRUE OR e IS NOT UNKNOWN
+select * from t where NOT (a IS NULL OR b IS UNKNOWN) AND (c = d) IS FALSE
+select * from t where (a + b * c) IS NOT NULL AND d IS TRUE OR e IS UNKNOWN
+select * from t where NOT (a IN (b, c, d) OR e IS FALSE) AND (f || g) IS NOT NULL
+select * from t where ((a > b) OR (c < d AND e = f)) IS TRUE AND g IS NOT UNKNOWN
+select * from t where a BETWEEN b AND c IS TRUE OR d AND e IS NULL
+select * from t where NOT ((a || b) LIKE c) IS FALSE AND d IS NOT NULL
+select * from t where (a IN (b, c) AND d BETWEEN e AND f) IS TRUE OR g IS FALSE
+select * from t where NOT (a = b IS TRUE OR c = d IS FALSE) AND e IS UNKNOWN
+select * from t where ((a + b) > (c - d) AND e) IS NOT FALSE OR f IS NULL
+select * from t where a IS TRUE OR b IS FALSE AND (c IS UNKNOWN OR d BETWEEN e AND f)
+select * from t where NOT ((a IN (b, c, d) IS TRUE) AND (e || f) IS NOT NULL)
+select * from t where NOT ((a || b) LIKE 'foo%' OR c BETWEEN 1 AND 10) AND CHAR_LENGTH(TRIM(name)) > 3 OR COALESCE(x, y, z) + SUBSTRING(description, 1, 5) * 2 <= 100 AND (status IS NOT NULL OR is_active = TRUE) OR ((id % 2 = 0 AND score >= 50) OR category IN ('A', 'B', 'C'))
+select * from t where TRIM(' ', full_name) || '...'
+select * from t where SUBSTRING(CONCAT(first_name, ' ', last_name), 1, CHAR_LENGTH(first_name) + 3) = 'John D'
+select * from t where COALESCE(discount, 0) * price / (1 + tax_rate) >= 100
+select * from t where (NOT status IN ('inactive', 'banned') AND last_login > '2025-01-01') OR is_admin = TRUE
+select * from t where score BETWEEN 50 AND 100 AND level + bonus >= 75 OR rank IN (1, 2, 3)
+select * from t where SUBSTRING(TRIM('x', field1), 2, CHAR_LENGTH(field2) - 1) || '-' || COALESCE(field3, 'NA')
+select * from t where (a IS NULL OR b IS NOT TRUE) AND c IS UNKNOWN OR d IS FALSE
+select * from t where ((a + b * c) / (d - e) > 10 AND f % 2 = 0) OR g || h = 'xyz'
+select * from t where username IN ('alice', 'bob', 'carol') AND age BETWEEN 18 AND 30 AND email LIKE '%@example.com' OR nickname NOT IN ('admin', 'root')
+select * from t where CAST(price * quantity AS DECIMAL(10,2)) BETWEEN CAST(discount AS DECIMAL(10,2)) AND CAST(discount + tax AS DECIMAL(10,2)) IS NOT FALSE
+select * from t where NOT ( CAST(TRIM(' ' ,first_name) || ' ' || last_name AS VARCHAR(100)) LIKE '%admin%')
+select * from t where CAST(score + bonus AS INTEGER) IN ( CAST(min_score AS INTEGER), CAST(avg_score * 1.1 AS INTEGER),CAST(max_score AS INTEGER))IS TRUE
+select * from t where (CAST(a + b * c AS BIGINT) > CAST(d / e AS BIGINT)    AND CAST(flag AS BOOLEAN)) OR CAST(status AS BOOLEAN) IS UNKNOWN
+select * from t where NOT (    CAST(        SUBSTRING(            COALESCE(code, 'X123'),            1,    CAST(LENGTH(prefix) AS INTEGER) + 2) AS CHAR(10)) = CAST(expected_code AS CHAR(10))    AND CAST(is_active AS BOOLEAN) IS TRUE)
