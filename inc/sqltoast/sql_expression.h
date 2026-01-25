@@ -6,6 +6,8 @@
 
 #include<sqltoast/sql_type.h>
 
+#include<sqltoast/sql_dql.h>
+
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
 {
@@ -79,6 +81,16 @@ enum sql_expression_type
 	SQL_FUNCTION,
 
 	SQL_CAST,
+
+	SQL_SUB_QUERY,
+};
+
+typedef enum sql_cmp_quantifier sql_cmp_quantifier;
+enum sql_cmp_quantifier
+{
+	SQL_CMP_NONE,
+	SQL_CMP_ANY,
+	SQL_CMP_ALL,
 };
 
 /*
@@ -90,6 +102,10 @@ struct sql_expression
 {
 	sql_expression_type type;
 
+	// only valid if the type is in (SQL_GT, SQL_GTE, SQL_LT, SQL_LTE, SQL_EQ, SQL_NEQ)
+	// this attribute makes sense only if the right is an operator of sub_query type
+	sql_cmp_quantifier cmp_rhs_quantfier;
+
 	union
 	{
 		// for all unary operators
@@ -99,7 +115,7 @@ struct sql_expression
 		struct
 		{
 			sql_expression* left;
-			sql_expression* right;
+			sql_expression* right; // if the right side is sub_query with more than 1 result, then use the struct below to resolve the operator
 		};
 
 		// for between operator
@@ -113,6 +129,8 @@ struct sql_expression
 		struct
 		{
 			sql_expression* in_input;
+
+			sql_dql* in_sub_query; // if this attribute is NULL, only then check the in_expr_list
 			arraylist in_expr_list;
 		};
 
@@ -135,6 +153,12 @@ struct sql_expression
 			sql_expression* cast_expr;
 			sql_type cast_type;
 		};
+
+		// for sql_sub_query
+		struct
+		{
+			sql_dql* sub_query;
+		};
 	};
 };
 
@@ -145,15 +169,19 @@ sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* una
 
 sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* left, sql_expression* right);
 
+sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, sql_expression* right);
+
 sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1);
 
 sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list);
 
-sql_expression* new_in_sql_expr(sql_expression* in_input, arraylist in_expr_list);
+sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query, arraylist in_expr_list);
 
 sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list);
 
 sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type);
+
+sql_expression* new_sub_query_sql_expr(sql_dql* sub_query);
 
 // for NUM, STR and VAR
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
