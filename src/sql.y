@@ -140,6 +140,9 @@
 %token EQ
 %token NEQ
 
+%token ANY
+%token ALL
+
 %token B_AND
 %token B_OR
 %token B_XOR

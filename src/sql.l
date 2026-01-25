@@ -66,6 +66,10 @@
 (?i:CAST)				{return CAST;}
 (?i:AS)					{return AS;}
 
+(?i:ANY)				{return ANY;}
+(?i:SOME)				{return ANY;}
+(?i:ALL)				{return ALL;}
+
 (?i:TRUE)				{return TRUE;}
 (?i:FALSE)				{return FALSE;}
 (?i:UNKNOWN)			{return UNKNOWN;}
