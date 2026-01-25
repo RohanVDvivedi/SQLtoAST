@@ -62,8 +62,12 @@ void print_dql(const sql_dql* dql)
 {
 	printf("select( ");
 
+	int clauses_printed = 0;
+
 	if(get_element_count_arraylist(&(dql->projections)) > 0)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("projections( ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->projections)); i++)
 		{
@@ -84,14 +88,22 @@ void print_dql(const sql_dql* dql)
 			printf(" )");
 		}
 		printf(" )");
+		clauses_printed++;
 	}
 
-	printf("from( ");
-	print_relation_input(&(dql->base_input));
-	printf(" )");
+	{
+		if(clauses_printed != 0)
+			printf(" , ");
+		printf("from( ");
+		print_relation_input(&(dql->base_input));
+		printf(" )");
+		clauses_printed++;
+	}
 
 	if(get_element_count_arraylist(&(dql->joins_with)) > 0)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("joins( ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
 		{
@@ -142,17 +154,23 @@ void print_dql(const sql_dql* dql)
 			printf(" )");
 		}
 		printf(" )");
+		clauses_printed++;
 	}
 
 	if(dql->where_expr)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("where( ");
 		print_sql_expr(dql->where_expr);
 		printf(" )");
+		clauses_printed++;
 	}
 
 	if(get_element_count_arraylist(&(dql->group_by)) > 0)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("group_by( ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
 		{
@@ -164,18 +182,24 @@ void print_dql(const sql_dql* dql)
 			printf(" )");
 		}
 		printf(" )");
+		clauses_printed++;
 	}
 
 	
 	if(dql->having_expr)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("having( ");
 		print_sql_expr(dql->having_expr);
 		printf(" )");
+		clauses_printed++;
 	}
 
 	if(get_element_count_arraylist(&(dql->ordered_by)) > 0)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("order_by( ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
 		{
@@ -186,20 +210,27 @@ void print_dql(const sql_dql* dql)
 			print_sql_expr(o->ordering_expr);
 			printf(" ) in %s order )", ((o->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
 		}
+		clauses_printed++;
 	}
 
 	if(dql->offset_expr)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("offset( ");
 		print_sql_expr(dql->offset_expr);
 		printf(" )");
+		clauses_printed++;
 	}
 
 	if(dql->limit_expr)
 	{
+		if(clauses_printed != 0)
+			printf(" , ");
 		printf("limit( ");
 		print_sql_expr(dql->limit_expr);
 		printf(" )");
+		clauses_printed++;
 	}
 
 	printf(" )");
