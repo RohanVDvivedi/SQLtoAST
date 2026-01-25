@@ -23,155 +23,186 @@ sql_dql* new_dql()
 	return dql;
 }
 
-static void print_tabs(int tabs)
-{
-	while(tabs--)
-		printf("\t");
-}
-
-static void print_relation_input(const relation_input* ri_p, int tabs)
+static void print_relation_input(const relation_input* ri_p)
 {
 	switch(ri_p->type)
 	{
 		case RELATION :
 		{
-			print_tabs(tabs);printf("( relation : ( ");
+			printf("relation( ");
 			printf_dstring(&(ri_p->relation_name));
 			break;
 		}
 		case SUB_QUERY :
 		{
-			print_tabs(tabs);printf("( sub_query : ( \n");
-			print_dql(ri_p->sub_query, tabs + 1);
+			printf("sub_query( \n");
+			print_dql(ri_p->sub_query);
 			break;
 		}
 		case FUNCTION :
 		{
-			print_tabs(tabs);printf("( function_call : ( ");
+			printf("function_call( ");
 			print_sql_expr(ri_p->function_call);
 			break;
 		}
 	}
-	printf(" ) AS ");
-	printf_dstring(&(ri_p->as));
-	printf(")");
+	printf(" ) as ");
+	if(is_empty_dstring(&(ri_p->as)))
+		printf("no-alias");
+	else
+	{
+		printf("\"");
+		printf_dstring(&(ri_p->as));
+		printf("\"");
+	}
+	printf(" )");
 }
 
-void print_dql(const sql_dql* dql, int tabs)
+void print_dql(const sql_dql* dql)
 {
-	print_tabs(tabs);printf("SELECT : \n\n");
+	printf("select( ");
 
-	print_tabs(tabs);printf("PROJECTION_LIST : \n");
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->projections)); i++)
+	if(get_element_count_arraylist(&(dql->projections)) > 0)
 	{
-		projection* p = (projection*) get_from_front_of_arraylist(&(dql->projections), i);
-		print_tabs(tabs+1);printf("(");print_sql_expr(p->projection_expr);printf(" AS ");printf_dstring(&(p->as));printf(")");
-		printf("\n");
-	}
-	printf("\n");
-
-	print_tabs(tabs);printf("FROM : \n");
-	print_relation_input(&(dql->base_input), tabs+1);
-	printf("\n\n");
-
-	print_tabs(tabs);printf("JOINS : \n");
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
-	{
-		join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
-		print_tabs(tabs+1);
-		switch(j->type)
+		printf("projections( ");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->projections)); i++)
 		{
-			case INNER_JOIN : 		printf(" INNER "); 		break;
-			case LEFT_JOIN : 		printf(" LEFT "); 		break;
-			case RIGHT_JOIN : 		printf(" RIGHT "); 		break;
-			case FULL_JOIN : 		printf(" FULL "); 		break;
-			case CROSS_JOIN : 		printf(" CROSS "); 		break;
+			if(i != 0)
+				printf(" , ");
+			projection* p = (projection*) get_from_front_of_arraylist(&(dql->projections), i);
+			printf("( ( ");
+			print_sql_expr(p->projection_expr);
+			printf(" ) as ");
+			if(is_empty_dstring(&(p->as)))
+				printf("no-alias");
+			else
+			{
+				printf("\"");
+				printf_dstring(&(p->as));
+				printf("\"");
+			}
+			printf(" )");
 		}
-		printf(" is_lateral = %d ", j->is_lateral);
-		print_relation_input(&(j->input), tabs+2);
-		switch(j->condition_type)
+		printf(" )");
+	}
+
+	printf("from( ");
+	print_relation_input(&(dql->base_input));
+	printf(" )");
+
+	if(get_element_count_arraylist(&(dql->joins_with)) > 0)
+	{
+		printf("joins( ");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
 		{
-			case NO_JOIN_CONDITION :
+			if(i != 0)
+				printf(" , ");
+			printf("( type(");
+			join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
+			switch(j->type)
 			{
-				printf(" NO CONDITION ");
-				break;
+				case INNER_JOIN : 		printf(" inner "); 		break;
+				case LEFT_JOIN : 		printf(" left "); 		break;
+				case RIGHT_JOIN : 		printf(" right "); 		break;
+				case FULL_JOIN : 		printf(" full "); 		break;
+				case CROSS_JOIN : 		printf(" cross "); 		break;
 			}
-			case NATURAL_JOIN_CONDITION :
+			printf("), is_lateral(%d), with( ", j->is_lateral);
+			print_relation_input(&(j->input));
+			printf(" )");
+			switch(j->condition_type)
 			{
-				printf(" NATURAL CONDITION ");
-				break;
-			}
-			case ON_EXPR_JOIN_CONDITION :
-			{
-				printf(" ON CONDITION ");
-				print_sql_expr(j->on_expr);
-				break;
-			}
-			case USING_JOIN_CONDITION :
-			{
-				printf(" USING ( ");
-				for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+				case NO_JOIN_CONDITION :
+					break;
+				case NATURAL_JOIN_CONDITION :
 				{
-					if(i > 0)
-						printf(" , ");
-					printf_dstring((dstring*) get_from_front_of_arraylist(&(j->using_cols), i));
+					printf(", condition(natural) ");
+					break;
 				}
-				printf(" )");
-				break;
+				case ON_EXPR_JOIN_CONDITION :
+				{
+					printf(", on_condition( ");
+					print_sql_expr(j->on_expr);
+					printf(" )");
+					break;
+				}
+				case USING_JOIN_CONDITION :
+				{
+					printf(", using_columns( ");
+					for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+					{
+						if(i > 0)
+							printf(" , ");
+						printf_dstring((dstring*) get_from_front_of_arraylist(&(j->using_cols), i));
+					}
+					printf(" )");
+					break;
+				}
 			}
+			printf(" )");
 		}
-		printf("\n");
+		printf(" )");
 	}
-	printf("\n");
 
-	print_tabs(tabs);printf("WHERE : \n");
-	print_tabs(tabs+1);
 	if(dql->where_expr)
+	{
+		printf("where( ");
 		print_sql_expr(dql->where_expr);
-	else
-		printf("NULL");
-	printf("\n\n");
-
-	print_tabs(tabs);printf("GROUP_BY : \n");
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
-	{
-		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->group_by), i);
-		print_tabs(tabs+1);print_sql_expr(grouping_expr);printf("\n");
+		printf(" )");
 	}
-	printf("\n");
 
-	print_tabs(tabs);printf("HAVING : \n");
-	print_tabs(tabs+1);
+	if(get_element_count_arraylist(&(dql->group_by)) > 0)
+	{
+		printf("group_by( ");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
+		{
+			if(i != 0)
+				printf(" , ");
+			sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->group_by), i);
+			printf("( ");
+			print_sql_expr(g);
+			printf(" )");
+		}
+		printf(" )");
+	}
+
+	
 	if(dql->having_expr)
-		print_sql_expr(dql->having_expr);
-	else
-		printf("NULL");
-	printf("\n\n");
-
-	print_tabs(tabs);printf("ORDERED_BY : \n");
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
 	{
-		order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->ordered_by), i);
-		print_tabs(tabs+1);printf("(");print_sql_expr(o->ordering_expr);printf(" in %s order )", ((o->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
-		printf("\n");
+		printf("having( ");
+		print_sql_expr(dql->having_expr);
+		printf(" )");
 	}
-	printf("\n");
 
-	print_tabs(tabs);printf("OFFSET : \n");
-	print_tabs(tabs+1);
+	if(get_element_count_arraylist(&(dql->ordered_by)) > 0)
+	{
+		printf("order_by( ");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
+		{
+			if(i != 0)
+				printf(" , ");
+			order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->ordered_by), i);
+			printf("( ( ");
+			print_sql_expr(o->ordering_expr);
+			printf(" ) in %s order )", ((o->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
+		}
+	}
+
 	if(dql->offset_expr)
+	{
+		printf("offset( ");
 		print_sql_expr(dql->offset_expr);
-	else
-		printf("NULL");
-	printf("\n\n");
+		printf(" )");
+	}
 
-	print_tabs(tabs);printf("LIMIT : \n");
-	print_tabs(tabs+1);
 	if(dql->limit_expr)
+	{
+		printf("limit( ");
 		print_sql_expr(dql->limit_expr);
-	else
-		printf("NULL");
-	printf("\n\n");
+		printf(" )");
+	}
+
+	printf(" )");
 }
 
 static void destroy_relation_input(relation_input* ri_p)
