@@ -442,8 +442,8 @@ value_expr :
 func_expr : IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
 sub_query_expr :
-			OPEN_BRACKET sub_query_expr CLOSE_BRACKET 								{$$ = $2;}
 			dql_query 																{$$ = new_sub_query_sql_expr($1);}
+			| OPEN_BRACKET sub_query_expr CLOSE_BRACKET 							{$$ = $2;}
 
 value_expr_list :
 			value_expr 																{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
