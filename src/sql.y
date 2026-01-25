@@ -98,12 +98,9 @@
 /* SQL EXPRESSION */
 %type <expr> expr
 %type <ptr_list> expr_list
-%type <expr> bool_expr
 %type <expr> bool_literal
 %type <expr> func_expr
-%type <expr> value_expr
 %type <expr> sub_query_expr
-%type <ptr_list> value_expr_list
 
 /* SQL DATA TYPE */
 %type <data_type> type
@@ -209,12 +206,12 @@
 %left L_XOR
 %left L_AND
 
-%nonassoc BETWEEN_PREC
-
-%nonassoc IN_PREC
+%right L_NOT
 
 %nonassoc IS_PREC
 
+%nonassoc BETWEEN_PREC
+%nonassoc IN_PREC
 %left EQ NEQ GT GTE LT LTE LIKE_PREC
 
 %left B_OR
@@ -228,10 +225,8 @@
 %left ADD NEG
 %left MUL DIV MOD
 
-/* Highest: unary operators */
-%right L_NOT
-%right B_NOT
 %right UMINUS UPLUS
+%right B_NOT
 
 %%
 
@@ -336,59 +331,80 @@ limit_clause :
 				| LIMIT expr 			{$$ = $2;}
 
 expr :
-			bool_expr							{$$ = $1;}
-			| value_expr						{$$ = $1;}
-			| sub_query_expr 					{$$ = $1;}
+			OPEN_BRACKET expr CLOSE_BRACKET 														{$$ = $2;}
 
-expr_list :
-			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
-			| expr_list COMMA expr 				{insert_in_expr_list(&($1), $3); $$ = $1;}
+			| L_NOT expr 																			{$$ = new_unary_sql_expr(SQL_LOGNOT, $2);}
 
-bool_expr :
-			OPEN_BRACKET bool_expr CLOSE_BRACKET 											{$$ = $2;}
+			| expr EQ expr																			{$$ = new_compare_sql_expr(SQL_EQ, SQL_CMP_NONE, $1, $3);}
+			| expr NEQ expr 																		{$$ = new_compare_sql_expr(SQL_NEQ, SQL_CMP_NONE, $1, $3);}
+			| expr GT expr 																			{$$ = new_compare_sql_expr(SQL_GT, SQL_CMP_NONE, $1, $3);}
+			| expr GTE expr 																		{$$ = new_compare_sql_expr(SQL_GTE, SQL_CMP_NONE, $1, $3);}
+			| expr LT expr 																			{$$ = new_compare_sql_expr(SQL_LT, SQL_CMP_NONE, $1, $3);}
+			| expr LTE expr 																		{$$ = new_compare_sql_expr(SQL_LTE, SQL_CMP_NONE, $1, $3);}
 
-			| IDENTIFIER																	{$$ = new_valued_sql_expr(SQL_VAR, $1);}
-			| TRUE																			{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
-			| FALSE																			{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
-			| _NULL_																		{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
-			| UNKNOWN																		{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
+			| expr EQ cmp_rhs_quantifier expr														{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
+			| expr NEQ cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
+			| expr GT cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
+			| expr GTE cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
+			| expr LT cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
+			| expr LTE cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
 
-			| L_NOT bool_expr 																{$$ = new_unary_sql_expr(SQL_LOGNOT, $2);}
+			| expr LIKE expr %prec LIKE_PREC														{$$ = new_binary_sql_expr(SQL_LIKE, $1, $3);}
+			| expr L_NOT LIKE expr %prec LIKE_PREC													{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1, $4));}
 
-			| value_expr EQ value_expr														{$$ = new_compare_sql_expr(SQL_EQ, SQL_CMP_NONE, $1, $3);}
-			| value_expr NEQ value_expr 													{$$ = new_compare_sql_expr(SQL_NEQ, SQL_CMP_NONE, $1, $3);}
-			| value_expr GT value_expr 														{$$ = new_compare_sql_expr(SQL_GT, SQL_CMP_NONE, $1, $3);}
-			| value_expr GTE value_expr 													{$$ = new_compare_sql_expr(SQL_GTE, SQL_CMP_NONE, $1, $3);}
-			| value_expr LT value_expr 														{$$ = new_compare_sql_expr(SQL_LT, SQL_CMP_NONE, $1, $3);}
-			| value_expr LTE value_expr 													{$$ = new_compare_sql_expr(SQL_LTE, SQL_CMP_NONE, $1, $3);}
+			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC							{$$ = new_in_sql_expr($1, NULL, $4);}
+			| expr L_NOT IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC						{$$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, NULL, $5));}
 
-			| value_expr EQ cmp_rhs_quantifier value_expr									{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
-			| value_expr NEQ cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
-			| value_expr GT cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
-			| value_expr GTE cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
-			| value_expr LT cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
-			| value_expr LTE cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
+			| expr IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC							{arraylist t; initialize_arraylist(&t, 0); $$ = new_in_sql_expr($1, $4, t);}
+			| expr L_NOT IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC						{arraylist t; initialize_arraylist(&t, 0); $$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5, t));}
 
-			| value_expr LIKE value_expr %prec LIKE_PREC									{$$ = new_binary_sql_expr(SQL_LIKE, $1, $3);}
-			| value_expr L_NOT LIKE value_expr %prec LIKE_PREC								{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1, $4));}
+			| expr BETWEEN expr L_AND expr %prec BETWEEN_PREC										{$$ = new_between_sql_expr($1, $3, $5);}
+			| expr L_NOT BETWEEN expr L_AND expr %prec BETWEEN_PREC									{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1, $4, $6));}
 
-			| value_expr IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC		{$$ = new_in_sql_expr($1, NULL, $4);}
-			| value_expr L_NOT IN OPEN_BRACKET value_expr_list CLOSE_BRACKET %prec IN_PREC	{$$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, NULL, $5));}
+			| expr IS bool_literal %prec IS_PREC													{$$ = new_binary_sql_expr(SQL_IS, $1, $3);}
+			| expr IS L_NOT bool_literal %prec IS_PREC 												{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_IS, $1, $4));}
 
-			| value_expr IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC				{arraylist t; initialize_arraylist(&t, 0); $$ = new_in_sql_expr($1, $4, t);}
-			| value_expr L_NOT IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC		{arraylist t; initialize_arraylist(&t, 0); $$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5, t));}
+			| expr L_AND expr 																		{$$ = new_binary_sql_expr(SQL_LOGAND, $1, $3);}
+			| expr L_OR expr 																		{$$ = new_binary_sql_expr(SQL_LOGOR, $1, $3);}
+			| expr L_XOR expr 																		{$$ = new_binary_sql_expr(SQL_LOGXOR, $1, $3);}
 
-			| value_expr BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC				{$$ = new_between_sql_expr($1, $3, $5);}
-			| value_expr L_NOT BETWEEN value_expr L_AND value_expr %prec BETWEEN_PREC		{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1, $4, $6));}
+			| CAST OPEN_BRACKET expr AS BOOL CLOSE_BRACKET 											{$$ = new_cast_sql_expr($3, new_sql_type(SQL_BOOL));}
 
-			| expr IS bool_literal %prec IS_PREC											{$$ = new_binary_sql_expr(SQL_IS, $1, $3);}
-			| expr IS L_NOT bool_literal %prec IS_PREC 										{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_IS, $1, $4));}
+			| INTEGER 																				{$$ = new_valued_sql_expr(SQL_NUM, $1);}
+			| NUMBER																				{$$ = new_valued_sql_expr(SQL_NUM, $1);}
+			| STRING																				{$$ = new_valued_sql_expr(SQL_STR, $1);}
+			| IDENTIFIER																			{$$ = new_valued_sql_expr(SQL_VAR, $1);}
+			| MUL																					{$$ = new_valued_sql_expr(SQL_VAR, new_dstring("*", 1));}
+			| TRUE																					{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
+			| FALSE																					{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
+			| _NULL_																				{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
+			| UNKNOWN																				{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
-			| bool_expr L_AND bool_expr 													{$$ = new_binary_sql_expr(SQL_LOGAND, $1, $3);}
-			| bool_expr L_OR bool_expr 														{$$ = new_binary_sql_expr(SQL_LOGOR, $1, $3);}
-			| bool_expr L_XOR bool_expr 													{$$ = new_binary_sql_expr(SQL_LOGXOR, $1, $3);}
+			| B_NOT expr 																			{$$ = new_unary_sql_expr(SQL_BITNOT, $2);}
+			| NEG expr %prec UMINUS																	{$$ = new_unary_sql_expr(SQL_NEG, $2);}
+			| ADD expr %prec UPLUS																	{$$ = $2;}
 
-			| CAST OPEN_BRACKET value_expr AS BOOL CLOSE_BRACKET 							{$$ = new_cast_sql_expr($3, new_sql_type(SQL_BOOL));}
+			| expr MUL expr 																		{$$ = new_binary_sql_expr(SQL_MUL, $1, $3);}
+			| expr DIV expr 																		{$$ = new_binary_sql_expr(SQL_DIV, $1, $3);}
+			| expr MOD expr 																		{$$ = new_binary_sql_expr(SQL_MOD, $1, $3);}
+
+			| expr ADD expr 																		{$$ = new_binary_sql_expr(SQL_ADD, $1, $3);}
+			| expr NEG expr 																		{$$ = new_binary_sql_expr(SQL_SUB, $1, $3);}
+
+			| expr B_AND expr 																		{$$ = new_binary_sql_expr(SQL_BITAND, $1, $3);}
+			| expr B_OR expr 																		{$$ = new_binary_sql_expr(SQL_BITOR, $1, $3);}
+			| expr B_XOR expr 																		{$$ = new_binary_sql_expr(SQL_BITXOR, $1, $3);}
+
+			| expr L_SHIFT expr 																	{$$ = new_binary_sql_expr(SQL_LSHIFT, $1, $3);}
+			| expr R_SHIFT expr 																	{$$ = new_binary_sql_expr(SQL_RSHIFT, $1, $3);}
+
+			| expr CONCAT expr 																		{$$ = new_binary_sql_expr(SQL_CONCAT, $1, $3);}
+
+			| func_expr																				{$$ = $1;}
+
+			| CAST OPEN_BRACKET expr AS type CLOSE_BRACKET 											{$$ = new_cast_sql_expr($3, $5);}
+
+			| sub_query_expr 																		{$$ = $1;}
 
 cmp_rhs_quantifier :
 			ANY 					{$$ = SQL_CMP_ANY;}
@@ -400,51 +416,13 @@ bool_literal:
 			| _NULL_			{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
 			| UNKNOWN			{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
-value_expr :
-			OPEN_BRACKET value_expr CLOSE_BRACKET 									{$$ = $2;}
-			| INTEGER 																{$$ = new_valued_sql_expr(SQL_NUM, $1);}
-			| NUMBER																{$$ = new_valued_sql_expr(SQL_NUM, $1);}
-			| STRING																{$$ = new_valued_sql_expr(SQL_STR, $1);}
-			| IDENTIFIER															{$$ = new_valued_sql_expr(SQL_VAR, $1);}
-			| MUL																	{$$ = new_valued_sql_expr(SQL_VAR, new_dstring("*", 1));}
-			| TRUE																	{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
-			| FALSE																	{$$ = new_const_non_valued_sql_expr(SQL_FALSE);}
-			| _NULL_																{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
-			| UNKNOWN																{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
-
-			| B_NOT value_expr 														{$$ = new_unary_sql_expr(SQL_BITNOT, $2);}
-			| NEG value_expr %prec UMINUS											{$$ = new_unary_sql_expr(SQL_NEG, $2);}
-			| ADD value_expr %prec UPLUS											{$$ = $2;}
-
-			| value_expr MUL value_expr 											{$$ = new_binary_sql_expr(SQL_MUL, $1, $3);}
-			| value_expr DIV value_expr 											{$$ = new_binary_sql_expr(SQL_DIV, $1, $3);}
-			| value_expr MOD value_expr 											{$$ = new_binary_sql_expr(SQL_MOD, $1, $3);}
-
-			| value_expr ADD value_expr 											{$$ = new_binary_sql_expr(SQL_ADD, $1, $3);}
-			| value_expr NEG value_expr 											{$$ = new_binary_sql_expr(SQL_SUB, $1, $3);}
-
-			| value_expr B_AND value_expr 											{$$ = new_binary_sql_expr(SQL_BITAND, $1, $3);}
-			| value_expr B_OR value_expr 											{$$ = new_binary_sql_expr(SQL_BITOR, $1, $3);}
-			| value_expr B_XOR value_expr 											{$$ = new_binary_sql_expr(SQL_BITXOR, $1, $3);}
-
-			| value_expr L_SHIFT value_expr 										{$$ = new_binary_sql_expr(SQL_LSHIFT, $1, $3);}
-			| value_expr R_SHIFT value_expr 										{$$ = new_binary_sql_expr(SQL_RSHIFT, $1, $3);}
-
-			| value_expr CONCAT value_expr 											{$$ = new_binary_sql_expr(SQL_CONCAT, $1, $3);}
-
-			| func_expr																{$$ = $1;}
-
-			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$ = new_cast_sql_expr($3, $5);}
-
-			| sub_query_expr 														{$$ = $1;}
-
-func_expr : IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
+func_expr : IDENTIFIER OPEN_BRACKET expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
 sub_query_expr : dql_query 															{$$ = new_sub_query_sql_expr($1);}
 
-value_expr_list :
-			value_expr 																{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
-			| value_expr_list COMMA value_expr 										{insert_in_expr_list(&($1), $3); $$ = $1;}
+expr_list :
+			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
+			| expr_list COMMA expr 				{insert_in_expr_list(&($1), $3); $$ = $1;}
 
 type : type_name type_specs type_with_or_without_timezone							{$$ = $1; $$.spec_size = $2.spec_size; memcpy($$.spec, $2.spec, sizeof($$.spec)); $$.with_time_zone = $3.with_time_zone;}
 
