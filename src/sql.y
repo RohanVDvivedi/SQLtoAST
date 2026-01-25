@@ -205,11 +205,9 @@
 %left L_OR
 %left L_XOR
 %left L_AND
-
 %right L_NOT
 
 %nonassoc IS_PREC
-
 %nonassoc BETWEEN_PREC
 %nonassoc IN_PREC
 %left EQ NEQ GT GTE LT LTE LIKE_PREC
@@ -217,7 +215,6 @@
 %left B_OR
 %left B_XOR
 %left B_AND
-
 %left L_SHIFT R_SHIFT
 
 %left CONCAT
