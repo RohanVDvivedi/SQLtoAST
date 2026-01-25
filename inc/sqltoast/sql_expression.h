@@ -8,6 +8,8 @@
 
 #include<sqltoast/sql_dql.h>
 
+typedef struct sql_dql sql_dql;
+
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
 {

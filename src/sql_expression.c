@@ -39,6 +39,16 @@ sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* le
 	return expr;
 }
 
+sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, sql_expression* right)
+{
+	sql_expression* expr = malloc(sizeof(sql_expression));
+	expr->type = type;
+	expr->cmp_rhs_quantfier = cmp_rhs_quantfier;
+	expr->left = left;
+	expr->right = right;
+	return expr;
+}
+
 sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
@@ -57,11 +67,12 @@ sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list)
 	return expr;
 }
 
-sql_expression* new_in_sql_expr(sql_expression* in_input, arraylist in_expr_list)
+sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query, arraylist in_expr_list)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = SQL_IN;
 	expr->in_input = in_input;
+	expr->in_sub_query = in_sub_query;
 	expr->in_expr_list = in_expr_list;
 	return expr;
 }
@@ -81,6 +92,14 @@ sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type)
 	expr->type = SQL_CAST;
 	expr->cast_expr = cast_expr;
 	expr->cast_type = cast_type;
+	return expr;
+}
+
+sql_expression* new_sub_query_sql_expr(sql_dql* sub_query)
+{
+	sql_expression* expr = malloc(sizeof(sql_expression));
+	expr->type = SQL_SUB_QUERY;
+	expr->sub_query = sub_query;
 	return expr;
 }
 
@@ -210,6 +229,8 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 
 		case SQL_IN :
 		{
+			if(expr->in_sub_query != NULL)
+				;//flatten_similar_associative_operators_in_sql_dql_query(expr->in_sub_query);
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
 				set_from_front_in_arraylist(&(expr->in_expr_list), (sql_expression*) flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i)), i);
 			expr->in_input = flatten_similar_associative_operators_in_sql_expression(expr->in_input);
@@ -237,6 +258,12 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_CAST :
 		{
 			expr->cast_expr = flatten_similar_associative_operators_in_sql_expression(expr->cast_expr);
+			return expr;
+		}
+
+		case SQL_SUB_QUERY :
+		{
+			;//flatten_similar_associative_operators_in_sql_dql_query(expr->sub_query);
 			return expr;
 		}
 	}
@@ -320,6 +347,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->left);
 			printf(" > ");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -329,6 +357,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->left);
 			printf(" >= ");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -338,6 +367,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->left);
 			printf(" < ");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -347,6 +377,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->left);
 			printf(" <= ");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -356,6 +387,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->left);
 			printf(" = ");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -365,6 +397,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->left);
 			printf(" <> ");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
 			print_sql_expr(expr->right);
 			printf(" )");
 			break;
@@ -558,11 +591,16 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( ");
 			print_sql_expr(expr->in_input);
 			printf(" IN ( ");
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
+			if(expr->in_sub_query)
+				print_dql(&(expr->in_sub_query));
+			else
 			{
-				if(i != 0)
-					printf(" , ");
-				print_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i));
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					print_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i));
+				}
 			}
 			printf(" ) )");
 			break;
@@ -633,6 +671,14 @@ void print_sql_expr(const sql_expression* expr)
 			printf(" ) )");
 			break;
 		}
+
+		case SQL_SUB_QUERY :
+		{
+			printf("( ");
+			print_dql(&(expr->sub_query));
+			printf(" )");
+			break;
+		}
 	}
 }
 
@@ -699,6 +745,8 @@ void delete_sql_expr(sql_expression* expr)
 
 		case SQL_IN :
 		{
+			if(expr->in_sub_query)
+				delete_dql(expr->in_sub_query);
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
 				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i));
 			delete_sql_expr(expr->in_input);
@@ -734,6 +782,12 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_CAST :
 		{
 			delete_sql_expr(expr->cast_expr);
+			break;
+		}
+
+		case SQL_SUB_QUERY :
+		{
+			delete_dql(expr->sub_query);
 			break;
 		}
 	}

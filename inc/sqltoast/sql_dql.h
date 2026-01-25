@@ -6,6 +6,8 @@
 #include<cutlery/arraylist.h>
 #include<cutlery/dstring.h>
 
+typedef struct sql_expression sql_expression;
+
 typedef enum sql_dql_type sql_dql_type;
 enum sql_dql_type
 {
