@@ -338,6 +338,7 @@ limit_clause :
 expr :
 			bool_expr							{$$ = $1;}
 			| value_expr						{$$ = $1;}
+			| sub_query_expr 					{$$ = $1;}
 
 expr_list :
 			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
