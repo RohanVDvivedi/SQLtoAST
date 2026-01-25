@@ -6,7 +6,7 @@ PICKED TASKS
 
 
 * SQL QUERY
-DQL (select) and then DML (insert (need values as relation_input) update delete)
+DML (insert (need values as relation_input) update delete)
  * where and select sub query can also be used in insert, update and delete queries
 TCL is very simple, do that right after DML parsing rules
 DDL (create alter drop)
