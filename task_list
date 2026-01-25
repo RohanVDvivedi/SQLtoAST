@@ -1,6 +1,7 @@
 
 PICKED TASKS
  * remove extensive newlines and tabs from printing debug version of queries, and print them in single line and with clauses around brackets and expressions
+   * if the expression is NULL or the arraylist is empty do not print or consider it
  * test the existing run_tests with test_cases for sql expression by making them into the queries, and verify their parse trees again using chatgpt
  * in clause to take in dql_query
  * any/some, all as expression that take in a sub query and can only be RHS of the comparison operators
