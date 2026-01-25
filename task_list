@@ -1,6 +1,9 @@
 
 PICKED TASKS
- * fix operato precedence of || operator over BETWEEN and IN %prec does seem to work
+
+
+
+
 
 * SQL QUERY
 DQL (select) and then DML (insert (need values as relation_input) update delete)

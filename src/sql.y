@@ -202,14 +202,19 @@
 
 /* Lowest precedence first (so Bison gives them the lowest binding) */
 
+/* on some systems %prec SYMBOL_PREC is not working */
+
 %left L_OR
 %left L_XOR
 %left L_AND
 %right L_NOT
 
 %nonassoc IS_PREC
+%nonassoc IS
 %nonassoc BETWEEN_PREC
+%nonassoc BETWEEN
 %nonassoc IN_PREC
+%nonassoc IN
 %left EQ NEQ GT GTE LT LTE LIKE_PREC
 
 %left B_OR
