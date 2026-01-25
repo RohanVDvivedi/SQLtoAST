@@ -390,8 +390,6 @@ bool_expr :
 
 			| CAST OPEN_BRACKET value_expr AS BOOL CLOSE_BRACKET 							{$$ = new_cast_sql_expr($3, new_sql_type(SQL_BOOL));}
 
-			| sub_query_expr 																{$$ = $1;}
-
 cmp_rhs_quantifier :
 			ANY 					{$$ = SQL_CMP_ANY;}
 			| ALL 					{$$ = SQL_CMP_ALL;}
@@ -437,8 +435,6 @@ value_expr :
 			| func_expr																{$$ = $1;}
 
 			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$ = new_cast_sql_expr($3, $5);}
-
-			| sub_query_expr 														{$$ = $1;}
 
 func_expr : IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
