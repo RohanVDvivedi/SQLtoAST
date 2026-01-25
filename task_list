@@ -1,6 +1,5 @@
 
 PICKED TASKS
- * test the existing run_tests with test_cases for sql expression by making them into the queries, and verify their parse trees again using chatgpt
  * in clause to take in dql_query
  * any/some, all as expression that take in a sub query and can only be RHS of the comparison operators
    * ANY, SOME, ALL :::::           a < ANY (select score from students)
