@@ -362,12 +362,12 @@ bool_expr :
 			| value_expr LT value_expr 														{$$ = new_compare_sql_expr(SQL_LT, SQL_CMP_NONE, $1, $3);}
 			| value_expr LTE value_expr 													{$$ = new_compare_sql_expr(SQL_LTE, SQL_CMP_NONE, $1, $3);}
 
-			| value_expr EQ cmp_rhs_quantifier sub_query_expr								{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
-			| value_expr NEQ cmp_rhs_quantifier sub_query_expr 								{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
-			| value_expr GT cmp_rhs_quantifier sub_query_expr 								{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
-			| value_expr GTE cmp_rhs_quantifier sub_query_expr 								{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
-			| value_expr LT cmp_rhs_quantifier sub_query_expr 								{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
-			| value_expr LTE cmp_rhs_quantifier sub_query_expr 								{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
+			| value_expr EQ cmp_rhs_quantifier value_expr									{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
+			| value_expr NEQ cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
+			| value_expr GT cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
+			| value_expr GTE cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
+			| value_expr LT cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
+			| value_expr LTE cmp_rhs_quantifier value_expr 									{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
 
 			| value_expr LIKE value_expr %prec LIKE_PREC									{$$ = new_binary_sql_expr(SQL_LIKE, $1, $3);}
 			| value_expr L_NOT LIKE value_expr %prec LIKE_PREC								{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1, $4));}
@@ -436,11 +436,11 @@ value_expr :
 
 			| CAST OPEN_BRACKET value_expr AS type CLOSE_BRACKET 					{$$ = new_cast_sql_expr($3, $5);}
 
+			| sub_query_expr 														{$$ = $1;}
+
 func_expr : IDENTIFIER OPEN_BRACKET value_expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
-sub_query_expr :
-			dql_query 																{$$ = new_sub_query_sql_expr($1);}
-			| OPEN_BRACKET sub_query_expr CLOSE_BRACKET 							{$$ = $2;}
+sub_query_expr : dql_query 															{$$ = new_sub_query_sql_expr($1);}
 
 value_expr_list :
 			value_expr 																{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
