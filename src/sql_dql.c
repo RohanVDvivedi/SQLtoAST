@@ -29,19 +29,19 @@ static void print_relation_input(const relation_input* ri_p)
 	{
 		case RELATION :
 		{
-			printf("relation( ");
+			printf("relation( ( ");
 			printf_dstring(&(ri_p->relation_name));
 			break;
 		}
 		case SUB_QUERY :
 		{
-			printf("sub_query( \n");
+			printf("sub_query( ( ");
 			print_dql(ri_p->sub_query);
 			break;
 		}
 		case FUNCTION :
 		{
-			printf("function_call( ");
+			printf("function_call( ( ");
 			print_sql_expr(ri_p->function_call);
 			break;
 		}
