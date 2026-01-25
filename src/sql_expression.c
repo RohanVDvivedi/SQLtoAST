@@ -592,7 +592,7 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->in_input);
 			printf(" IN ( ");
 			if(expr->in_sub_query)
-				print_dql(&(expr->in_sub_query));
+				print_dql(expr->in_sub_query);
 			else
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
@@ -675,7 +675,7 @@ void print_sql_expr(const sql_expression* expr)
 		case SQL_SUB_QUERY :
 		{
 			printf("( ");
-			print_dql(&(expr->sub_query));
+			print_dql(expr->sub_query);
 			printf(" )");
 			break;
 		}
