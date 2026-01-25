@@ -1,10 +1,6 @@
 
 PICKED TASKS
- * in clause to take in dql_query
- * any/some, all as expression that take in a sub query and can only be RHS of the comparison operators
-   * ANY, SOME, ALL :::::           a < ANY (select score from students)
-   * IN / NOT INT ::::::            a in (select id from students where passed = true)
- * ask chatgpt for more complex sql queries atleast 30 and add them to tests
+ * fix operato precedence of || operator over BETWEEN and IN %prec does seem to work
 
 * SQL QUERY
 DQL (select) and then DML (insert (need values as relation_input) update delete)
