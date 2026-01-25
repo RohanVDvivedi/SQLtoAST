@@ -258,19 +258,19 @@ projection_list :
 
 projection :
 					expr 													{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, new_copy_dstring(&get_dstring_pointing_to_cstring(""))};}
-					| expr as_opt IDENTIFIER 								{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, $3};}
+					| expr AS IDENTIFIER 									{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, $3};}
+					| expr IDENTIFIER 										{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, $2};}
 
 rel_input :
 			IDENTIFIER 																{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| IDENTIFIER as_opt IDENTIFIER											{$$ = new_relation_input($1, $3);}
+			| IDENTIFIER AS IDENTIFIER												{$$ = new_relation_input($1, $3);}
+			| IDENTIFIER IDENTIFIER													{$$ = new_relation_input($1, $2);}
 			| OPEN_BRACKET dql_query CLOSE_BRACKET 									{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET as_opt IDENTIFIER				{$$ = new_sub_query_relation_input($2, $5);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER					{$$ = new_sub_query_relation_input($2, $5);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER						{$$ = new_sub_query_relation_input($2, $4);}
 			| func_expr 															{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| func_expr as_opt IDENTIFIER											{$$ = new_function_call_relation_input($1, $3);}
-
-as_opt :
-					{}
-			| AS 	{}
+			| func_expr AS IDENTIFIER												{$$ = new_function_call_relation_input($1, $3);}
+			| func_expr IDENTIFIER													{$$ = new_function_call_relation_input($1, $2);}
 
 join_clauses :
 												{initialize_arraylist(&($$), 0);}
