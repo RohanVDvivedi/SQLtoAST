@@ -1,14 +1,13 @@
 
 PICKED TASKS
 
+* parse INSERT, UPDATE and DELETE queries in DML (use where and rel_input from dql queries)
+* parse TCL queries (the easiest)
 
 
 
 
 * SQL QUERY
-DML (insert (need values as relation_input) update delete)
- * where and select sub query can also be used in insert, update and delete queries
-TCL is very simple, do that right after DML parsing rules
 DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
