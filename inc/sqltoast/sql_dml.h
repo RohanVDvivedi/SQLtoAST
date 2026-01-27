@@ -21,7 +21,7 @@ struct sql_insert
 	arraylist column_name_list;
 
 	// if NULL, check the values attribute
-	dql_query* input_data_query;
+	sql_dql* input_data_query;
 
 	// if input_data_query = NULL, then it instead has values expression
 
@@ -37,7 +37,7 @@ struct column_to_be_set
 	dstring column_name;
 
 	// if the expression is NULL, it is considered to be equivalent to DEFAULT in the sql statement
-	sql_exression* value_expr;
+	sql_expression* value_expr;
 };
 
 typedef struct sql_update sql_update;
