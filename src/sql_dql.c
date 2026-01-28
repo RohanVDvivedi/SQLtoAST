@@ -9,6 +9,8 @@ sql_dql* new_dql()
 
 	dql->type = SELECT_QUERY;
 
+	initialize_arraylist(&(dql->projections), 0);
+
 	dql->base_input = new_relation_input(new_copy_dstring(&get_dstring_pointing_to_cstring("")), new_copy_dstring(&get_dstring_pointing_to_cstring("")));
 
 	initialize_arraylist(&(dql->joins_with), 0);
