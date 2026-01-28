@@ -55,6 +55,8 @@ struct sql_tcl
 	};
 };
 
+sql_tcl* new_tcl(sql_tcl_type type);
+
 void delete_tcl(sql_tcl* tcl);
 
 #endif
