@@ -2,6 +2,49 @@
 
 #include<stdlib.h>
 
+sql_dml* new_dml(sql_dml_type type)
+{
+	sql_dml* dml = malloc(sizeof(sql_dml));
+
+	dml->type = type;
+
+	switch(dml->type)
+	{
+		case INSERT_QUERY :
+		{
+			init_empty_dstring(&(dml->insert_query.table_name), 0);
+
+			initialize_arraylist(&(dml->insert_query.column_name_list), 0);
+
+			dml->insert_query.input_data_query = NULL;
+
+			initialize_arraylist(&(dml->insert_query.values), 0);
+
+			break;
+		}
+		case UPDATE_QUERY :
+		{
+			init_empty_dstring(&(dml->update_query.table_name), 0);
+
+			initialize_arraylist(&(dml->update_query.values_to_be_set), 0);
+
+			dml->update_query.where_expr = NULL;
+
+			break;
+		}
+		case DELETE_QUERY :
+		{
+			init_empty_dstring(&(dml->delete_query.table_name), 0);
+
+			dml->delete_query.where_expr = NULL;
+
+			break;
+		}
+	}
+
+	return dml;
+}
+
 void delete_dml(sql_dml* dml)
 {
 	switch(dml->type)
