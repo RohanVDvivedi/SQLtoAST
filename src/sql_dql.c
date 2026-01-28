@@ -322,7 +322,7 @@ void delete_dql(sql_dql* dql)
 		delete_sql_expr(o->ordering_expr);
 		free(o);
 	}
-	deinitialize_arraylist(&(dql->group_by));
+	deinitialize_arraylist(&(dql->ordered_by));
 
 	if(dql->offset_expr)
 		delete_sql_expr(dql->offset_expr);
