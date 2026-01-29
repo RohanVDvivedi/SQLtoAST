@@ -1,9 +1,12 @@
 
 PICKED TASKS
 
-* parse INSERT, UPDATE and DELETE queries in DML (use where and rel_input from dql queries)
-* parse TCL queries (the easiest)
-
+* parse DELETE (simplest)
+* parse UPDATE
+* parse INSERT
+* parse COMMIT, ROLLBACK
+* parse SAVEPOINT, ROLLBACK_TO, RELEASE_SAVEPOINT
+* finally the ones like begin, set_tx and set_tx_charact* that may have isolation level and mode, both optionally
 
 
 
