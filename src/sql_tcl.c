@@ -11,7 +11,7 @@ sql_tcl* new_tcl(sql_tcl_type type)
 
 	if(type == SAVEPOINT_TCL_CMD || type == ROLLBACK_TO_SAVEPOINT_TCL_CMD || type == RELEASE_SAVEPOINT_TCL_CMD)
 		init_empty_dstring(&(tcl->savepoint_name), 0);
-	else if(type == BEGIN_TCL_CMD || type == SET_TX_TCL_CMD || type == SET_TX_CHARST_TCL_CMD)
+	else if(type == BEGIN_TCL_CMD || type == SET_TX_TCL_CMD || type == SET_TX_CHARACTERISTICS_TCL_CMD)
 	{
 		tcl->isolation_level = ISO_UNSPECIFIED;
 		tcl->mode = TX_ACC_RW_UNSPECIFIED;
@@ -110,7 +110,7 @@ void print_tcl(const sql_tcl* tcl)
 			printf(" )");
 			break;
 		}
-		case SET_TX_CHARST_TCL_CMD :
+		case SET_TX_CHARACTERISTICS_TCL_CMD :
 		{
 			printf("set_tx_characteristics( ");
 

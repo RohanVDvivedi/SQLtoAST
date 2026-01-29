@@ -15,7 +15,7 @@ enum sql_tcl_type
 	RELEASE_SAVEPOINT_TCL_CMD,
 
 	SET_TX_TCL_CMD,	// set transaction
-	SET_TX_CHARST_TCL_CMD, // set transaction characteristics
+	SET_TX_CHARACTERISTICS_TCL_CMD, // set transaction characteristics
 };
 
 typedef enum sql_isolation_level sql_isolation_level;
