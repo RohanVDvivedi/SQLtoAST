@@ -78,6 +78,8 @@ struct sql_dml
 
 sql_dml* new_dml(sql_dml_type type);
 
+void print_dml(const sql_dml* dml);
+
 void delete_dml(sql_dml* dml);
 
 #endif

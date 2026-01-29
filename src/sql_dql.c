@@ -32,7 +32,9 @@ static void print_relation_input(const relation_input* ri_p)
 		case RELATION :
 		{
 			printf("relation( ( ");
+			printf("\"");
 			printf_dstring(&(ri_p->relation_name));
+			printf("\"");
 			break;
 		}
 		case SUB_QUERY :

@@ -36,7 +36,7 @@ void print_sql(const sql* sqlast)
 		}
 		case DML :
 		{
-			//print_dml(sqlast->dml_query);
+			print_dml(sqlast->dml_query);
 			break;
 		}
 		case DDL :

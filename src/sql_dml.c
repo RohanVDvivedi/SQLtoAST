@@ -1,6 +1,7 @@
 #include<sqltoast/sql_dml.h>
 
 #include<stdlib.h>
+#include<stdio.h>
 
 sql_dml* new_dml(sql_dml_type type)
 {
@@ -45,6 +46,180 @@ sql_dml* new_dml(sql_dml_type type)
 	return dml;
 }
 
+void print_dml(const sql_dml* dml)
+{
+	switch(dml->type)
+	{
+		case INSERT_QUERY :
+		{
+			printf("insert( ");
+
+			int clauses_printed = 0;
+
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("table( \"");
+				printf_dstring(&(dml->insert_query.table_name));
+				printf("\" )");
+				clauses_printed++;
+			}
+
+			if(get_element_count_arraylist(&(dml->insert_query.column_name_list)) > 0)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("columns( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.column_name_list)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					printf("\"");
+					printf_dstring((dstring*) get_from_front_of_arraylist(&(dml->insert_query.column_name_list), i));
+					printf("\"");
+				}
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(dml->insert_query.input_data_query)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("data( ");
+				print_dql(dml->insert_query.input_data_query);
+				printf(" )");
+				clauses_printed++;
+			}
+			else if(get_element_count_arraylist(&(dml->insert_query.values)) > 0)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("data( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.values)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					printf("( ");
+					arraylist* row = (arraylist*) get_from_front_of_arraylist(&(dml->insert_query.values), i);
+					for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
+					{
+						if(j != 0)
+							printf(" , ");
+						sql_expression* cell = (sql_expression*) get_from_front_of_arraylist(row, j);
+						if(cell)
+						{
+							printf("( ");
+							print_sql_expr(cell);
+							printf(" )");
+						}
+						else
+							printf("DEFAULT");
+					}
+					printf(" )");
+				}
+				printf(" )");
+				clauses_printed++;
+			}
+			else
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("data( DEFAULT )");
+				clauses_printed++;
+			}
+
+			printf(" )");
+
+			break;
+		}
+		case UPDATE_QUERY :
+		{
+			printf("update( ");
+
+			int clauses_printed = 0;
+
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("table( \"");
+				printf_dstring(&(dml->update_query.table_name));
+				printf("\" )");
+				clauses_printed++;
+			}
+
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("set( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->update_query.values_to_be_set)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					column_to_be_set* c = (column_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
+					printf("\"");
+					printf_dstring(&(c->column_name));
+					printf("\"");
+					printf(" = ");
+					if(c->value_expr)
+					{
+						printf("( ");
+						print_sql_expr(c->value_expr);
+						printf(" )");
+					}
+					else
+						printf("DEFAULT");
+				}
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(dml->update_query.where_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("where( ");
+				print_sql_expr(dml->update_query.where_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+
+			printf(" )");
+
+			break;
+		}
+		case DELETE_QUERY :
+		{
+			printf("delete( ");
+
+			int clauses_printed = 0;
+
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("table( \"");
+				printf_dstring(&(dml->delete_query.table_name));
+				printf("\" )");
+				clauses_printed++;
+			}
+
+			if(dml->delete_query.where_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("where( ");
+				print_sql_expr(dml->delete_query.where_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+
+			printf(" )");
+
+			break;
+		}
+	}
+}
+
 void delete_dml(sql_dml* dml)
 {
 	switch(dml->type)
@@ -54,7 +229,11 @@ void delete_dml(sql_dml* dml)
 			deinit_dstring(&(dml->insert_query.table_name));
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.column_name_list)); i++)
-				deinit_dstring((dstring*) get_from_front_of_arraylist(&(dml->insert_query.column_name_list), i));
+			{
+				dstring* col_name = (dstring*) get_from_front_of_arraylist(&(dml->insert_query.column_name_list), i);
+				deinit_dstring(col_name);
+				free(col_name);
+			}
 			deinitialize_arraylist(&(dml->insert_query.column_name_list));
 
 			if(dml->insert_query.input_data_query)
@@ -70,6 +249,7 @@ void delete_dml(sql_dml* dml)
 						delete_sql_expr(cell);
 				}
 				deinitialize_arraylist(row);
+				free(row);
 			}
 			deinitialize_arraylist(&(dml->insert_query.values));
 
