@@ -6,16 +6,16 @@
 typedef enum sql_tcl_type sql_tcl_type;
 enum sql_tcl_type
 {
-	BEGIN_QUERY,
-	COMMIT_QUERY,
-	ROLLBACK_QUERY,
+	BEGIN_TCL_CMD,
+	COMMIT_TCL_CMD,
+	ROLLBACK_TCL_CMD,
 
-	SAVEPOINT_QUERY,
-	ROLLBACK_TO_SAVEPOINT_QUERY,
-	RELEASE_SAVEPOINT_QUERY,
+	SAVEPOINT_TCL_CMD,
+	ROLLBACK_TO_SAVEPOINT_TCL_CMD,
+	RELEASE_SAVEPOINT_TCL_CMD,
 
-	SET_TX_QUERY,	// set transaction
-	SET_TX_CHARST_QUERY, // set transaction characteristics
+	SET_TX_TCL_CMD,	// set transaction
+	SET_TX_CHARST_TCL_CMD, // set transaction characteristics
 };
 
 typedef enum sql_isolation_level sql_isolation_level;
@@ -56,6 +56,8 @@ struct sql_tcl
 };
 
 sql_tcl* new_tcl(sql_tcl_type type);
+
+void print_tcl(const sql_tcl* tcl);
 
 void delete_tcl(sql_tcl* tcl);
 
