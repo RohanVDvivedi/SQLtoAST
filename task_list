@@ -1,7 +1,6 @@
 
 PICKED TASKS
 
-* implement debug print_dml/tcl and new_dml/tcl functions for the dml and tcl queries
 * parse INSERT, UPDATE and DELETE queries in DML (use where and rel_input from dql queries)
 * parse TCL queries (the easiest)
 
