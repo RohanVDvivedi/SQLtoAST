@@ -17,10 +17,9 @@ As the name "SQL-to-AST" suggests this C library converts SQL to an AST, that ca
  * ***Once you have installed from source, you may discard the build by*** `make clean`
 
 ## Using The library
- * add `-lcapp` linker flag, while compiling your application
+ * add `-lsqltoast -lcutlery` linker flag, while compiling your application
  * do not forget to include appropriate public api headers as and when needed. this includes
-   * `#include<capp/capp.h>`
-   * `#include<capp/print_temp.h>`
+   * `#include<sqltoast/sqltoast.h>`
 
 ## Instructions for uninstalling library
 
