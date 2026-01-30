@@ -1,7 +1,6 @@
 
 PICKED TASKS
 
-* parse DELETE (simplest)
 * parse UPDATE
 * parse INSERT
 * parse COMMIT, ROLLBACK
