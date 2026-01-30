@@ -46,7 +46,7 @@ void print_sql(const sql* sqlast)
 		}
 		case TCL :
 		{
-			print_tcl(sqlast->tcl_query);
+			print_tcl(sqlast->tcl_cmd);
 			break;
 		}
 	}
@@ -73,7 +73,7 @@ void delete_sql(sql* sqlast)
 		}
 		case TCL :
 		{
-			delete_tcl(sqlast->tcl_query);
+			delete_tcl(sqlast->tcl_cmd);
 			break;
 		}
 	}

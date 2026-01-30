@@ -27,7 +27,7 @@ struct sql
 		sql_dql* dql_query;
 		sql_dml* dml_query;
 		sql_ddl* ddl_query;
-		sql_tcl* tcl_query;
+		sql_tcl* tcl_cmd;
 	};
 };
 

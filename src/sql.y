@@ -265,7 +265,7 @@
 sql_query:
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
 			| dml_query 						{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DML; (*sql_ast)->dml_query = $1;}
-			| tcl_cmd 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = TCL; (*sql_ast)->tcl_query = $1;}
+			| tcl_cmd 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = TCL; (*sql_ast)->tcl_cmd = $1;}
 
 tcl_cmd:
 			COMMIT 								{$$ = new_tcl(COMMIT_TCL_CMD);}
