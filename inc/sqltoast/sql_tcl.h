@@ -6,7 +6,7 @@
 typedef enum sql_tcl_type sql_tcl_type;
 enum sql_tcl_type
 {
-	BEGIN_TCL_CMD,
+	START_TX_TCL_CMD,
 	COMMIT_TCL_CMD,
 	ROLLBACK_TCL_CMD,
 
