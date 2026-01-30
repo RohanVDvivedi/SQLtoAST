@@ -28,6 +28,10 @@
 
 	sql_dql* dql_query;
 
+	sql_dml* dml_query;
+
+	sql_tcl* tcl_query;
+
 	projection* projection;
 
 	join_with* join_with;
@@ -48,10 +52,14 @@
 	dstring sval; // for any other lexeme
 }
 
+/* SQL */
 %type <sql_query> sql_query
 
-/* SELECT query */
+/* DQL query */
 %type <dql_query> dql_query
+
+/* SELECT query */
+%type <dql_query> select_query
 %type <ptr_list> projection_list
 %type <projection> projection
 %type <rel_input> rel_input
@@ -94,6 +102,14 @@
 
 %token ASC
 %token DESC
+
+/* DML query */
+%type <dml_query> dml_query
+
+/* DELETE query */
+%type <dml_query> delete_query
+
+%token DELETE
 
 /* SQL EXPRESSION */
 %type <expr> expr
@@ -234,8 +250,18 @@
 
 sql_query:
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
+			| dml_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DML; (*sql_ast)->dml_query = $1;}
 
-dql_query:
+dml_query :
+			delete_query 			{$$ = $1;}
+
+delete_query :
+			DELETE FROM IDENTIFIER where_clause 	{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
+
+dql_query :
+			select_query 			{$$ = $1;}
+
+select_query :
 			SELECT projection_list FROM rel_input join_clauses where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
 				$$ = new_dql();
 				$$->projections = $2;

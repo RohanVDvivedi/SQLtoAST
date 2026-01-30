@@ -121,6 +121,8 @@
 (?i:ASC)				{return ASC;}
 (?i:DESC)				{return DESC;}
 
+(?i:DELETE)				{return DELETE;}
+
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 
