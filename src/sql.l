@@ -123,6 +123,17 @@
 
 (?i:DELETE)				{return DELETE;}
 
+(?i:START)				{return START;}
+(?i:TRANSACTION)		{return TRANSACTION;}
+(?i:ROLLBACK)			{return ROLLBACK;}
+(?i:COMMIT)				{return COMMIT;}
+(?i:RELEASE)			{return RELEASE;}
+(?i:TO)					{return TO;}
+(?i:SAVEPOINT)			{return SAVEPOINT;}
+(?i:WORK)				{return WORK;}
+(?i:SET)				{return SET;}
+(?i:CHARACTERISTICS)	{return CHARACTERISTICS;}
+
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 

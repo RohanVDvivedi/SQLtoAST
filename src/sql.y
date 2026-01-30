@@ -30,7 +30,7 @@
 
 	sql_dml* dml_query;
 
-	sql_tcl* tcl_query;
+	sql_tcl* tcl_cmd;
 
 	projection* projection;
 
@@ -110,6 +110,20 @@
 %type <dml_query> delete_query
 
 %token DELETE
+
+/* TCL command */
+%type <tcl_cmd> tcl_cmd
+
+%token START
+%token TRANSACTION
+%token ROLLBACK
+%token COMMIT
+%token RELEASE
+%token TO
+%token SAVEPOINT
+%token WORK
+%token SET
+%token CHARACTERISTICS
 
 /* SQL EXPRESSION */
 %type <expr> expr
@@ -250,7 +264,11 @@
 
 sql_query:
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
-			| dml_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DML; (*sql_ast)->dml_query = $1;}
+			| dml_query 						{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DML; (*sql_ast)->dml_query = $1;}
+			| tcl_cmd 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = TCL; (*sql_ast)->tcl_query = $1;}
+
+tcl_cmd:
+			COMMIT 								{$$ = new_tcl(COMMIT_TCL_CMD);}
 
 dml_query :
 			delete_query 			{$$ = $1;}
