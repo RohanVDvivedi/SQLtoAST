@@ -268,12 +268,12 @@ sql_query:
 			| tcl_cmd 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = TCL; (*sql_ast)->tcl_cmd = $1;}
 
 tcl_cmd:
-			START TRANSACTION								{$$ = new_tcl(START_TX_TCL_CMD);}
-			| COMMIT work_opt								{$$ = new_tcl(COMMIT_TCL_CMD);}
-			| ROLLBACK work_opt								{$$ = new_tcl(ROLLBACK_TCL_CMD);}
-			| SAVEPOINT IDENTIFIER							{$$ = new_tcl(SAVEPOINT_TCL_CMD); $$->savepoint_name = $2;}
-			| RELEASE SAVEPOINT IDENTIFIER					{$$ = new_tcl(RELEASE_SAVEPOINT_TCL_CMD); $$->savepoint_name = $3;}
-			| ROLLBACK work_opt TO IDENTIFIER				{$$ = new_tcl(ROLLBACK_TO_SAVEPOINT_TCL_CMD); $$->savepoint_name = $4;}
+			START TRANSACTION										{$$ = new_tcl(START_TX_TCL_CMD);}
+			| COMMIT work_opt										{$$ = new_tcl(COMMIT_TCL_CMD);}
+			| ROLLBACK work_opt										{$$ = new_tcl(ROLLBACK_TCL_CMD);}
+			| SAVEPOINT IDENTIFIER									{$$ = new_tcl(SAVEPOINT_TCL_CMD); $$->savepoint_name = $2;}
+			| RELEASE SAVEPOINT IDENTIFIER							{$$ = new_tcl(RELEASE_SAVEPOINT_TCL_CMD); $$->savepoint_name = $3;}
+			| ROLLBACK work_opt TO SAVEPOINT IDENTIFIER				{$$ = new_tcl(ROLLBACK_TO_SAVEPOINT_TCL_CMD); $$->savepoint_name = $5;}
 
 work_opt:
 						{}
