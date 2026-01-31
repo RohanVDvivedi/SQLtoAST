@@ -25,8 +25,4 @@ DDL (create alter drop)
 * make a function to make queries flatten their operators in sql expressions
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
 
-* subqueries can only be select queries
-*SQL EXPRESSIONS that work with sub queries
- * EXISTS / NOT EXISTS :::::::
- * UNIQUE ::::
- etc (check for all operators like these)
+* add distinct and unique for projections of the select query
