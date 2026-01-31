@@ -170,6 +170,8 @@ void print_dml(const sql_dml* dml)
 					printf("( ");
 					for(cy_uint j = 0; j < get_element_count_arraylist(&(c->column_names)); j++)
 					{
+						if(j != 0)
+							printf(" , ");
 						dstring* column_name = (dstring*) get_from_front_of_arraylist(&(c->column_names), j);
 						printf("\"");
 						printf_dstring(column_name);
@@ -178,6 +180,8 @@ void print_dml(const sql_dml* dml)
 					printf(" ) = ( ");
 					for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
 					{
+						if(j != 0)
+							printf(" , ");
 						sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
 						if(value_expr)
 						{
