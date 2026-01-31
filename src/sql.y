@@ -76,6 +76,8 @@
 %type <expr> offset_clause
 %type <expr> limit_clause
 
+%type <dql_query> sub_query
+
 %token SELECT
 %token FROM
 %token JOIN
@@ -470,12 +472,12 @@ expr :
 			| expr LT expr 																			{$$ = new_compare_sql_expr(SQL_LT, SQL_CMP_NONE, $1, $3);}
 			| expr LTE expr 																		{$$ = new_compare_sql_expr(SQL_LTE, SQL_CMP_NONE, $1, $3);}
 
-			| expr EQ cmp_rhs_quantifier expr														{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
-			| expr NEQ cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
-			| expr GT cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
-			| expr GTE cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
-			| expr LT cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
-			| expr LTE cmp_rhs_quantifier expr 														{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
+			| expr EQ cmp_rhs_quantifier sub_query													{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
+			| expr NEQ cmp_rhs_quantifier sub_query 												{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
+			| expr GT cmp_rhs_quantifier sub_query 													{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
+			| expr GTE cmp_rhs_quantifier sub_query 												{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
+			| expr LT cmp_rhs_quantifier sub_query 													{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
+			| expr LTE cmp_rhs_quantifier sub_query 												{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
 
 			| expr LIKE expr %prec LIKE_PREC														{$$ = new_binary_sql_expr(SQL_LIKE, $1, $3);}
 			| expr L_NOT LIKE expr %prec LIKE_PREC													{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1, $4));}
@@ -483,8 +485,8 @@ expr :
 			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC							{$$ = new_in_sql_expr($1, NULL, $4);}
 			| expr L_NOT IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC						{$$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, NULL, $5));}
 
-			| expr IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC							{arraylist t; initialize_arraylist(&t, 0); $$ = new_in_sql_expr($1, $4, t);}
-			| expr L_NOT IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC						{arraylist t; initialize_arraylist(&t, 0); $$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5, t));}
+			| expr IN OPEN_BRACKET sub_query CLOSE_BRACKET %prec IN_PREC							{arraylist t; initialize_arraylist(&t, 0); $$ = new_in_sql_expr($1, $4, t);}
+			| expr L_NOT IN OPEN_BRACKET sub_query CLOSE_BRACKET %prec IN_PREC						{arraylist t; initialize_arraylist(&t, 0); $$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5, t));}
 
 			| expr BETWEEN expr L_AND expr %prec BETWEEN_PREC										{$$ = new_between_sql_expr($1, $3, $5);}
 			| expr L_NOT BETWEEN expr L_AND expr %prec BETWEEN_PREC									{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1, $4, $6));}
@@ -547,8 +549,11 @@ bool_literal:
 func_expr : IDENTIFIER OPEN_BRACKET expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
 sub_query_expr :
-			dql_query 															{$$ = new_sub_query_sql_expr($1);}
-			| OPEN_BRACKET sub_query_expr CLOSE_BRACKET 						{$$ = $2;}
+			sub_query 															{$$ = new_sub_query_sql_expr($1);}
+
+sub_query :
+			dql_query 													{$$ = $1;}
+			| OPEN_BRACKET sub_query CLOSE_BRACKET 						{$$ = $2;}
 
 expr_list :
 			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}

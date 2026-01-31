@@ -117,7 +117,13 @@ struct sql_expression
 		struct
 		{
 			sql_expression* left;
-			sql_expression* right; // if the right side is sub_query with more than 1 result, then use the struct below to resolve the operator
+			union
+			{
+				sql_expression* right;
+
+				sql_dql* right_sub_query; // to be used only when expr.type is any of SQL_GT,SQL_GTE,SQL_LT,SQL_LTE,SQL_EQ OR SQL_NEQ
+				// and the cmp_rhs_quantfier must be SQL_CMP_ANY or SQL_CMP_ALL
+			};
 		};
 
 		// for between operator
@@ -171,7 +177,7 @@ sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* una
 
 sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* left, sql_expression* right);
 
-sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, sql_expression* right);
+sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, void* right);
 
 sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1);
 

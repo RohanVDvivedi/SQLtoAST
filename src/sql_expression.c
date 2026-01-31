@@ -39,7 +39,7 @@ sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* le
 	return expr;
 }
 
-sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, sql_expression* right)
+sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, void* right)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
@@ -348,7 +348,10 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->left);
 			printf(" > ");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			print_sql_expr(expr->right);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				print_sql_expr(expr->right);
+			else
+				print_dql(expr->right_sub_query);
 			printf(" )");
 			break;
 		}
@@ -358,7 +361,10 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->left);
 			printf(" >= ");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			print_sql_expr(expr->right);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				print_sql_expr(expr->right);
+			else
+				print_dql(expr->right_sub_query);
 			printf(" )");
 			break;
 		}
@@ -368,7 +374,10 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->left);
 			printf(" < ");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			print_sql_expr(expr->right);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				print_sql_expr(expr->right);
+			else
+				print_dql(expr->right_sub_query);
 			printf(" )");
 			break;
 		}
@@ -378,7 +387,10 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->left);
 			printf(" <= ");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			print_sql_expr(expr->right);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				print_sql_expr(expr->right);
+			else
+				print_dql(expr->right_sub_query);
 			printf(" )");
 			break;
 		}
@@ -388,7 +400,10 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->left);
 			printf(" = ");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			print_sql_expr(expr->right);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				print_sql_expr(expr->right);
+			else
+				print_dql(expr->right_sub_query);
 			printf(" )");
 			break;
 		}
@@ -398,7 +413,10 @@ void print_sql_expr(const sql_expression* expr)
 			print_sql_expr(expr->left);
 			printf(" <> ");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			print_sql_expr(expr->right);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				print_sql_expr(expr->right);
+			else
+				print_dql(expr->right_sub_query);
 			printf(" )");
 			break;
 		}
@@ -699,12 +717,6 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_MUL :
 		case SQL_DIV :
 		case SQL_MOD :
-		case SQL_GT :
-		case SQL_GTE :
-		case SQL_LT :
-		case SQL_LTE :
-		case SQL_EQ :
-		case SQL_NEQ :
 		case SQL_BITAND :
 		case SQL_BITOR :
 		case SQL_BITXOR :
@@ -719,6 +731,21 @@ void delete_sql_expr(sql_expression* expr)
 		{
 			delete_sql_expr(expr->left);
 			delete_sql_expr(expr->right);
+			break;
+		}
+
+		case SQL_GT :
+		case SQL_GTE :
+		case SQL_LT :
+		case SQL_LTE :
+		case SQL_EQ :
+		case SQL_NEQ :
+		{
+			delete_sql_expr(expr->left);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				delete_sql_expr(expr->right);
+			else
+				delete_dql(expr->right_sub_query);
 			break;
 		}
 
