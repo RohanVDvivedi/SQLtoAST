@@ -69,3 +69,21 @@ SELECT p.product_id FROM products p WHERE p.price < ALL (        SELECT o.price 
 SELECT * FROM orders o WHERE (SELECT MAX(total) FROM orders WHERE customer_id = o.customer_id)      >= ALL (          SELECT total          FROM orders          WHERE order_date >= CAST('2025-01-01' AS DATE)      )
 SELECT u.user_id FROM users u WHERE u.score > ANY (        SELECT t.score        FROM tests t        WHERE t.test_id IN (              SELECT r.test_id              FROM results r              WHERE r.user_id = u.user_id        )) OR u.level = SOME (        SELECT l.level        FROM levels l        WHERE l.required_score <= u.score)
 SELECT * FROM accounts a WHERE a.balance < ALL (        SELECT t.amount        FROM transactions t        WHERE t.account_id IN (              SELECT a2.id              FROM accounts a2              WHERE a2.owner_id IN (                    SELECT o.id                    FROM owners o                    WHERE o.status = 'ACTIVE'              )        )) AND a.balance > (SELECT MIN(balance) FROM accounts)
+UPDATE orders SET total_amount =    (SELECT SUM(price * quantity)     FROM order_items     WHERE order_items.order_id = orders.id) WHERE status = 'OPEN'
+UPDATE users SET last_login = DEFAULT WHERE active = 0
+UPDATE accounts SET balance = balance - 100,    last_updated = CURRENT_TIMESTAMP WHERE balance >= 100
+UPDATE products SET price =    (SELECT AVG(p2.price)     FROM products p2     WHERE p2.category_id =           (SELECT c.id            FROM categories c            WHERE c.name = 'Electronics')) WHERE discontinued = 0
+UPDATE employees SET bonus = bonus * 1.1 WHERE EXISTS (    SELECT 1    FROM sales    WHERE sales.employee_id = employees.id      AND sales.amount > 10000 )
+UPDATE inventory SET (quantity, last_checked) = (0, CURRENT_DATE) WHERE warehouse_id = 5
+UPDATE customer_summary SET (total_orders, total_spent) =    (SELECT COUNT(*), SUM(amount)     FROM orders     WHERE orders.customer_id = customer_summary.customer_id) WHERE customer_id IS NOT NULL
+DELETE FROM sessions WHERE user_id IN (    SELECT users.id    FROM users    WHERE users.active = 0)
+DELETE FROM logs WHERE EXISTS (    SELECT 1    FROM log_levels    WHERE log_levels.id = logs.level_id      AND log_levels.severity = 'DEBUG' )AND created_at < CURRENT_DATE
+DELETE FROM audit_events WHERE event_type IN (    SELECT t.type    FROM event_types t    WHERE t.category_id IN (        SELECT c.id        FROM categories c        WHERE c.name = 'TEMPORARY'    ))
+BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE
+BEGIN TRANSACTION READ ONLY
+BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ WRITE
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED READ WRITE
+SET TRANSACTION READ ONLY
+SAVEPOINT sp_order_update
+ROLLBACK TO SAVEPOINT sp_order_update
+RELEASE SAVEPOINT sp_order_update
