@@ -134,6 +134,16 @@
 (?i:SET)				{return SET;}
 (?i:CHARACTERISTICS)	{return CHARACTERISTICS;}
 
+(?i:READ)				{return READ;}
+(?i:WRITE)				{return WRITE;}
+(?i:ONLY)				{return ONLY;}
+(?i:ISOLATION)			{return ISOLATION;}
+(?i:LEVEL)				{return LEVEL;}
+(?i:UNCOMMITTED)		{return UNCOMMITTED;}
+(?i:COMMITTED)			{return COMMITTED;}
+(?i:REPEATABLE)			{return REPEATABLE;}
+(?i:SERIALIZABLE)		{return SERIALIZABLE;}
+
 (?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
 (?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
 

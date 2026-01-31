@@ -125,6 +125,19 @@
 %token SET
 %token CHARACTERISTICS
 
+%token READ
+%token WRITE
+%token ONLY
+%token ISOLATION
+%token LEVEL
+%token UNCOMMITTED
+%token COMMITTED
+%token REPEATABLE
+%token SERIALIZABLE
+
+%type <uval> access_mode
+%type <uval> isolation_level
+
 /* SQL EXPRESSION */
 %type <expr> expr
 %type <ptr_list> expr_list
@@ -262,20 +275,37 @@
 
 %%
 
-sql_query:
+sql_query :
 			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
 			| dml_query 						{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DML; (*sql_ast)->dml_query = $1;}
 			| tcl_cmd 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = TCL; (*sql_ast)->tcl_cmd = $1;}
 
-tcl_cmd:
-			START TRANSACTION										{$$ = new_tcl(START_TX_TCL_CMD);}
-			| COMMIT work_opt										{$$ = new_tcl(COMMIT_TCL_CMD);}
-			| ROLLBACK work_opt										{$$ = new_tcl(ROLLBACK_TCL_CMD);}
-			| SAVEPOINT IDENTIFIER									{$$ = new_tcl(SAVEPOINT_TCL_CMD); $$->savepoint_name = $2;}
-			| RELEASE SAVEPOINT IDENTIFIER							{$$ = new_tcl(RELEASE_SAVEPOINT_TCL_CMD); $$->savepoint_name = $3;}
-			| ROLLBACK work_opt TO SAVEPOINT IDENTIFIER				{$$ = new_tcl(ROLLBACK_TO_SAVEPOINT_TCL_CMD); $$->savepoint_name = $5;}
+tcl_cmd :
+			START TRANSACTION access_mode isolation_level							{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $4; $$->mode = $3;}
+			| START TRANSACTION isolation_level access_mode							{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $3; $$->mode = $4;}
+			| COMMIT work_opt														{$$ = new_tcl(COMMIT_TCL_CMD);}
+			| ROLLBACK work_opt														{$$ = new_tcl(ROLLBACK_TCL_CMD);}
+			| SAVEPOINT IDENTIFIER													{$$ = new_tcl(SAVEPOINT_TCL_CMD); $$->savepoint_name = $2;}
+			| RELEASE SAVEPOINT IDENTIFIER											{$$ = new_tcl(RELEASE_SAVEPOINT_TCL_CMD); $$->savepoint_name = $3;}
+			| ROLLBACK work_opt TO SAVEPOINT IDENTIFIER								{$$ = new_tcl(ROLLBACK_TO_SAVEPOINT_TCL_CMD); $$->savepoint_name = $5;}
+			| SET TRANSACTION access_mode isolation_level							{$$ = new_tcl(SET_TX_TCL_CMD); $$->isolation_level = $4; $$->mode = $3;}
+			| SET TRANSACTION isolation_level access_mode							{$$ = new_tcl(SET_TX_TCL_CMD); $$->isolation_level = $3; $$->mode = $4;}
+			| SET TRANSACTION CHARACTERISTICS access_mode isolation_level			{$$ = new_tcl(SET_TX_CHARACTERISTICS_TCL_CMD); $$->isolation_level = $5; $$->mode = $4;}
+			| SET TRANSACTION CHARACTERISTICS isolation_level access_mode			{$$ = new_tcl(SET_TX_CHARACTERISTICS_TCL_CMD); $$->isolation_level = $4; $$->mode = $5;}
 
-work_opt:
+access_mode :
+										{$$ = TX_ACC_RW_UNSPECIFIED;}
+				| READ WRITE 			{$$ = TX_ACC_RW_READ_WRITE;}
+				| READ ONLY 			{$$ = TX_ACC_RW_READ_ONLY;}
+
+isolation_level :
+										{$$ = ISO_UNSPECIFIED;}
+				| READ UNCOMMITTED 		{$$ = ISO_READ_UNCOMMITTED;}
+				| READ COMMITTED 		{$$ = ISO_READ_COMMITTED;}
+				| REPEATABLE READ  		{$$ = ISO_REPEATABLE_READ;}
+				| SERIALIZABLE 			{$$ = ISO_SERIALIZABLE;}
+
+work_opt :
 						{}
 			| WORK 		{}
 
