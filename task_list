@@ -3,7 +3,6 @@ PICKED TASKS
 
 * parse UPDATE
 * parse INSERT
-* finally the ones like start_tx, set_tx and set_tx_charact* that may have isolation level and mode, both optionally and that too in any order
 
 
 
