@@ -122,6 +122,7 @@
 (?i:DESC)				{return DESC;}
 
 (?i:UPDATE)				{return UPDATE;}
+(?i:DEFAULT)			{return DEFAULT;}
 
 (?i:DELETE)				{return DELETE;}
 

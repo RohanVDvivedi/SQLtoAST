@@ -115,6 +115,7 @@
 %type <attribute_assignment> attribute_assignment
 
 %token UPDATE
+%token DEFAULT
 
 /* DELETE query */
 %type <dml_query> delete_query
@@ -335,6 +336,7 @@ attribute_assignment_list :
 
 attribute_assignment :
 			IDENTIFIER EQ expr 				{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = $3;}
+			IDENTIFIER EQ DEFAULT 			{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = NULL;}
 
 delete_query :
 			DELETE FROM IDENTIFIER where_clause 		{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
