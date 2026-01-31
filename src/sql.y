@@ -30,6 +30,8 @@
 
 	sql_dml* dml_query;
 
+	column_to_be_set* attribute_assignment;
+
 	sql_tcl* tcl_cmd;
 
 	projection* projection;
@@ -105,6 +107,14 @@
 
 /* DML query */
 %type <dml_query> dml_query
+
+/* UPDATE query */
+%type <dml_query> update_query
+%type <ptr_list> set_clause
+%type <ptr_list> attribute_assignment_list
+%type <attribute_assignment> attribute_assignment
+
+%token UPDATE
 
 /* DELETE query */
 %type <dml_query> delete_query
@@ -310,10 +320,24 @@ work_opt :
 			| WORK 		{}
 
 dml_query :
-			delete_query 			{$$ = $1;}
+			update_query 			{$$ = $1;}
+			| delete_query 			{$$ = $1;}
+
+update_query :
+			UPDATE IDENTIFIER set_clause where_clause 	{$$ = new_dml(UPDATE_QUERY); $$->update_query.table_name = $2; $$->update_query.values_to_be_set = $3; $$->update_query.where_expr = $4;}
+
+set_clause :
+			SET attribute_assignment_list 			{$$ = $2;}
+
+attribute_assignment_list :
+			attribute_assignment 											{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
+			| attribute_assignment_list COMMA attribute_assignment 			{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
+
+attribute_assignment :
+			IDENTIFIER EQ expr 				{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = $3;}
 
 delete_query :
-			DELETE FROM IDENTIFIER where_clause 	{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
+			DELETE FROM IDENTIFIER where_clause 		{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
 
 dql_query :
 			select_query 			{$$ = $1;}

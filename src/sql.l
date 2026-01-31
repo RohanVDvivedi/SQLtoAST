@@ -121,6 +121,8 @@
 (?i:ASC)				{return ASC;}
 (?i:DESC)				{return DESC;}
 
+(?i:UPDATE)				{return UPDATE;}
+
 (?i:DELETE)				{return DELETE;}
 
 (?i:START)				{return START;}
