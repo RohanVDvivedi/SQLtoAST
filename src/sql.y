@@ -30,7 +30,7 @@
 
 	sql_dml* dml_query;
 
-	column_to_be_set* attribute_assignment;
+	columns_to_be_set* attribute_assignment;
 
 	sql_tcl* tcl_cmd;
 
@@ -116,6 +116,9 @@
 
 %token UPDATE
 %token DEFAULT
+
+%type <ptr_list> defaultable_expr_list
+%type <expr> defaultable_expr
 
 /* DELETE query */
 %type <dml_query> delete_query
@@ -341,8 +344,16 @@ attribute_assignment_list :
 			| attribute_assignment_list COMMA attribute_assignment 			{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
 
 attribute_assignment :
-			IDENTIFIER EQ expr 					{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = $3;}
-			| IDENTIFIER EQ DEFAULT 			{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = NULL;}
+			IDENTIFIER EQ defaultable_expr 																		{$$ = new_columns_to_be_set(); dstring* t = malloc(sizeof(dstring)); (*t) = $1; push_back_to_arraylist(&($$->column_names), t); push_back_to_arraylist(&($$->value_exprs), $3);}
+			| OPEN_BRACKET identifier_list CLOSE_BRACKET EQ OPEN_BRACKET defaultable_expr_list CLOSE_BRACKET 	{$$ = new_columns_to_be_set(); $$->column_names = $2; $$->value_exprs = $6;}
+
+defaultable_expr_list :
+			defaultable_expr 											{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
+			| defaultable_expr_list COMMA defaultable_expr 				{insert_in_expr_list(&($1), $3); $$ = $1;}
+
+defaultable_expr :
+			expr 			{$$ = $1;}
+			| DEFAULT 		{$$ = NULL;}
 
 delete_query :
 			DELETE FROM IDENTIFIER where_clause 		{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}

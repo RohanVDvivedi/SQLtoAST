@@ -3,6 +3,14 @@
 #include<stdlib.h>
 #include<stdio.h>
 
+columns_to_be_set* new_columns_to_be_set()
+{
+	columns_to_be_set* c = malloc(sizeof(columns_to_be_set));
+	initialize_arraylist(&(c->column_names), 1);
+	initialize_arraylist(&(c->value_exprs), 1);
+	return c;
+};
+
 sql_dml* new_dml(sql_dml_type type)
 {
 	sql_dml* dml = malloc(sizeof(sql_dml));
@@ -156,19 +164,31 @@ void print_dml(const sql_dml* dml)
 				{
 					if(i != 0)
 						printf(" , ");
-					column_to_be_set* c = (column_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
-					printf("\"");
-					printf_dstring(&(c->column_name));
-					printf("\"");
-					printf(" = ");
-					if(c->value_expr)
+
+					columns_to_be_set* c = (columns_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
+
+					printf("( ");
+					for(cy_uint j = 0; j < get_element_count_arraylist(&(c->column_names)); j++)
 					{
-						printf("( ");
-						print_sql_expr(c->value_expr);
-						printf(" )");
+						dstring* column_name = (dstring*) get_from_front_of_arraylist(&(c->column_names), j);
+						printf("\"");
+						printf_dstring(column_name);
+						printf("\"");
 					}
-					else
-						printf("DEFAULT");
+					printf(" ) = ( ");
+					for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
+					{
+						sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
+						if(value_expr)
+						{
+							printf("( ");
+							print_sql_expr(value_expr);
+							printf(" )");
+						}
+						else
+							printf("DEFAULT");
+					}
+					printf(" )");
 				}
 				printf(" )");
 				clauses_printed++;
@@ -261,10 +281,19 @@ void delete_dml(sql_dml* dml)
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->update_query.values_to_be_set)); i++)
 			{
-				column_to_be_set* c = (column_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
-				if(c->value_expr)
-					delete_sql_expr(c->value_expr);
-				deinit_dstring(&(c->column_name));
+				columns_to_be_set* c = (columns_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
+				for(cy_uint j = 0; j < get_element_count_arraylist(&(c->column_names)); j++)
+				{
+					dstring* column_name = (dstring*) get_from_front_of_arraylist(&(c->column_names), j);
+					deinit_dstring(column_name);
+					free(column_name);
+				}
+				for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
+				{
+					sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
+					if(value_expr)
+						delete_sql_expr(value_expr);
+				}
 				free(c);
 			}
 			deinitialize_arraylist(&(dml->update_query.values_to_be_set));

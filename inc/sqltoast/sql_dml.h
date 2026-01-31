@@ -30,14 +30,14 @@ struct sql_insert
 	arraylist values;
 };
 
-typedef struct column_to_be_set column_to_be_set;
-struct column_to_be_set
+typedef struct columns_to_be_set columns_to_be_set;
+struct columns_to_be_set
 {
-	// set column for the given_column_name with the value from value_expr
-	dstring column_name;
+	// set columns with the value from value_expr or each one indivdually from the value_expr_list
+	arraylist column_names;
 
-	// if the expression is NULL, it is considered to be equivalent to DEFAULT in the sql statement
-	sql_expression* value_expr;
+	// if any of the the expressions is NULL, it is considered to be equivalent to DEFAULT in the sql statement
+	arraylist value_exprs;
 };
 
 typedef struct sql_update sql_update;
@@ -46,7 +46,7 @@ struct sql_update
 	// table to be updated
 	dstring table_name;
 
-	// each element in values_to_be_set is a pointer to the column_to_be_set
+	// each element in values_to_be_set is a pointer to the columns_to_be_set
 	arraylist values_to_be_set;
 
 	// where clause
@@ -75,6 +75,8 @@ struct sql_dml
 		sql_delete delete_query;
 	};
 };
+
+columns_to_be_set* new_columns_to_be_set();
 
 sql_dml* new_dml(sql_dml_type type);
 
