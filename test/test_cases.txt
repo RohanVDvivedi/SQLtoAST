@@ -87,3 +87,18 @@ SET TRANSACTION READ ONLY
 SAVEPOINT sp_order_update
 ROLLBACK TO SAVEPOINT sp_order_update
 RELEASE SAVEPOINT sp_order_update
+UPDATE orders SET total_amount = (SELECT SUM(oi.price * oi.quantity) FROM order_items oi WHERE oi.order_id = orders.id) WHERE status = 'OPEN'
+UPDATE customer_summary SET (total_orders, total_spent) = (SELECT COUNT(*), SUM(amount) FROM orders o WHERE o.customer_id = customer_summary.customer_id) WHERE customer_id IS NOT NULL
+UPDATE employees SET bonus = bonus * 1.15 WHERE EXISTS (SELECT 1 FROM sales s WHERE s.employee_id = employees.id AND s.amount > 10000)
+UPDATE products SET price = (SELECT AVG(p2.price) FROM products p2 WHERE p2.category_id = (SELECT c.id FROM categories c WHERE c.name = 'Electronics')) WHERE discontinued = 0
+UPDATE accounts SET balance = balance - 500, last_updated = CURRENT_TIMESTAMP WHERE balance >= 500 AND account_status = 'ACTIVE'
+UPDATE users SET last_login = CURRENT_TIMESTAMP, failed_attempts = DEFAULT WHERE locked = 0 AND active = 1
+UPDATE inventory SET (quantity, last_checked) = (0, CURRENT_DATE) WHERE warehouse_id = 5 AND quantity > 0
+UPDATE orders SET status = 'CLOSED' WHERE id IN (SELECT o.id FROM orders o WHERE o.status = 'OPEN' AND o.total_amount = 0)
+UPDATE employees SET salary = salary + (SELECT AVG(bonus) FROM bonuses b WHERE b.employee_id = employees.id) WHERE department_id = 3
+UPDATE tickets SET priority = 'HIGH' WHERE (severity = 'CRITICAL' OR impact > 8) AND status <> 'RESOLVED'
+DELETE FROM sessions WHERE user_id IN (SELECT u.id FROM users u WHERE u.active = 0)
+DELETE FROM logs WHERE EXISTS (SELECT 1 FROM log_levels l WHERE l.id = logs.level_id AND l.severity = 'DEBUG')
+DELETE FROM audit_events WHERE event_type IN (SELECT t.type FROM event_types t WHERE t.category_id IN (SELECT c.id FROM categories c WHERE c.name = 'TEMPORARY'))
+DELETE FROM orders WHERE status = 'CANCELLED' AND created_at < CURRENT_DATE
+DELETE FROM employees WHERE salary < (SELECT AVG(e2.salary) FROM employees e2 WHERE e2.department_id = employees.department_id)
