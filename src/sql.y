@@ -498,8 +498,6 @@ expr :
 			| expr L_OR expr 																		{$$ = new_binary_sql_expr(SQL_LOGOR, $1, $3);}
 			| expr L_XOR expr 																		{$$ = new_binary_sql_expr(SQL_LOGXOR, $1, $3);}
 
-			| CAST OPEN_BRACKET expr AS BOOL CLOSE_BRACKET 											{$$ = new_cast_sql_expr($3, new_sql_type(SQL_BOOL));}
-
 			| INTEGER 																				{$$ = new_valued_sql_expr(SQL_NUM, $1);}
 			| NUMBER																				{$$ = new_valued_sql_expr(SQL_NUM, $1);}
 			| STRING																				{$$ = new_valued_sql_expr(SQL_STR, $1);}
