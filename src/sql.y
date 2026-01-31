@@ -390,9 +390,9 @@ rel_input :
 			IDENTIFIER 																{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
 			| IDENTIFIER AS IDENTIFIER												{$$ = new_relation_input($1, $3);}
 			| IDENTIFIER IDENTIFIER													{$$ = new_relation_input($1, $2);}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET 									{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER					{$$ = new_sub_query_relation_input($2, $5);}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER						{$$ = new_sub_query_relation_input($2, $4);}
+			| OPEN_BRACKET sub_query CLOSE_BRACKET 									{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| OPEN_BRACKET sub_query CLOSE_BRACKET AS IDENTIFIER					{$$ = new_sub_query_relation_input($2, $5);}
+			| OPEN_BRACKET sub_query CLOSE_BRACKET IDENTIFIER						{$$ = new_sub_query_relation_input($2, $4);}
 			| func_expr 															{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
 			| func_expr AS IDENTIFIER												{$$ = new_function_call_relation_input($1, $3);}
 			| func_expr IDENTIFIER													{$$ = new_function_call_relation_input($1, $2);}
