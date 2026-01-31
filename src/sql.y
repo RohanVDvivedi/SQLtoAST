@@ -335,8 +335,8 @@ attribute_assignment_list :
 			| attribute_assignment_list COMMA attribute_assignment 			{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
 
 attribute_assignment :
-			IDENTIFIER EQ expr 				{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = $3;}
-			IDENTIFIER EQ DEFAULT 			{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = NULL;}
+			IDENTIFIER EQ expr 					{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = $3;}
+			| IDENTIFIER EQ DEFAULT 			{$$ = malloc(sizeof(column_to_be_set)); $$->column_name = $1; $$->value_expr = NULL;}
 
 delete_query :
 			DELETE FROM IDENTIFIER where_clause 		{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
