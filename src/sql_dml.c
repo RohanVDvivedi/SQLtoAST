@@ -292,12 +292,14 @@ void delete_dml(sql_dml* dml)
 					deinit_dstring(column_name);
 					free(column_name);
 				}
+				deinitialize_arraylist(&(c->column_names));
 				for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
 				{
 					sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
 					if(value_expr)
 						delete_sql_expr(value_expr);
 				}
+				deinitialize_arraylist(&(c->value_exprs));
 				free(c);
 			}
 			deinitialize_arraylist(&(dml->update_query.values_to_be_set));
