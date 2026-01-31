@@ -3,11 +3,11 @@
 #include<stdlib.h>
 #include<stdio.h>
 
-columns_to_be_set* new_columns_to_be_set()
+columns_to_be_set* new_columns_to_be_set(cy_uint capacity)
 {
 	columns_to_be_set* c = malloc(sizeof(columns_to_be_set));
-	initialize_arraylist(&(c->column_names), 1);
-	initialize_arraylist(&(c->value_exprs), 1);
+	initialize_arraylist(&(c->column_names), capacity);
+	initialize_arraylist(&(c->value_exprs), capacity);
 	return c;
 };
 

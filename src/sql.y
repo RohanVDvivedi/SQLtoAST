@@ -344,8 +344,8 @@ attribute_assignment_list :
 			| attribute_assignment_list COMMA attribute_assignment 			{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
 
 attribute_assignment :
-			IDENTIFIER EQ defaultable_expr 																		{$$ = new_columns_to_be_set(); dstring* t = malloc(sizeof(dstring)); (*t) = $1; push_back_to_arraylist(&($$->column_names), t); push_back_to_arraylist(&($$->value_exprs), $3);}
-			| OPEN_BRACKET identifier_list CLOSE_BRACKET EQ OPEN_BRACKET defaultable_expr_list CLOSE_BRACKET 	{$$ = new_columns_to_be_set(); $$->column_names = $2; $$->value_exprs = $6;}
+			IDENTIFIER EQ defaultable_expr 																		{$$ = new_columns_to_be_set(1); dstring* t = malloc(sizeof(dstring)); (*t) = $1; push_back_to_arraylist(&($$->column_names), t); push_back_to_arraylist(&($$->value_exprs), $3);}
+			| OPEN_BRACKET identifier_list CLOSE_BRACKET EQ OPEN_BRACKET defaultable_expr_list CLOSE_BRACKET 	{$$ = new_columns_to_be_set(0); $$->column_names = $2; $$->value_exprs = $6;}
 
 defaultable_expr_list :
 			defaultable_expr 											{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}

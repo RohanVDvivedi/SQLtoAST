@@ -76,7 +76,7 @@ struct sql_dml
 	};
 };
 
-columns_to_be_set* new_columns_to_be_set();
+columns_to_be_set* new_columns_to_be_set(cy_uint capacity);
 
 sql_dml* new_dml(sql_dml_type type);
 
