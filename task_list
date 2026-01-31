@@ -1,8 +1,9 @@
 
 PICKED TASKS
 
-* parse UPDATE
 * parse INSERT
+
+* add %destructor rules
 
 
 
