@@ -141,8 +141,7 @@
 (?i:READ)				{return READ;}
 (?i:WRITE)				{return WRITE;}
 (?i:ONLY)				{return ONLY;}
-(?i:ISOLATION)			{return ISOLATION;}
-(?i:LEVEL)				{return LEVEL;}
+(?i:ISOLATION_LEVEL)	{return ISOLATION_LEVEL;}
 (?i:UNCOMMITTED)		{return UNCOMMITTED;}
 (?i:COMMITTED)			{return COMMITTED;}
 (?i:REPEATABLE)			{return REPEATABLE;}

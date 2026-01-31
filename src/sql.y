@@ -145,8 +145,7 @@
 %token READ
 %token WRITE
 %token ONLY
-%token ISOLATION
-%token LEVEL
+%token ISOLATION_LEVEL
 %token UNCOMMITTED
 %token COMMITTED
 %token REPEATABLE
@@ -259,23 +258,20 @@
 
 /* Precedence + Associativity */
 
-
 /* Lowest precedence first (so Bison gives them the lowest binding) */
-
-/* on some systems %prec SYMBOL_PREC is not working */
 
 %left L_OR
 %left L_XOR
 %left L_AND
 %right L_NOT
 
-%nonassoc IS_PREC
 %nonassoc IS
-%nonassoc BETWEEN_PREC
+%nonassoc IS_PREC
 %nonassoc BETWEEN
-%nonassoc IN_PREC
+%nonassoc BETWEEN_PREC
 %nonassoc IN
-%left EQ NEQ GT GTE LT LTE LIKE_PREC
+%nonassoc IN_PREC
+%left EQ NEQ GT GTE LT LTE LIKE LIKE_PREC
 
 %left B_OR
 %left B_XOR
@@ -322,10 +318,10 @@ access_mode :
 
 isolation_level :
 														{$$ = ISO_UNSPECIFIED;}
-				| ISOLATION LEVEL READ UNCOMMITTED 		{$$ = ISO_READ_UNCOMMITTED;}
-				| ISOLATION LEVEL READ COMMITTED 		{$$ = ISO_READ_COMMITTED;}
-				| ISOLATION LEVEL REPEATABLE READ  		{$$ = ISO_REPEATABLE_READ;}
-				| ISOLATION LEVEL SERIALIZABLE 			{$$ = ISO_SERIALIZABLE;}
+				| ISOLATION_LEVEL READ UNCOMMITTED 		{$$ = ISO_READ_UNCOMMITTED;}
+				| ISOLATION_LEVEL READ COMMITTED 		{$$ = ISO_READ_COMMITTED;}
+				| ISOLATION_LEVEL REPEATABLE READ  		{$$ = ISO_REPEATABLE_READ;}
+				| ISOLATION_LEVEL SERIALIZABLE 			{$$ = ISO_SERIALIZABLE;}
 
 work_opt :
 						{}
