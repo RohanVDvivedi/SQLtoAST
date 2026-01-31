@@ -127,6 +127,7 @@
 (?i:DELETE)				{return DELETE;}
 
 (?i:START)				{return START;}
+(?i:BEGIN)				{return _BEGIN_;}
 (?i:TRANSACTION)		{return TRANSACTION;}
 (?i:ROLLBACK)			{return ROLLBACK;}
 (?i:COMMIT)				{return COMMIT;}

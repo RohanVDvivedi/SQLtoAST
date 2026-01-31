@@ -126,6 +126,7 @@
 %type <tcl_cmd> tcl_cmd
 
 %token START
+%token _BEGIN_
 %token TRANSACTION
 %token ROLLBACK
 %token COMMIT
@@ -294,6 +295,8 @@ sql_query :
 tcl_cmd :
 			START TRANSACTION access_mode isolation_level							{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $4; $$->mode = $3;}
 			| START TRANSACTION isolation_level access_mode							{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $3; $$->mode = $4;}
+			| _BEGIN_ TRANSACTION_opt access_mode isolation_level					{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $4; $$->mode = $3;}
+			| _BEGIN_ TRANSACTION_opt isolation_level access_mode					{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $3; $$->mode = $4;}
 			| COMMIT work_opt														{$$ = new_tcl(COMMIT_TCL_CMD);}
 			| ROLLBACK work_opt														{$$ = new_tcl(ROLLBACK_TCL_CMD);}
 			| SAVEPOINT IDENTIFIER													{$$ = new_tcl(SAVEPOINT_TCL_CMD); $$->savepoint_name = $2;}
@@ -303,6 +306,10 @@ tcl_cmd :
 			| SET TRANSACTION isolation_level access_mode							{$$ = new_tcl(SET_TX_TCL_CMD); $$->isolation_level = $3; $$->mode = $4;}
 			| SET TRANSACTION CHARACTERISTICS access_mode isolation_level			{$$ = new_tcl(SET_TX_CHARACTERISTICS_TCL_CMD); $$->isolation_level = $5; $$->mode = $4;}
 			| SET TRANSACTION CHARACTERISTICS isolation_level access_mode			{$$ = new_tcl(SET_TX_CHARACTERISTICS_TCL_CMD); $$->isolation_level = $4; $$->mode = $5;}
+
+TRANSACTION_opt :
+								{}
+			| TRANSACTION 		{}
 
 access_mode :
 										{$$ = TX_ACC_RW_UNSPECIFIED;}
