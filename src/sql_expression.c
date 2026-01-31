@@ -351,7 +351,11 @@ void print_sql_expr(const sql_expression* expr)
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
+			{
+				printf("( ");
 				print_dql(expr->right_sub_query);
+				printf(" )");
+			}
 			printf(" )");
 			break;
 		}
@@ -364,7 +368,11 @@ void print_sql_expr(const sql_expression* expr)
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
+			{
+				printf("( ");
 				print_dql(expr->right_sub_query);
+				printf(" )");
+			}
 			printf(" )");
 			break;
 		}
@@ -377,7 +385,11 @@ void print_sql_expr(const sql_expression* expr)
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
+			{
+				printf("( ");
 				print_dql(expr->right_sub_query);
+				printf(" )");
+			}
 			printf(" )");
 			break;
 		}
@@ -390,7 +402,11 @@ void print_sql_expr(const sql_expression* expr)
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
+			{
+				printf("( ");
 				print_dql(expr->right_sub_query);
+				printf(" )");
+			}
 			printf(" )");
 			break;
 		}
@@ -403,7 +419,11 @@ void print_sql_expr(const sql_expression* expr)
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
+			{
+				printf("( ");
 				print_dql(expr->right_sub_query);
+				printf(" )");
+			}
 			printf(" )");
 			break;
 		}
@@ -416,7 +436,11 @@ void print_sql_expr(const sql_expression* expr)
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
+			{
+				printf("( ");
 				print_dql(expr->right_sub_query);
+				printf(" )");
+			}
 			printf(" )");
 			break;
 		}
