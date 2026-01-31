@@ -3,6 +3,12 @@ PICKED TASKS
 
 * parse INSERT
 
+* make separate rules for sub_query (dql_query with or without nested brackets) and sub_query_expr (sub_query put into an expression)
+  * replace other rules as required
+  * all brakcet nesting of sub_query will keep it into a dql_query only, so that it can be used by other operators like set operations on bracketed dql_query or exists operator or any/all operators
+* add exists and not exists as operators over queries
+* add dql_query to work with union, intersect or except, as binary operators
+
 * add %destructor rules
 
 
