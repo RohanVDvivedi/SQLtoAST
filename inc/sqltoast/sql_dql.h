@@ -12,6 +12,8 @@ typedef enum sql_dql_type sql_dql_type;
 enum sql_dql_type
 {
 	SELECT_QUERY,
+	VALUES_QUERY,
+	SET_OPERATION
 };
 
 typedef struct sql_dql sql_dql;
@@ -103,11 +105,9 @@ struct order_by
 	order_by_dir dir;
 };
 
-typedef struct sql_dql sql_dql;
-struct sql_dql
+typedef struct sql_select sql_select;
+struct sql_select
 {
-	sql_dql_type type;
-
 	// result columns (each struct is result_alias)
 	arraylist projections;
 
@@ -136,7 +136,51 @@ struct sql_dql
 	sql_expression* limit_expr;
 };
 
-sql_dql* new_dql();
+typedef struct sql_values sql_values;
+struct sql_values
+{
+	// 2D pointer arraylist of expressions, each element of values is an arraylist, pointing to sql_expression pointer
+	// if any expression is NULL, it is considered to be equivalent to DEFAULT in the sql statement
+	arraylist values;
+};
+
+typedef enum set_op_type set_op_type;
+enum set_op_type
+{
+	SQL_SET_INTERSECT,
+	SQL_SET_UNION,
+	SQL_SET_EXCEPT,
+};
+
+typedef enum set_op_mod set_op_mod;
+enum set_op_mod
+{
+	SQL_RESULT_SET_DISTINCT,
+	SQL_RESULT_SET_ALL
+};
+
+typedef struct sql_dql sql_dql;
+struct sql_dql
+{
+	sql_dql_type type;
+
+	union
+	{
+		sql_select select_query;
+		sql_values values_query;
+		struct 
+		{
+			set_op_type op_type;
+
+			set_op_mod op_mod;
+
+			sql_dql* left;
+			sql_dql* right;
+		} set_operation;
+	};
+};
+
+sql_dql* new_dql(sql_dql_type type);
 
 #define new_relation_input(relation_name_, as_)                             ((relation_input){.type = RELATION, .relation_name = relation_name_, .as = as_})
 #define new_sub_query_relation_input(sub_query_, as_)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query_, .as = as_})

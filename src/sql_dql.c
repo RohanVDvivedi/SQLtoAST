@@ -3,24 +3,43 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-sql_dql* new_dql()
+sql_dql* new_dql(sql_dql_type type)
 {
 	sql_dql* dql = malloc(sizeof(sql_dql));
 
-	dql->type = SELECT_QUERY;
+	dql->type = type;
 
-	initialize_arraylist(&(dql->projections), 0);
+	switch(dql->type)
+	{
+		case SELECT_QUERY :
+		{
+			initialize_arraylist(&(dql->select_query.projections), 0);
 
-	dql->base_input = new_relation_input(new_copy_dstring(&get_dstring_pointing_to_cstring("")), new_copy_dstring(&get_dstring_pointing_to_cstring("")));
+			dql->select_query.base_input = new_relation_input(new_copy_dstring(&get_dstring_pointing_to_cstring("")), new_copy_dstring(&get_dstring_pointing_to_cstring("")));
 
-	initialize_arraylist(&(dql->joins_with), 0);
+			initialize_arraylist(&(dql->select_query.joins_with), 0);
 
-	dql->where_expr = NULL;
-	initialize_arraylist(&(dql->group_by), 0);
-	dql->having_expr = NULL;
-	initialize_arraylist(&(dql->ordered_by), 0);
-	dql->offset_expr = NULL;
-	dql->limit_expr = NULL;
+			dql->select_query.where_expr = NULL;
+			initialize_arraylist(&(dql->select_query.group_by), 0);
+			dql->select_query.having_expr = NULL;
+			initialize_arraylist(&(dql->select_query.ordered_by), 0);
+			dql->select_query.offset_expr = NULL;
+			dql->select_query.limit_expr = NULL;
+
+			break;
+		}
+		case VALUES_QUERY :
+		{
+			initialize_arraylist(&(dql->values_query.values), 0);
+			break;
+		}
+		case SET_OPERATION :
+		{
+			dql->set_operation.left = NULL;
+			dql->set_operation.right = NULL;
+			break;
+		}
+	}
 
 	return dql;
 }
@@ -64,180 +83,230 @@ static void print_relation_input(const relation_input* ri_p)
 
 void print_dql(const sql_dql* dql)
 {
-	printf("select( ");
-
-	int clauses_printed = 0;
-
-	if(get_element_count_arraylist(&(dql->projections)) > 0)
+	switch(dql->type)
 	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("projections( ");
-		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->projections)); i++)
+		case SELECT_QUERY :
 		{
-			if(i != 0)
-				printf(" , ");
-			projection* p = (projection*) get_from_front_of_arraylist(&(dql->projections), i);
-			printf("( ( ");
-			print_sql_expr(p->projection_expr);
-			printf(" ) as ");
-			if(is_empty_dstring(&(p->as)))
-				printf("no-alias");
-			else
-			{
-				printf("\"");
-				printf_dstring(&(p->as));
-				printf("\"");
-			}
-			printf(" )");
-		}
-		printf(" )");
-		clauses_printed++;
-	}
+			printf("select( ");
 
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("from( ");
-		print_relation_input(&(dql->base_input));
-		printf(" )");
-		clauses_printed++;
-	}
+			int clauses_printed = 0;
 
-	if(get_element_count_arraylist(&(dql->joins_with)) > 0)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("joins( ");
-		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
-		{
-			if(i != 0)
-				printf(" , ");
-			printf("( type(");
-			join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
-			switch(j->type)
+			if(get_element_count_arraylist(&(dql->select_query.projections)) > 0)
 			{
-				case INNER_JOIN : 		printf(" inner "); 		break;
-				case LEFT_JOIN : 		printf(" left "); 		break;
-				case RIGHT_JOIN : 		printf(" right "); 		break;
-				case FULL_JOIN : 		printf(" full "); 		break;
-				case CROSS_JOIN : 		printf(" cross "); 		break;
-			}
-			printf("), is_lateral(%d), with( ", j->is_lateral);
-			print_relation_input(&(j->input));
-			printf(" )");
-			switch(j->condition_type)
-			{
-				case NO_JOIN_CONDITION :
-					break;
-				case NATURAL_JOIN_CONDITION :
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("projections( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
 				{
-					printf(", condition(natural) ");
-					break;
-				}
-				case ON_EXPR_JOIN_CONDITION :
-				{
-					printf(", on_condition( ");
-					print_sql_expr(j->on_expr);
-					printf(" )");
-					break;
-				}
-				case USING_JOIN_CONDITION :
-				{
-					printf(", using_columns( ");
-					for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+					if(i != 0)
+						printf(" , ");
+					projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
+					printf("( ( ");
+					print_sql_expr(p->projection_expr);
+					printf(" ) as ");
+					if(is_empty_dstring(&(p->as)))
+						printf("no-alias");
+					else
 					{
-						if(i > 0)
-							printf(" , ");
-						printf_dstring((dstring*) get_from_front_of_arraylist(&(j->using_cols), i));
+						printf("\"");
+						printf_dstring(&(p->as));
+						printf("\"");
 					}
 					printf(" )");
+				}
+				printf(" )");
+				clauses_printed++;
+			}
+
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("from( ");
+				print_relation_input(&(dql->select_query.base_input));
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(get_element_count_arraylist(&(dql->select_query.joins_with)) > 0)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("joins( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					printf("( type(");
+					join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
+					switch(j->type)
+					{
+						case INNER_JOIN : 		printf(" inner "); 		break;
+						case LEFT_JOIN : 		printf(" left "); 		break;
+						case RIGHT_JOIN : 		printf(" right "); 		break;
+						case FULL_JOIN : 		printf(" full "); 		break;
+						case CROSS_JOIN : 		printf(" cross "); 		break;
+					}
+					printf("), is_lateral(%d), with( ", j->is_lateral);
+					print_relation_input(&(j->input));
+					printf(" )");
+					switch(j->condition_type)
+					{
+						case NO_JOIN_CONDITION :
+							break;
+						case NATURAL_JOIN_CONDITION :
+						{
+							printf(", condition(natural) ");
+							break;
+						}
+						case ON_EXPR_JOIN_CONDITION :
+						{
+							printf(", on_condition( ");
+							print_sql_expr(j->on_expr);
+							printf(" )");
+							break;
+						}
+						case USING_JOIN_CONDITION :
+						{
+							printf(", using_columns( ");
+							for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+							{
+								if(i > 0)
+									printf(" , ");
+								printf_dstring((dstring*) get_from_front_of_arraylist(&(j->using_cols), i));
+							}
+							printf(" )");
+							break;
+						}
+					}
+					printf(" )");
+				}
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(dql->select_query.where_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("where( ");
+				print_sql_expr(dql->select_query.where_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(get_element_count_arraylist(&(dql->select_query.group_by)) > 0)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("group_by( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.group_by)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
+					printf("( ");
+					print_sql_expr(g);
+					printf(" )");
+				}
+				printf(" )");
+				clauses_printed++;
+			}
+
+			
+			if(dql->select_query.having_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("having( ");
+				print_sql_expr(dql->select_query.having_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(get_element_count_arraylist(&(dql->select_query.ordered_by)) > 0)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("order_by( ");
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
+				{
+					if(i != 0)
+						printf(" , ");
+					order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
+					printf("( ( ");
+					print_sql_expr(o->ordering_expr);
+					printf(" ) in %s order )", ((o->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
+				}
+				clauses_printed++;
+			}
+
+			if(dql->select_query.offset_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("offset( ");
+				print_sql_expr(dql->select_query.offset_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+
+			if(dql->select_query.limit_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("limit( ");
+				print_sql_expr(dql->select_query.limit_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+
+			printf(" )");
+			break;
+		}
+		case VALUES_QUERY :
+		{
+			break;
+		}
+		case SET_OPERATION :
+		{
+			printf("( ");
+			printf("( ");print_dql(dql->set_operation.left);printf(" )");
+			switch(dql->set_operation.op_type)
+			{
+				case SQL_SET_INTERSECT :
+				{
+					printf(" INTERSECT ");
+					break;
+				}
+				case SQL_SET_UNION :
+				{
+					printf(" UNION ");
+					break;
+				}
+				case SQL_SET_EXCEPT :
+				{
+					printf(" EXCEPT ");
 					break;
 				}
 			}
+			switch(dql->set_operation.op_mod)
+			{
+				case SQL_RESULT_SET_DISTINCT :
+				{
+					printf(" DISTINCT ");
+					break;
+				}
+				case SQL_RESULT_SET_ALL :
+				{
+					printf(" ALL ");
+					break;
+				}
+			}
+			printf("( ");print_dql(dql->set_operation.right);printf(" )");
 			printf(" )");
+			break;
 		}
-		printf(" )");
-		clauses_printed++;
 	}
-
-	if(dql->where_expr)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("where( ");
-		print_sql_expr(dql->where_expr);
-		printf(" )");
-		clauses_printed++;
-	}
-
-	if(get_element_count_arraylist(&(dql->group_by)) > 0)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("group_by( ");
-		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
-		{
-			if(i != 0)
-				printf(" , ");
-			sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->group_by), i);
-			printf("( ");
-			print_sql_expr(g);
-			printf(" )");
-		}
-		printf(" )");
-		clauses_printed++;
-	}
-
-	
-	if(dql->having_expr)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("having( ");
-		print_sql_expr(dql->having_expr);
-		printf(" )");
-		clauses_printed++;
-	}
-
-	if(get_element_count_arraylist(&(dql->ordered_by)) > 0)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("order_by( ");
-		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
-		{
-			if(i != 0)
-				printf(" , ");
-			order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->ordered_by), i);
-			printf("( ( ");
-			print_sql_expr(o->ordering_expr);
-			printf(" ) in %s order )", ((o->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
-		}
-		clauses_printed++;
-	}
-
-	if(dql->offset_expr)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("offset( ");
-		print_sql_expr(dql->offset_expr);
-		printf(" )");
-		clauses_printed++;
-	}
-
-	if(dql->limit_expr)
-	{
-		if(clauses_printed != 0)
-			printf(" , ");
-		printf("limit( ");
-		print_sql_expr(dql->limit_expr);
-		printf(" )");
-		clauses_printed++;
-	}
-
-	printf(" )");
 }
 
 static void destroy_relation_input(relation_input* ri_p)
@@ -265,72 +334,90 @@ static void destroy_relation_input(relation_input* ri_p)
 
 void delete_dql(sql_dql* dql)
 {
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->projections)); i++)
+	switch(dql->type)
 	{
-		projection* p = (projection*) get_from_front_of_arraylist(&(dql->projections), i);
-		delete_sql_expr(p->projection_expr);
-		deinit_dstring(&(p->as));
-		free(p);
-	}
-	deinitialize_arraylist(&(dql->projections));
-
-	destroy_relation_input(&(dql->base_input));
-
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->joins_with)); i++)
-	{
-		join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->joins_with), i);
-		destroy_relation_input(&(j->input));
-		switch(j->condition_type)
+		case SELECT_QUERY :
 		{
-			case ON_EXPR_JOIN_CONDITION :
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
 			{
-				delete_sql_expr(j->on_expr);
-				break;
+				projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
+				delete_sql_expr(p->projection_expr);
+				deinit_dstring(&(p->as));
+				free(p);
 			}
-			case USING_JOIN_CONDITION :
+			deinitialize_arraylist(&(dql->select_query.projections));
+
+			destroy_relation_input(&(dql->select_query.base_input));
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
 			{
-				for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+				join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
+				destroy_relation_input(&(j->input));
+				switch(j->condition_type)
 				{
-					dstring* col = (dstring*) get_from_front_of_arraylist(&(j->using_cols), i);
-					deinit_dstring(col);
-					free(col);
+					case ON_EXPR_JOIN_CONDITION :
+					{
+						delete_sql_expr(j->on_expr);
+						break;
+					}
+					case USING_JOIN_CONDITION :
+					{
+						for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+						{
+							dstring* col = (dstring*) get_from_front_of_arraylist(&(j->using_cols), i);
+							deinit_dstring(col);
+							free(col);
+						}
+						deinitialize_arraylist(&(j->using_cols));
+						break;
+					}
+					default :
+						break;
 				}
-				deinitialize_arraylist(&(j->using_cols));
-				break;
+				free(j);
 			}
-			default :
-				break;
+			deinitialize_arraylist(&(dql->select_query.joins_with));
+
+			if(dql->select_query.where_expr)
+				delete_sql_expr(dql->select_query.where_expr);
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.group_by)); i++)
+			{
+				sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
+				delete_sql_expr(grouping_expr);
+			}
+			deinitialize_arraylist(&(dql->select_query.group_by));
+
+			if(dql->select_query.having_expr)
+				delete_sql_expr(dql->select_query.having_expr);
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
+			{
+				order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
+				delete_sql_expr(o->ordering_expr);
+				free(o);
+			}
+			deinitialize_arraylist(&(dql->select_query.ordered_by));
+
+			if(dql->select_query.offset_expr)
+				delete_sql_expr(dql->select_query.offset_expr);
+
+			if(dql->select_query.limit_expr)
+				delete_sql_expr(dql->select_query.limit_expr);
+
+			break;
 		}
-		free(j);
+		case VALUES_QUERY :
+		{
+			break;
+		}
+		case SET_OPERATION :
+		{
+			delete_dql(dql->set_operation.left);
+			delete_dql(dql->set_operation.right);
+			break;
+		}
 	}
-	deinitialize_arraylist(&(dql->joins_with));
-
-	if(dql->where_expr)
-		delete_sql_expr(dql->where_expr);
-
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->group_by)); i++)
-	{
-		sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->group_by), i);
-		delete_sql_expr(grouping_expr);
-	}
-	deinitialize_arraylist(&(dql->group_by));
-
-	if(dql->having_expr)
-		delete_sql_expr(dql->having_expr);
-
-	for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->ordered_by)); i++)
-	{
-		order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->ordered_by), i);
-		delete_sql_expr(o->ordering_expr);
-		free(o);
-	}
-	deinitialize_arraylist(&(dql->ordered_by));
-
-	if(dql->offset_expr)
-		delete_sql_expr(dql->offset_expr);
-
-	if(dql->limit_expr)
-		delete_sql_expr(dql->limit_expr);
 
 	free(dql);
 }
