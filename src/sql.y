@@ -78,7 +78,12 @@
 %type <expr> offset_clause
 %type <expr> limit_clause
 
-%type <dql_query> sub_query
+%type <uval> set_op_mod
+
+%token INTERSECT
+%token UNION
+%token EXCEPT
+%token DISTINCT
 
 %token SELECT
 %token FROM
@@ -265,6 +270,9 @@
 
 /* Lowest precedence first (so Bison gives them the lowest binding) */
 
+%left UNION EXCEPT
+%left INTERSECT
+
 %left L_OR
 %left L_XOR
 %left L_AND
@@ -366,7 +374,16 @@ delete_query :
 			DELETE FROM IDENTIFIER where_clause 		{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
 
 dql_query :
-			select_query 			{$$ = $1;}
+			select_query 										{$$ = $1;}
+			| dql_query INTERSECT set_op_mod dql_query 			{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_INTERSECT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
+			| dql_query UNION set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_UNION; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
+			| dql_query EXCEPT set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_EXCEPT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET				{$$ = $2;}
+
+set_op_mod :
+							{$$ = SQL_RESULT_SET_DISTINCT;}
+			| ALL 			{$$ = SQL_RESULT_SET_ALL;}
+			| DISTINCT 		{$$ = SQL_RESULT_SET_DISTINCT;}
 
 select_query :
 			SELECT projection_list FROM rel_input join_clauses where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
@@ -395,9 +412,9 @@ rel_input :
 			IDENTIFIER 																{$$ = new_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
 			| IDENTIFIER AS IDENTIFIER												{$$ = new_relation_input($1, $3);}
 			| IDENTIFIER IDENTIFIER													{$$ = new_relation_input($1, $2);}
-			| OPEN_BRACKET sub_query CLOSE_BRACKET 									{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| OPEN_BRACKET sub_query CLOSE_BRACKET AS IDENTIFIER					{$$ = new_sub_query_relation_input($2, $5);}
-			| OPEN_BRACKET sub_query CLOSE_BRACKET IDENTIFIER						{$$ = new_sub_query_relation_input($2, $4);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET 									{$$ = new_sub_query_relation_input($2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER					{$$ = new_sub_query_relation_input($2, $5);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER						{$$ = new_sub_query_relation_input($2, $4);}
 			| func_expr 															{$$ = new_function_call_relation_input($1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
 			| func_expr AS IDENTIFIER												{$$ = new_function_call_relation_input($1, $3);}
 			| func_expr IDENTIFIER													{$$ = new_function_call_relation_input($1, $2);}
@@ -477,12 +494,12 @@ expr :
 			| expr LT expr 																			{$$ = new_compare_sql_expr(SQL_LT, SQL_CMP_NONE, $1, $3);}
 			| expr LTE expr 																		{$$ = new_compare_sql_expr(SQL_LTE, SQL_CMP_NONE, $1, $3);}
 
-			| expr EQ cmp_rhs_quantifier sub_query													{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $4);}
-			| expr NEQ cmp_rhs_quantifier sub_query 												{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $4);}
-			| expr GT cmp_rhs_quantifier sub_query 													{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $4);}
-			| expr GTE cmp_rhs_quantifier sub_query 												{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $4);}
-			| expr LT cmp_rhs_quantifier sub_query 													{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $4);}
-			| expr LTE cmp_rhs_quantifier sub_query 												{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $4);}
+			| expr EQ cmp_rhs_quantifier OPEN_BRACKET dql_query	CLOSE_BRACKET						{$$ = new_compare_sql_expr(SQL_EQ, $3, $1, $5);}
+			| expr NEQ cmp_rhs_quantifier OPEN_BRACKET dql_query CLOSE_BRACKET						{$$ = new_compare_sql_expr(SQL_NEQ, $3, $1, $5);}
+			| expr GT cmp_rhs_quantifier OPEN_BRACKET dql_query CLOSE_BRACKET						{$$ = new_compare_sql_expr(SQL_GT, $3, $1, $5);}
+			| expr GTE cmp_rhs_quantifier OPEN_BRACKET dql_query CLOSE_BRACKET						{$$ = new_compare_sql_expr(SQL_GTE, $3, $1, $5);}
+			| expr LT cmp_rhs_quantifier OPEN_BRACKET dql_query CLOSE_BRACKET						{$$ = new_compare_sql_expr(SQL_LT, $3, $1, $5);}
+			| expr LTE cmp_rhs_quantifier OPEN_BRACKET dql_query CLOSE_BRACKET						{$$ = new_compare_sql_expr(SQL_LTE, $3, $1, $5);}
 
 			| expr LIKE expr %prec LIKE_PREC														{$$ = new_binary_sql_expr(SQL_LIKE, $1, $3);}
 			| expr L_NOT LIKE expr %prec LIKE_PREC													{$$ = new_unary_sql_expr(SQL_LOGNOT, new_binary_sql_expr(SQL_LIKE, $1, $4));}
@@ -490,8 +507,8 @@ expr :
 			| expr IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC							{$$ = new_in_sql_expr($1, NULL, $4);}
 			| expr L_NOT IN OPEN_BRACKET expr_list CLOSE_BRACKET %prec IN_PREC						{$$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, NULL, $5));}
 
-			| expr IN OPEN_BRACKET sub_query CLOSE_BRACKET %prec IN_PREC							{arraylist t; initialize_arraylist(&t, 0); $$ = new_in_sql_expr($1, $4, t);}
-			| expr L_NOT IN OPEN_BRACKET sub_query CLOSE_BRACKET %prec IN_PREC						{arraylist t; initialize_arraylist(&t, 0); $$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5, t));}
+			| expr IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC							{arraylist t; initialize_arraylist(&t, 0); $$ = new_in_sql_expr($1, $4, t);}
+			| expr L_NOT IN OPEN_BRACKET dql_query CLOSE_BRACKET %prec IN_PREC						{arraylist t; initialize_arraylist(&t, 0); $$ = new_unary_sql_expr(SQL_LOGNOT, new_in_sql_expr($1, $5, t));}
 
 			| expr BETWEEN expr L_AND expr %prec BETWEEN_PREC										{$$ = new_between_sql_expr($1, $3, $5);}
 			| expr L_NOT BETWEEN expr L_AND expr %prec BETWEEN_PREC									{$$ = new_unary_sql_expr(SQL_LOGNOT, new_between_sql_expr($1, $4, $6));}
@@ -539,7 +556,7 @@ expr :
 
 			| sub_query_expr 																		{$$ = $1;}
 
-			| EXISTS OPEN_BRACKET sub_query CLOSE_BRACKET 											{$$ = new_sub_query_sql_expr(SQL_EXISTS, $3);}
+			| EXISTS OPEN_BRACKET dql_query CLOSE_BRACKET 											{$$ = new_sub_query_sql_expr(SQL_EXISTS, $3);}
 
 cmp_rhs_quantifier :
 			ANY 					{$$ = SQL_CMP_ANY;}
@@ -554,11 +571,7 @@ bool_literal:
 func_expr : IDENTIFIER OPEN_BRACKET expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
 sub_query_expr :
-			sub_query 															{$$ = new_sub_query_sql_expr(SQL_SUB_QUERY, $1);}
-
-sub_query :
-			dql_query 													{$$ = $1;}
-			| OPEN_BRACKET sub_query CLOSE_BRACKET 						{$$ = $2;}
+			dql_query 															{$$ = new_sub_query_sql_expr(SQL_SUB_QUERY, $1);}
 
 expr_list :
 			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}

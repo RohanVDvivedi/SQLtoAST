@@ -99,6 +99,11 @@
 (?i:TIME)				{return TIME;}
 (?i:TIMESTAMP)			{return TIMESTAMP;}
 
+(?i:INTERSECT)			{return INTERSECT;}
+(?i:UNION)				{return UNION;}
+(?i:EXCEPT)				{return EXCEPT;}
+(?i:DISTINCT)			{return DISTINCT;}
+
 (?i:SELECT)				{return SELECT;}
 (?i:FROM)				{return FROM;}
 (?i:JOIN)				{return JOIN;}
