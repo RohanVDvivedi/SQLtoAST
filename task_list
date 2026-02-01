@@ -21,8 +21,17 @@ PICKED TASKS
         } select_query;
       };
   };
+  dql_query :
+    select_query
+    | values_query
+    | OPEN_BRACKET dql_query CLOSE_BRACKET
+    | dql_query INTERSECT dql_query
+    | dql_query UNION dql_query
+    | dql_query EXCEPT dql_query
+  now we can replace sub_query replacing it with dql_query
 
 * parse INSERT
+  * use dql_query as input for insert statements
 
 * add %destructor rules
 
