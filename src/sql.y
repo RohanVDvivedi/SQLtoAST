@@ -370,16 +370,16 @@ dql_query :
 
 select_query :
 			SELECT projection_list FROM rel_input join_clauses where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
-				$$ = new_dql();
-				$$->projections = $2;
-				$$->base_input = $4;
-				$$->joins_with = $5;
-				$$->where_expr = $6;
-				$$->group_by = $7;
-				$$->having_expr = $8;
-				$$->ordered_by = $9;
-				$$->offset_expr = $10;
-				$$->limit_expr = $11;
+				$$ = new_dql(SELECT_QUERY);
+				$$->select_query.projections = $2;
+				$$->select_query.base_input = $4;
+				$$->select_query.joins_with = $5;
+				$$->select_query.where_expr = $6;
+				$$->select_query.group_by = $7;
+				$$->select_query.having_expr = $8;
+				$$->select_query.ordered_by = $9;
+				$$->select_query.offset_expr = $10;
+				$$->select_query.limit_expr = $11;
 			}
 
 projection_list :
