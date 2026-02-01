@@ -95,10 +95,10 @@ sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type)
 	return expr;
 }
 
-sql_expression* new_sub_query_sql_expr(sql_dql* sub_query)
+sql_expression* new_sub_query_sql_expr(sql_expression_type type, sql_dql* sub_query)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_SUB_QUERY;
+	expr->type = type;
 	expr->sub_query = sub_query;
 	return expr;
 }
@@ -262,6 +262,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		}
 
 		case SQL_SUB_QUERY :
+		case SQL_EXISTS :
 		{
 			;//flatten_similar_associative_operators_in_sql_dql_query(expr->sub_query);
 			return expr;
@@ -721,6 +722,14 @@ void print_sql_expr(const sql_expression* expr)
 			printf(" )");
 			break;
 		}
+
+		case SQL_EXISTS :
+		{
+			printf("( EXISTS( ");
+			print_dql(expr->sub_query);
+			printf(" ) )");
+			break;
+		}
 	}
 }
 
@@ -837,6 +846,7 @@ void delete_sql_expr(sql_expression* expr)
 		}
 
 		case SQL_SUB_QUERY :
+		case SQL_EXISTS :
 		{
 			delete_dql(expr->sub_query);
 			break;

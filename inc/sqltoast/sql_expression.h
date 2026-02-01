@@ -85,6 +85,7 @@ enum sql_expression_type
 	SQL_CAST,
 
 	SQL_SUB_QUERY,
+	SQL_EXISTS,
 };
 
 typedef enum sql_cmp_quantifier sql_cmp_quantifier;
@@ -162,7 +163,7 @@ struct sql_expression
 			sql_type cast_type;
 		};
 
-		// for sql_sub_query
+		// for sql_sub_query and sql_exists
 		struct
 		{
 			sql_dql* sub_query;
@@ -189,7 +190,7 @@ sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list);
 
 sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type);
 
-sql_expression* new_sub_query_sql_expr(sql_dql* sub_query);
+sql_expression* new_sub_query_sql_expr(sql_expression_type type, sql_dql* sub_query);
 
 // for NUM, STR and VAR
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
