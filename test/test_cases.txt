@@ -103,3 +103,8 @@ DELETE FROM logs WHERE EXISTS (SELECT 1 FROM log_levels l WHERE l.id = logs.leve
 DELETE FROM audit_events WHERE event_type IN (SELECT t.type FROM event_types t WHERE t.category_id IN (SELECT c.id FROM categories c WHERE c.name = 'TEMPORARY'))
 DELETE FROM orders WHERE status = 'CANCELLED' AND created_at < CURRENT_DATE
 DELETE FROM employees WHERE salary < (SELECT AVG(e2.salary) FROM employees e2 WHERE e2.department_id = employees.department_id)
+select * from t where not exists ( select * from y ) and x
+select * from t where not exists ( select * from y )
+select * from t where exists ( select * from y )
+select * from t where exists ( select * from y where exists (select * from x) )
+select * from t where exists ( select * from y where not exists (select * from x) or not z )
