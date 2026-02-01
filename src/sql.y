@@ -226,6 +226,8 @@
 %token IN
 %token COMMA
 
+%token EXISTS
+
 %token CAST
 %token AS
 
@@ -267,6 +269,9 @@
 %left L_XOR
 %left L_AND
 %right L_NOT
+
+%nonassoc EXISTS
+%nonassoc EXISTS_PREC
 
 %nonassoc IS
 %nonassoc IS_PREC
@@ -534,6 +539,8 @@ expr :
 
 			| sub_query_expr 																		{$$ = $1;}
 
+			| EXISTS OPEN_BRACKET sub_query CLOSE_BRACKET 											{$$ = new_sub_query_sql_expr(SQL_EXISTS, $3);}
+
 cmp_rhs_quantifier :
 			ANY 					{$$ = SQL_CMP_ANY;}
 			| ALL 					{$$ = SQL_CMP_ALL;}
@@ -547,7 +554,7 @@ bool_literal:
 func_expr : IDENTIFIER OPEN_BRACKET expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
 
 sub_query_expr :
-			sub_query 															{$$ = new_sub_query_sql_expr($1);}
+			sub_query 															{$$ = new_sub_query_sql_expr(SQL_SUB_QUERY, $1);}
 
 sub_query :
 			dql_query 													{$$ = $1;}

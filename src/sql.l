@@ -63,6 +63,8 @@
 (?i:IN) 				{return IN;}
 ","						{return COMMA;}
 
+(?i:EXISTS)				{return EXISTS;}
+
 (?i:CAST)				{return CAST;}
 (?i:AS)					{return AS;}
 
