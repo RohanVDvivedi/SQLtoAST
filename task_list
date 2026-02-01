@@ -1,11 +1,6 @@
 
 PICKED TASKS
 
-* add exists and not exists as operators over queries in sql_expression
-  * EXISTS ( sub_query ) %prec EXISTS_PREC
-  * L_NOT EXISTS ( sub_query ) %prec EXISTS_PREC
-  * place its precedence between logixal and comparison operators
-
 * add dql_query to work with union, intersect or except, as binary operators
   * check operator precedence and then only combine
   struct dql_query
