@@ -265,6 +265,7 @@ void print_dql(const sql_dql* dql)
 		}
 		case VALUES_QUERY :
 		{
+			// TODO
 			break;
 		}
 		case SET_OPERATION :
@@ -409,6 +410,7 @@ void delete_dql(sql_dql* dql)
 		}
 		case VALUES_QUERY :
 		{
+			// TODO
 			break;
 		}
 		case SET_OPERATION :
