@@ -1,6 +1,13 @@
 #ifndef SQL_DQL_H
 #define SQL_DQL_H
 
+typedef enum set_op_mod set_op_mod;
+enum set_op_mod
+{
+	SQL_RESULT_SET_DISTINCT,
+	SQL_RESULT_SET_ALL
+};
+
 #include<sqltoast/sql_expression.h>
 
 #include<cutlery/arraylist.h>
@@ -108,6 +115,8 @@ struct order_by
 typedef struct sql_select sql_select;
 struct sql_select
 {
+	set_op_mod projection_mode;
+
 	// result columns (each struct is result_alias)
 	arraylist projections;
 
@@ -150,13 +159,6 @@ enum set_op_type
 	SQL_SET_INTERSECT,
 	SQL_SET_UNION,
 	SQL_SET_EXCEPT,
-};
-
-typedef enum set_op_mod set_op_mod;
-enum set_op_mod
-{
-	SQL_RESULT_SET_DISTINCT,
-	SQL_RESULT_SET_ALL
 };
 
 typedef struct sql_dql sql_dql;

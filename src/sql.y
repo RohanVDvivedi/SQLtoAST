@@ -86,6 +86,7 @@
 %token DISTINCT
 
 %token SELECT
+%token UNIQUE
 %token FROM
 %token JOIN
 %token ON
@@ -106,6 +107,8 @@
 %token CROSS
 %token LATERAL
 %token NATURAL
+
+%type <uval> projection_all_or_distinct
 
 %type <uval> lateral_opt
 %type <uval> join_type
@@ -168,6 +171,8 @@
 %type <expr> bool_literal
 %type <expr> func_expr
 %type <expr> sub_query_expr
+
+%type <uval> aggregate_distinct_opt
 
 /* SQL DATA TYPE */
 %type <data_type> type
@@ -386,18 +391,25 @@ set_op_mod :
 			| DISTINCT 		{$$ = SQL_RESULT_SET_DISTINCT;}
 
 select_query :
-			SELECT projection_list FROM rel_input join_clauses where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
+			SELECT projection_all_or_distinct projection_list FROM rel_input join_clauses where_clause group_by_clause having_clause order_by_clause offset_clause limit_clause {
 				$$ = new_dql(SELECT_QUERY);
-				$$->select_query.projections = $2;
-				$$->select_query.base_input = $4;
-				$$->select_query.joins_with = $5;
-				$$->select_query.where_expr = $6;
-				$$->select_query.group_by = $7;
-				$$->select_query.having_expr = $8;
-				$$->select_query.ordered_by = $9;
-				$$->select_query.offset_expr = $10;
-				$$->select_query.limit_expr = $11;
+				$$->select_query.projection_mode = $2;
+				$$->select_query.projections = $3;
+				$$->select_query.base_input = $5;
+				$$->select_query.joins_with = $6;
+				$$->select_query.where_expr = $7;
+				$$->select_query.group_by = $8;
+				$$->select_query.having_expr = $9;
+				$$->select_query.ordered_by = $10;
+				$$->select_query.offset_expr = $11;
+				$$->select_query.limit_expr = $12;
 			}
+
+projection_all_or_distinct :
+														{$$ = SQL_RESULT_SET_ALL;}
+								| ALL 					{$$ = SQL_RESULT_SET_ALL;}
+								| DISTINCT 				{$$ = SQL_RESULT_SET_DISTINCT;}
+								| UNIQUE 				{$$ = SQL_RESULT_SET_DISTINCT;}
 
 projection_list :
 					projection 											{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
@@ -568,7 +580,12 @@ bool_literal:
 			| _NULL_			{$$ = new_const_non_valued_sql_expr(SQL_NULL);}
 			| UNKNOWN			{$$ = new_const_non_valued_sql_expr(SQL_UNKNOWN);}
 
-func_expr : IDENTIFIER OPEN_BRACKET expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3);}
+aggregate_distinct_opt :
+												{$$ = SQL_RESULT_SET_ALL;}
+						| ALL 					{$$ = SQL_RESULT_SET_ALL;}
+						| DISTINCT 				{$$ = SQL_RESULT_SET_DISTINCT;}
+
+func_expr : IDENTIFIER OPEN_BRACKET aggregate_distinct_opt expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3, $4);}
 
 sub_query_expr :
 			dql_query 															{$$ = new_sub_query_sql_expr(SQL_SUB_QUERY, $1);}

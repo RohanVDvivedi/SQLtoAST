@@ -105,6 +105,7 @@
 (?i:DISTINCT)			{return DISTINCT;}
 
 (?i:SELECT)				{return SELECT;}
+(?i:UNIQUE)				{return UNIQUE;}
 (?i:FROM)				{return FROM;}
 (?i:JOIN)				{return JOIN;}
 (?i:ON)					{return ON;}

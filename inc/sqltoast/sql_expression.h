@@ -153,6 +153,7 @@ struct sql_expression
 		struct
 		{
 			dstring func_name; // name of the function
+			set_op_mod aggregate_mode;
 			arraylist param_expr_list;
 		};
 
@@ -186,7 +187,7 @@ sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list)
 
 sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query, arraylist in_expr_list);
 
-sql_expression* new_func_sql_expr(dstring func_name, arraylist param_expr_list);
+sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, arraylist param_expr_list);
 
 sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type);
 
