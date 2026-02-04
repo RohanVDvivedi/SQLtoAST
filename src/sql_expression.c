@@ -697,7 +697,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf_dstring(&(expr->func_name));
 			printf("( ");
 			if(expr->aggregate_mode == SQL_RESULT_SET_DISTINCT)
-				printf("DISTINCT");
+				printf("DISTINCT ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 			{
 				if(i != 0)

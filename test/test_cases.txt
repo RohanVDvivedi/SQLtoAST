@@ -108,3 +108,13 @@ select * from t where not exists ( select * from y )
 select * from t where exists ( select * from y )
 select * from t where exists ( select * from y where exists (select * from x) )
 select * from t where exists ( select * from y where not exists (select * from x) or not z )
+SELECT DISTINCT a.id, COUNT(DISTINCT b.val) FROM a JOIN b ON a.id=b.aid GROUP BY a.id UNION ALL SELECT ALL c.id, COUNT(*) FROM c GROUP BY c.id
+SELECT ALL dept, SUM(salary) FROM emp GROUP BY dept INTERSECT SELECT DISTINCT dept, SUM(DISTINCT salary) FROM emp GROUP BY dept
+SELECT DISTINCT category, AVG(price) FROM products GROUP BY category UNION SELECT ALL category, AVG(DISTINCT price) FROM products GROUP BY category
+SELECT ALL customer_id, COUNT(*) FROM orders GROUP BY customer_id EXCEPT SELECT DISTINCT customer_id, COUNT(DISTINCT id) FROM orders GROUP BY customer_id
+SELECT DISTINCT region, MAX(revenue) FROM sales GROUP BY region UNION ALL SELECT ALL region, MAX(DISTINCT revenue) FROM sales GROUP BY region
+SELECT ALL a, SUM(b) FROM t GROUP BY a UNION SELECT DISTINCT a, SUM(DISTINCT b) FROM t GROUP BY a INTERSECT SELECT DISTINCT a, SUM(b) FROM t GROUP BY a
+SELECT DISTINCT dept, COUNT(*) FROM emp GROUP BY dept UNION ALL SELECT ALL dept, COUNT(DISTINCT emp_id) FROM emp GROUP BY dept
+SELECT ALL x, MIN(y) FROM t1 GROUP BY x EXCEPT SELECT DISTINCT x, MIN(DISTINCT y) FROM t1 GROUP BY x
+SELECT DISTINCT store, SUM(amount) FROM payments GROUP BY store UNION SELECT ALL store, SUM(DISTINCT amount) FROM payments GROUP BY store
+SELECT ALL p.type, COUNT(*) FROM products p GROUP BY p.type UNION ALL SELECT DISTINCT p.type, COUNT(DISTINCT p.id) FROM products p GROUP BY p.type
