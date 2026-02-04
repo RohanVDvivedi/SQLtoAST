@@ -91,13 +91,19 @@ void print_dql(const sql_dql* dql)
 
 			int clauses_printed = 0;
 
+			if(dql->select_query.projection_mode == SQL_RESULT_SET_DISTINCT)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("DISTINCT ");
+				clauses_printed++;
+			}
+
 			if(get_element_count_arraylist(&(dql->select_query.projections)) > 0)
 			{
 				if(clauses_printed != 0)
 					printf(" , ");
 				printf("projections( ");
-				if(dql->select_query.projection_mode == SQL_RESULT_SET_DISTINCT)
-					printf("DISTINCT ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
 				{
 					if(i != 0)
