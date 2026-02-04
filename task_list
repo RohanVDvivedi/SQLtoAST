@@ -1,13 +1,6 @@
 
 PICKED TASKS
 
-DISTINCT/UNIQUE/ALL
-* distinct and unique are synonyms and can be place right between select keyword and the projection list
- * applicable to the whole projection list, but it optional, and distinct_opt must be used to refer to none, distinct and unique in parser rules
-* distinct is also allowed inside aggregate functions (UNIQUE is not allowed here)
- * this include inside COUNT, SUM, AVG, MIN and MAX (although it it a no-on for the last 2)
- * make function operator have distinct flag if it has only 1 parameter
-
 * need values operator in both dql and insert query
 
 * parse INSERT
