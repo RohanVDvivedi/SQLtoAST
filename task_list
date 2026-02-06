@@ -2,9 +2,10 @@
 PICKED TASKS
 
 * need values operator in both dql and insert query
-
 * parse INSERT
   * use dql_query as input for insert statements
+
+* make a function to make queries flatten their operators in sql expressions
 
 * add %destructor rules
 
@@ -20,5 +21,4 @@ DDL (create alter drop)
 * add case and when statements in sql expression for parse tree
 
 * flatten a - b expression into a + (-b) as flat addition list, if either a or b is a constant, do that same for a/b
-* make a function to make queries flatten their operators in sql expressions
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
