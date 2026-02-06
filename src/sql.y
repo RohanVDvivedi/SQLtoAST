@@ -125,6 +125,12 @@
 /* DML query */
 %type <dml_query> dml_query
 
+/* INSERT query */
+%type <dml_query> insert_query
+
+%token INSERT
+%token INTO
+
 /* UPDATE query */
 %type <dml_query> update_query
 %type <ptr_list> set_clause
@@ -355,8 +361,13 @@ work_opt :
 			| WORK 		{}
 
 dml_query :
-			update_query 			{$$ = $1;}
+			insert_query 			{$$ = $1;}
+			| update_query 			{$$ = $1;}
 			| delete_query 			{$$ = $1;}
+
+insert_query :
+			INSERT INTO IDENTIFIER dql_query														{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.input_data_query = $4;}
+			| INSERT INTO IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET dql_query			{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.column_name_list = $5; $$->insert_query.input_data_query = $7;}
 
 update_query :
 			UPDATE IDENTIFIER set_clause where_clause 	{$$ = new_dml(UPDATE_QUERY); $$->update_query.table_name = $2; $$->update_query.values_to_be_set = $3; $$->update_query.where_expr = $4;}

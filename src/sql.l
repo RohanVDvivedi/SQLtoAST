@@ -131,6 +131,9 @@
 (?i:ASC)				{return ASC;}
 (?i:DESC)				{return DESC;}
 
+(?i:INSERT)				{return INSERT;}
+(?i:INTO)				{return INTO;}
+
 (?i:UPDATE)				{return UPDATE;}
 (?i:DEFAULT)			{return DEFAULT;}
 
