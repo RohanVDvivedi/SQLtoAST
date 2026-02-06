@@ -118,3 +118,13 @@ SELECT DISTINCT dept, COUNT(*) FROM emp GROUP BY dept UNION ALL SELECT ALL dept,
 SELECT ALL x, MIN(y) FROM t1 GROUP BY x EXCEPT SELECT DISTINCT x, MIN(DISTINCT y) FROM t1 GROUP BY x
 SELECT DISTINCT store, SUM(amount) FROM payments GROUP BY store UNION SELECT ALL store, SUM(DISTINCT amount) FROM payments GROUP BY store
 SELECT ALL p.type, COUNT(*) FROM products p GROUP BY p.type UNION ALL SELECT DISTINCT p.type, COUNT(DISTINCT p.id) FROM products p GROUP BY p.type
+insert into orders (order_id, customer_id, amount) values (1, 10, 99.50), (2, DEFAULT, 149.75), (3, 12, DEFAULT)
+insert into audit_log (event_id, event_type, created_at) select v.id, v.type, CURRENT_TIMESTAMP from (values (1, 'LOGIN'), (2, 'LOGOUT'), (3, 'ERROR')) as v(id, type)
+select * from (values (1, 2, 3), (4, 5, DEFAULT), (DEFAULT, 8, 9)) as t(a, b, c) where a is not null
+update accounts set balance = v.new_balance from (values (101, 5000), (102, 7500), (103, DEFAULT)) as v(account_id, new_balance) where accounts.id = v.account_id
+delete from inventory using (values ('A', 10), ('B', 20), ('C', 30)) as v(sku, qty) where inventory.sku = v.sku and inventory.quantity < v.qty
+select sum(x) from (values (10), (20), (30), (DEFAULT)) as v(x) where x is not null
+insert into metrics (host, cpu, mem) select host, avg(cpu), max(mem) from (values ('h1', 10, 20), ('h1', 20, 30), ('h2', 5, 15)) as v(host, cpu, mem) group by host
+select * from users u where u.id in (select v.user_id from (values (1), (2), (3), (DEFAULT)) as v(user_id) where v.user_id is not null)
+select a, b from (values (1, 2), (3, 4), (5, 6)) as t(a, b) union all select c, d from (values (7, 8), (9, 10)) as s(c, d)
+insert into result_table select * from (values (1, 'ok'), (2, 'fail'), (3, DEFAULT)) as v(code, status) where code > 1
