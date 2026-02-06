@@ -104,6 +104,8 @@
 (?i:EXCEPT)				{return EXCEPT;}
 (?i:DISTINCT)			{return DISTINCT;}
 
+(?i:VALUES)				{return VALUES;}
+
 (?i:SELECT)				{return SELECT;}
 (?i:UNIQUE)				{return UNIQUE;}
 (?i:FROM)				{return FROM;}

@@ -78,12 +78,17 @@
 %type <expr> offset_clause
 %type <expr> limit_clause
 
+%type <dql_query> values_query
+%type <ptr_list> values_rows_list
+
 %type <uval> set_op_mod
 
 %token INTERSECT
 %token UNION
 %token EXCEPT
 %token DISTINCT
+
+%token VALUES
 
 %token SELECT
 %token UNIQUE
@@ -380,10 +385,18 @@ delete_query :
 
 dql_query :
 			select_query 										{$$ = $1;}
+			| values_query 										{$$ = $1;}
 			| dql_query INTERSECT set_op_mod dql_query 			{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_INTERSECT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| dql_query UNION set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_UNION; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| dql_query EXCEPT set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_EXCEPT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| OPEN_BRACKET dql_query CLOSE_BRACKET				{$$ = $2;}
+
+values_query :
+			VALUES values_rows_list 					{$$ = new_dql(VALUES_QUERY); $$->values_query.values = $2;}
+
+values_rows_list :
+			OPEN_BRACKET expr_list OPEN_BRACKET 								{initialize_arraylist(&$$, 1); arraylist* t = malloc(sizeof(arraylist)); (*t) = $2; push_back_to_arraylist(&$$, t);}
+			| values_rows_list COMMA OPEN_BRACKET expr_list OPEN_BRACKET 		{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); arraylist* t = malloc(sizeof(arraylist)); (*t) = $4; push_back_to_arraylist(&($1), t); $$ = $1;}
 
 set_op_mod :
 							{$$ = SQL_RESULT_SET_DISTINCT;}
