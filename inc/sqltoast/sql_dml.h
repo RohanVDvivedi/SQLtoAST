@@ -20,14 +20,9 @@ struct sql_insert
 
 	arraylist column_name_list;
 
-	// if NULL, check the values attribute
+	// NULL in input_data_query here implies inserting a DEFAULT
+	// NULL in values_query here, consider it equivalent to DEFAULT
 	sql_dql* input_data_query;
-
-	// if input_data_query = NULL, then it instead has values expression
-
-	// 2D pointer arraylist of expressions, element element of values is an arraylist, pointing to sql_expression pointer
-	// if any expression is NULL, it is considered to be equivalent to DEFAULT in the sql statement
-	arraylist values;
 };
 
 typedef struct columns_to_be_set columns_to_be_set;

@@ -27,8 +27,6 @@ sql_dml* new_dml(sql_dml_type type)
 
 			dml->insert_query.input_data_query = NULL;
 
-			initialize_arraylist(&(dml->insert_query.values), 0);
-
 			break;
 		}
 		case UPDATE_QUERY :
@@ -96,36 +94,6 @@ void print_dml(const sql_dml* dml)
 					printf(" , ");
 				printf("data( ");
 				print_dql(dml->insert_query.input_data_query);
-				printf(" )");
-				clauses_printed++;
-			}
-			else if(get_element_count_arraylist(&(dml->insert_query.values)) > 0)
-			{
-				if(clauses_printed != 0)
-					printf(" , ");
-				printf("data( ");
-				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.values)); i++)
-				{
-					if(i != 0)
-						printf(" , ");
-					printf("( ");
-					arraylist* row = (arraylist*) get_from_front_of_arraylist(&(dml->insert_query.values), i);
-					for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
-					{
-						if(j != 0)
-							printf(" , ");
-						sql_expression* cell = (sql_expression*) get_from_front_of_arraylist(row, j);
-						if(cell)
-						{
-							printf("( ");
-							print_sql_expr(cell);
-							printf(" )");
-						}
-						else
-							printf("DEFAULT");
-					}
-					printf(" )");
-				}
 				printf(" )");
 				clauses_printed++;
 			}
@@ -262,20 +230,6 @@ void delete_dml(sql_dml* dml)
 
 			if(dml->insert_query.input_data_query)
 				delete_dql(dml->insert_query.input_data_query);
-
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.values)); i++)
-			{
-				arraylist* row = (arraylist*) get_from_front_of_arraylist(&(dml->insert_query.values), i);
-				for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
-				{
-					sql_expression* cell = (sql_expression*) get_from_front_of_arraylist(row, j);
-					if(cell)
-						delete_sql_expr(cell);
-				}
-				deinitialize_arraylist(row);
-				free(row);
-			}
-			deinitialize_arraylist(&(dml->insert_query.values));
 
 			break;
 		}
