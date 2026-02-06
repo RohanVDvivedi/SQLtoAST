@@ -395,8 +395,8 @@ values_query :
 			VALUES values_rows_list 					{$$ = new_dql(VALUES_QUERY); $$->values_query.values = $2;}
 
 values_rows_list :
-			OPEN_BRACKET expr_list CLOSE_BRACKET 								{initialize_arraylist(&$$, 1); arraylist* t = malloc(sizeof(arraylist)); (*t) = $2; push_back_to_arraylist(&$$, t);}
-			| values_rows_list COMMA OPEN_BRACKET expr_list CLOSE_BRACKET 		{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); arraylist* t = malloc(sizeof(arraylist)); (*t) = $4; push_back_to_arraylist(&($1), t); $$ = $1;}
+			OPEN_BRACKET defaultable_expr_list CLOSE_BRACKET 								{initialize_arraylist(&$$, 1); arraylist* t = malloc(sizeof(arraylist)); (*t) = $2; push_back_to_arraylist(&$$, t);}
+			| values_rows_list COMMA OPEN_BRACKET defaultable_expr_list CLOSE_BRACKET 		{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); arraylist* t = malloc(sizeof(arraylist)); (*t) = $4; push_back_to_arraylist(&($1), t); $$ = $1;}
 
 set_op_mod :
 							{$$ = SQL_RESULT_SET_DISTINCT;}
