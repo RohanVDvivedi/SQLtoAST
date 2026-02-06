@@ -1,7 +1,7 @@
 
 PICKED TASKS
 
-* make a function to make queries flatten their operators in sql expressions
+* flatten function for dql and dml functions
 
 * add %destructor rules
 
@@ -15,6 +15,10 @@ DDL (create alter drop)
  * start with drop table, database and index queries
 
 * add case and when statements in sql expression for parse tree
+
+* add using and with clauses/statements
+* add column aliases after table alias like
+ * select * from (select * from v) as t(a,b,c)
 
 * flatten a - b expression into a + (-b) as flat addition list, if either a or b is a constant, do that same for a/b
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
