@@ -273,7 +273,30 @@ void print_dql(const sql_dql* dql)
 		}
 		case VALUES_QUERY :
 		{
-			// TODO
+			printf("values ( ");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->values_query.values)); i++)
+			{
+				if(i != 0)
+					printf(" , ");
+				const arraylist* row = get_from_front_of_arraylist(&(dql->values_query.values), i);
+				printf("( ");
+				for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
+				{
+					if(j != 0)
+						printf(" , ");
+					const sql_expression* expr = get_from_front_of_arraylist(row, j);
+					if(expr == NULL)
+						printf("DEFAULT");
+					else
+					{
+						printf("( ");
+						print_sql_expr(expr);
+						printf(" )");
+					}
+				}
+				printf(" )");
+			}
+			printf(" )");
 			break;
 		}
 		case SET_OPERATION :
@@ -418,7 +441,22 @@ void delete_dql(sql_dql* dql)
 		}
 		case VALUES_QUERY :
 		{
-			// TODO
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->values_query.values)); i++)
+			{
+				arraylist* row = (arraylist*) get_from_front_of_arraylist(&(dql->values_query.values), i);
+				for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
+				{
+					sql_expression* expr = (sql_expression*) get_from_front_of_arraylist(row, j);
+					if(expr != NULL)
+					{
+						delete_sql_expr(expr);
+						free(expr);
+					}
+				}
+				deinitialize_arraylist(row);
+				free(row);
+			}
+			deinitialize_arraylist(&(dql->values_query.values));
 			break;
 		}
 		case SET_OPERATION :
