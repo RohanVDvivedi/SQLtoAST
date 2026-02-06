@@ -448,10 +448,7 @@ void delete_dql(sql_dql* dql)
 				{
 					sql_expression* expr = (sql_expression*) get_from_front_of_arraylist(row, j);
 					if(expr != NULL)
-					{
 						delete_sql_expr(expr);
-						free(expr);
-					}
 				}
 				deinitialize_arraylist(row);
 				free(row);
