@@ -16,8 +16,8 @@ int main()
 
 	if(sqlast)
 	{
-		print_sql(sqlast);
-		printf("\n\n");
+		/*print_sql(sqlast);
+		printf("\n\n");*/
 
 		flatten_exprs_sql(sqlast);
 		
