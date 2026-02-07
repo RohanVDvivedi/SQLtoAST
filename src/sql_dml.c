@@ -212,6 +212,48 @@ void print_dml(const sql_dml* dml)
 	}
 }
 
+void flatten_exprs_dml(sql_dml* dml)
+{
+	switch(dml->type)
+	{
+		case INSERT_QUERY :
+		{
+			if(dml->insert_query.input_data_query)
+				flatten_exprs_dql(dml->insert_query.input_data_query);
+
+			break;
+		}
+		case UPDATE_QUERY :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->update_query.values_to_be_set)); i++)
+			{
+				columns_to_be_set* c = (columns_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
+				for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
+				{
+					sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
+					if(value_expr)
+					{
+						value_expr = flatten_similar_associative_operators_in_sql_expression(value_expr);
+						set_from_front_in_arraylist(&(c->value_exprs), value_expr, j);
+					}
+				}
+			}
+
+			if(dml->update_query.where_expr)
+				dml->update_query.where_expr = flatten_similar_associative_operators_in_sql_expression(dml->update_query.where_expr);
+
+			break;
+		}
+		case DELETE_QUERY :
+		{
+			if(dml->delete_query.where_expr)
+				dml->delete_query.where_expr = flatten_similar_associative_operators_in_sql_expression(dml->delete_query.where_expr);
+
+			break;
+		}
+	}
+}
+
 void delete_dml(sql_dml* dml)
 {
 	switch(dml->type)

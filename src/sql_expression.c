@@ -265,7 +265,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_SUB_QUERY :
 		case SQL_EXISTS :
 		{
-			;//flatten_similar_associative_operators_in_sql_dql_query(expr->sub_query);
+			flatten_exprs_dql(expr->sub_query);
 			return expr;
 		}
 	}

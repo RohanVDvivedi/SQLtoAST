@@ -25,6 +25,33 @@ sql* parse_sql(stream* strm, int* error)
 	}
 }
 
+void flatten_exprs_sqlast(sql* sqlast)
+{
+	switch(sqlast->type)
+	{
+		case DQL :
+		{
+			flatten_exprs_dql(sqlast->dql_query);
+			break;
+		}
+		case DML :
+		{
+			flatten_exprs_dml(sqlast->dml_query);
+			break;
+		}
+		case DDL :
+		{
+			//flatten_exprs_ddl(sqlast->ddl_query);
+			break;
+		}
+		case TCL :
+		{
+			// nothing to be done here
+			break;
+		}
+	}
+}
+
 void print_sql(const sql* sqlast)
 {
 	switch(sqlast->type)

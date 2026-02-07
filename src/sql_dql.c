@@ -44,6 +44,127 @@ sql_dql* new_dql(sql_dql_type type)
 	return dql;
 }
 
+static void flatten_exprs_relation_input(relation_input* ri_p)
+{
+	switch(ri_p->type)
+	{
+		case RELATION :
+		{
+			break;
+		}
+		case SUB_QUERY :
+		{
+			flatten_exprs_dql(ri_p->sub_query);
+			break;
+		}
+		case FUNCTION :
+		{
+			ri_p->function_call = flatten_similar_associative_operators_in_sql_expression(ri_p->function_call);
+			break;
+		}
+	}
+}
+
+void flatten_exprs_dql(sql_dql* dql)
+{
+	switch(dql->type)
+	{
+		case SELECT_QUERY :
+		{
+			if(get_element_count_arraylist(&(dql->select_query.projections)) > 0)
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
+				{
+					projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
+					p->projection_expr = flatten_similar_associative_operators_in_sql_expression(p->projection_expr);
+				}
+			}
+
+			flatten_exprs_relation_input(&(dql->select_query.base_input));
+
+			if(get_element_count_arraylist(&(dql->select_query.joins_with)) > 0)
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
+				{
+					join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
+					flatten_exprs_relation_input(&(j->input));
+					switch(j->condition_type)
+					{
+						case NO_JOIN_CONDITION :
+							break;
+						case NATURAL_JOIN_CONDITION :
+							break;
+						case ON_EXPR_JOIN_CONDITION :
+						{
+							j->on_expr = flatten_similar_associative_operators_in_sql_expression(j->on_expr);
+							break;
+						}
+						case USING_JOIN_CONDITION :
+							break;
+					}
+				}
+			}
+
+			if(dql->select_query.where_expr)
+				dql->select_query.where_expr = flatten_similar_associative_operators_in_sql_expression(dql->select_query.where_expr);
+
+			if(get_element_count_arraylist(&(dql->select_query.group_by)) > 0)
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.group_by)); i++)
+				{
+					sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
+					g = flatten_similar_associative_operators_in_sql_expression(g);
+					set_from_front_in_arraylist(&(dql->select_query.group_by), g, i);
+				}
+			}
+
+			
+			if(dql->select_query.having_expr)
+				dql->select_query.having_expr = flatten_similar_associative_operators_in_sql_expression(dql->select_query.having_expr);
+
+			if(get_element_count_arraylist(&(dql->select_query.ordered_by)) > 0)
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
+				{
+					order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
+					o->ordering_expr = flatten_similar_associative_operators_in_sql_expression(o->ordering_expr);
+				}
+			}
+
+			if(dql->select_query.offset_expr)
+				dql->select_query.offset_expr = flatten_similar_associative_operators_in_sql_expression(dql->select_query.offset_expr);
+
+			if(dql->select_query.limit_expr)
+				dql->select_query.limit_expr = flatten_similar_associative_operators_in_sql_expression(dql->select_query.limit_expr);
+
+			break;
+		}
+		case VALUES_QUERY :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->values_query.values)); i++)
+			{
+				arraylist* row = (arraylist*) get_from_front_of_arraylist(&(dql->values_query.values), i);
+				for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
+				{
+					sql_expression* expr = (sql_expression*) get_from_front_of_arraylist(row, j);
+					if(expr != NULL)
+					{
+						expr = flatten_similar_associative_operators_in_sql_expression(expr);
+						set_from_front_in_arraylist(row, expr, j);
+					}
+				}
+			}
+			break;
+		}
+		case SET_OPERATION :
+		{
+			flatten_exprs_dql(dql->set_operation.left);
+			flatten_exprs_dql(dql->set_operation.right);
+			break;
+		}
+	}
+}
+
 static void print_relation_input(const relation_input* ri_p)
 {
 	switch(ri_p->type)
