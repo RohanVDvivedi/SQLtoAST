@@ -17,8 +17,8 @@ int main()
 	if(sqlast)
 	{
 		print_sql(sqlast);
-		// call flatten_similar_associative_operators_in_sql_expression on all sql expressions
-		//print_sql(sqlast);
+		flatten_exprs_sql(sqlast);
+		print_sql(sqlast);
 		printf("\n\n");
 		printf("error = %d\n", error);
 		delete_sql(sqlast);

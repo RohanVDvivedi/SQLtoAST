@@ -25,7 +25,7 @@ sql* parse_sql(stream* strm, int* error)
 	}
 }
 
-void flatten_exprs_sqlast(sql* sqlast)
+void flatten_exprs_sql(sql* sqlast)
 {
 	switch(sqlast->type)
 	{
