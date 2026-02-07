@@ -190,12 +190,6 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_SUB :
 		case SQL_DIV :
 		case SQL_MOD :
-		case SQL_GT :
-		case SQL_GTE :
-		case SQL_LT :
-		case SQL_LTE :
-		case SQL_EQ :
-		case SQL_NEQ :
 		case SQL_BITAND :
 		case SQL_BITOR :
 		case SQL_BITXOR :
@@ -206,6 +200,21 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		{
 			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
 			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+			return expr;
+		}
+
+		case SQL_GT :
+		case SQL_GTE :
+		case SQL_LT :
+		case SQL_LTE :
+		case SQL_EQ :
+		case SQL_NEQ :
+		{
+			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+			else
+				flatten_exprs_dql(expr->right_sub_query);
 			return expr;
 		}
 
