@@ -468,7 +468,8 @@ join_clause :
 
 
 join_type :
-			INNER outer_opt 			{$$ = INNER_JOIN;}
+			 							{$$ = INNER_JOIN;}
+			| INNER 					{$$ = INNER_JOIN;}
 			| LEFT outer_opt 			{$$ = LEFT_JOIN;}
 			| RIGHT outer_opt 			{$$ = RIGHT_JOIN;}
 			| FULL outer_opt 			{$$ = FULL_JOIN;}
