@@ -17,10 +17,15 @@ int main()
 	if(sqlast)
 	{
 		print_sql(sqlast);
+		printf("\n\n");
+
 		flatten_exprs_sql(sqlast);
+		
 		print_sql(sqlast);
 		printf("\n\n");
+		
 		printf("error = %d\n", error);
+		
 		delete_sql(sqlast);
 	}
 	else
