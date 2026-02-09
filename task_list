@@ -1,7 +1,23 @@
 
 PICKED TASKS
 
+* implement case statements
+  * CASE expr_opt
+  		WHEN expr THEN expr
+  		...
+  		ELSE expr -> if ELSE not present it is taken as NULL
+  	END
+  * SQL_CASE type sql_expression
+  * {
+  		sql_expression* case_expr; // may be NULL, if absent
+  		arraylist when_exprs;
+  		arraylist then_exprs;
+  		sql_expression* else_expr; // may be NULL, if absent
+  }
+
 * add %destructor rules
+%destructor { free($$); } non_terminal/terminal
+%destructor { delete_temp($$); } unioned_type
 
 
 TO BE PICKED TASKS
@@ -11,8 +27,6 @@ DDL (create alter drop)
  * start with create table, database and index queries
  * start with alter table, database and index querires
  * start with drop table, database and index queries
-
-* add case and when statements in sql expression for parse tree
 
 * add using and with clauses/statements
 * add column aliases after table alias like
