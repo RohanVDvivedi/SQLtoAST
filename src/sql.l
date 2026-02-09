@@ -77,6 +77,11 @@
 (?i:UNKNOWN)			{return UNKNOWN;}
 (?i:NULL)				{return _NULL_;}
 
+(?i:CASE)				{return CASE;}
+(?i:WHEN)				{return WHEN;}
+(?i:THEN)				{return THEN;}
+(?i:ELSE)				{return ELSE;}
+
 (?i:BOOL)				{return BOOL;}
 (?i:BOOLEAN)			{return BOOL;}
 (?i:BIT)				{return BIT;}

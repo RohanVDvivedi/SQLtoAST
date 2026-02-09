@@ -44,6 +44,8 @@
 
 	arraylist ptr_list;
 
+	arraylist ptr_lists[2]; // useful for list of when and then statements
+
 	relation_input rel_input;
 
 	sql_type data_type;
@@ -251,6 +253,11 @@
 
 %token CAST
 %token AS
+
+%token CASE
+%token WHEN
+%token THEN
+%token ELSE
 
 /* sql type names and needed tokens */
 
