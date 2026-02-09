@@ -1,5 +1,7 @@
 #include<sqltoast/sql_expression.h>
 
+#include<cutlery/cutlery_math.h>
+
 #include<stdlib.h>
 #include<stdio.h>
 
@@ -116,6 +118,17 @@ sql_expression* new_const_non_valued_sql_expr(sql_expression_type type)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
+	return expr;
+}
+
+sql_expression* new_case_sql_expr(sql_expression* case_expr, arraylist when_exprs, arraylist then_exprs, sql_expression* else_expr)
+{
+	sql_expression* expr = malloc(sizeof(sql_expression));
+	expr->type = SQL_CASE;
+	expr->case_expr = case_expr;
+	expr->when_exprs = when_exprs;
+	expr->then_exprs = then_exprs;
+	expr->else_expr = else_expr;
 	return expr;
 }
 
@@ -275,6 +288,27 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_EXISTS :
 		{
 			flatten_exprs_dql(expr->sub_query);
+			return expr;
+		}
+
+		case SQL_CASE :
+		{
+			if(expr->case_expr)
+				expr->case_expr = flatten_similar_associative_operators_in_sql_expression(expr->case_expr);
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
+			{
+				sql_expression* x = (sql_expression*) get_from_front_of_arraylist(&(expr->when_exprs), i);
+				x = flatten_similar_associative_operators_in_sql_expression(x);
+				set_from_front_in_arraylist(&(expr->when_exprs), x, i);
+			}
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->then_exprs)); i++)
+			{
+				sql_expression* x = (sql_expression*) get_from_front_of_arraylist(&(expr->then_exprs), i);
+				x = flatten_similar_associative_operators_in_sql_expression(x);
+				set_from_front_in_arraylist(&(expr->then_exprs), x, i);
+			}
+			if(expr->else_expr)
+				expr->else_expr = flatten_similar_associative_operators_in_sql_expression(expr->else_expr);
 			return expr;
 		}
 	}
@@ -742,6 +776,52 @@ void print_sql_expr(const sql_expression* expr)
 			printf(" ) )");
 			break;
 		}
+
+		case SQL_CASE :
+		{
+			int clauses_printed = 0;
+			printf("( CASE( ");
+			if(expr->case_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				print_sql_expr(expr->case_expr);
+				clauses_printed++;
+			}
+			for(cy_uint i = 0; i < min(get_element_count_arraylist(&(expr->when_exprs)), get_element_count_arraylist(&(expr->then_exprs))); i++)
+			{
+				{
+					const sql_expression* when = get_from_front_of_arraylist(&(expr->when_exprs), i);
+					if(clauses_printed != 0)
+						printf(" , ");
+					printf("WHEN( ");
+					print_sql_expr(when);
+					printf(" )");
+					clauses_printed++;
+				}
+
+				{
+					const sql_expression* then = get_from_front_of_arraylist(&(expr->then_exprs), i);
+					if(clauses_printed != 0)
+						printf(" , ");
+					printf("THEN( ");
+					print_sql_expr(then);
+					printf(" )");
+					clauses_printed++;
+				}
+			}
+			if(expr->else_expr)
+			{
+				if(clauses_printed != 0)
+					printf(" , ");
+				printf("ELSE( ");
+				print_sql_expr(expr->else_expr);
+				printf(" )");
+				clauses_printed++;
+			}
+			printf(" ) )");
+			break;
+		}
 	}
 }
 
@@ -861,6 +941,27 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_EXISTS :
 		{
 			delete_dql(expr->sub_query);
+			break;
+		}
+
+		case SQL_CASE :
+		{
+			if(expr->case_expr)
+				delete_sql_expr(expr->case_expr);
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
+			{
+				sql_expression* x = (sql_expression*) get_from_front_of_arraylist(&(expr->when_exprs), i);
+				delete_sql_expr(x);
+			}
+			deinitialize_arraylist(&(expr->when_exprs));
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->then_exprs)); i++)
+			{
+				sql_expression* x = (sql_expression*) get_from_front_of_arraylist(&(expr->then_exprs), i);
+				delete_sql_expr(x);
+			}
+			deinitialize_arraylist(&(expr->then_exprs));
+			if(expr->else_expr)
+				delete_sql_expr(expr->else_expr);
 			break;
 		}
 	}

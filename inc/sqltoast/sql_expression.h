@@ -86,6 +86,9 @@ enum sql_expression_type
 
 	SQL_SUB_QUERY,
 	SQL_EXISTS,
+
+	// case when then else statements
+	SQL_CASE,
 };
 
 typedef enum sql_cmp_quantifier sql_cmp_quantifier;
@@ -169,6 +172,17 @@ struct sql_expression
 		{
 			sql_dql* sub_query;
 		};
+
+		struct
+		{
+			sql_expression* case_expr; // NULL, if absent
+
+			arraylist when_exprs;
+
+			arraylist then_exprs;
+
+			sql_expression* else_expr; // NULL, if absent
+		};
 	};
 };
 
@@ -198,6 +212,8 @@ sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
 
 // for unknown, true, false and null
 sql_expression* new_const_non_valued_sql_expr(sql_expression_type type);
+
+sql_expression* new_case_sql_expr(sql_expression* case_expr, arraylist when_exprs, arraylist then_exprs, sql_expression* else_expr);
 
 // the below function destroys the old tree and returns a new one
 sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expression* expr);
