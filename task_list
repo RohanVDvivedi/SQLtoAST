@@ -1,20 +1,6 @@
 
 PICKED TASKS
 
-* implement case statements
-  * CASE expr_opt
-  		WHEN expr THEN expr
-  		...
-  		ELSE expr -> if ELSE not present it is taken as NULL
-  	END
-  * SQL_CASE type sql_expression
-  * {
-  		sql_expression* case_expr; // may be NULL, if absent
-  		arraylist when_exprs;
-  		arraylist then_exprs;
-  		sql_expression* else_expr; // may be NULL, if absent
-  }
-
 * add %destructor rules
 %destructor { free($$); } non_terminal/terminal
 %destructor { delete_temp($$); } unioned_type
