@@ -127,3 +127,13 @@ insert into metrics (host, cpu, mem) select host, avg(cpu), max(mem) from (value
 select * from users u where u.id in (select v.user_id from (values (1), (2), (3), (DEFAULT)) as v where v.user_id is not null)
 select a, b from (values (1, 2), (3, 4), (5, 6)) as t union all select c, d from (values (7, 8), (9, 10)) as s
 insert into result_table select * from (values (1, 'ok'), (2, 'fail'), (3, DEFAULT)) as v where code > 1
+SELECT a, CASE WHEN b > 10 AND c < 5 OR d = 3 THEN e + f * 2 ELSE e / (f + 1) END AS x FROM t
+SELECT CASE WHEN a + b * c > d THEN a ELSE b END + CASE WHEN c > 0 THEN d / c ELSE 0 END AS r FROM t
+SELECT a FROM t WHERE CASE WHEN b > 0 THEN c * d ELSE e + f END > g AND h < i OR j = k
+SELECT a, SUM(CASE WHEN b > c AND (d < e OR f = g) THEN h ELSE i END) FROM t GROUP BY a
+SELECT a FROM t GROUP BY a HAVING SUM(CASE WHEN b * c > d + e THEN f ELSE g END) > h * 2
+SELECT a, CASE WHEN b > c THEN CASE WHEN d < e THEN f ELSE g END ELSE h END FROM t
+SELECT a FROM t ORDER BY CASE WHEN b > c AND d < e OR f = g THEN h ELSE i END + j * k
+SELECT CASE WHEN a > b THEN c ELSE d END * e + CASE WHEN f < g THEN h ELSE i END / j FROM t
+SELECT a FROM t WHERE (b + CASE WHEN c > d THEN e ELSE f END) * g > h AND i < j
+SELECT a, COUNT(*) FROM t GROUP BY a HAVING COUNT(*) > CASE WHEN SUM(b) > c * d THEN e ELSE f + g END
