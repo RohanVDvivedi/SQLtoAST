@@ -81,6 +81,7 @@
 (?i:WHEN)				{return WHEN;}
 (?i:THEN)				{return THEN;}
 (?i:ELSE)				{return ELSE;}
+(?i:END)				{return END;}
 
 (?i:BOOL)				{return BOOL;}
 (?i:BOOLEAN)			{return BOOL;}

@@ -184,6 +184,8 @@
 %type <expr> bool_literal
 %type <expr> func_expr
 %type <expr> sub_query_expr
+%type <ptr_lists> when_then_lists
+%type <expr> else_opt
 
 %type <uval> aggregate_distinct_opt
 
@@ -258,6 +260,7 @@
 %token WHEN
 %token THEN
 %token ELSE
+%token END
 
 /* sql type names and needed tokens */
 
@@ -601,6 +604,17 @@ expr :
 			| sub_query_expr 																		{$$ = $1;}
 
 			| EXISTS OPEN_BRACKET dql_query CLOSE_BRACKET 											{$$ = new_sub_query_sql_expr(SQL_EXISTS, $3);}
+
+			| CASE      when_then_lists else_opt END 												{$$ = new_case_sql_expr(NULL, $2[0], $2[1], $3);}
+			| CASE expr when_then_lists else_opt END 												{$$ = new_case_sql_expr($2, $3[0], $3[1], $4);}
+
+when_then_lists :
+			WHEN expr THEN expr 						{initialize_expr_list(&($$[0])); initialize_expr_list(&($$[1])); insert_in_expr_list(&($$[0]), $2); insert_in_expr_list(&($$[1]), $4);}
+			| when_then_lists WHEN expr THEN expr 		{insert_in_expr_list(&($$[0]), $3); insert_in_expr_list(&($$[1]), $5);}
+
+else_opt :
+								{$$ = NULL;}
+			| ELSE expr 		{$$ = $2;}
 
 cmp_rhs_quantifier :
 			ANY 					{$$ = SQL_CMP_ANY;}
