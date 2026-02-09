@@ -137,3 +137,6 @@ SELECT a FROM t ORDER BY CASE WHEN b > c AND d < e OR f = g THEN h ELSE i END + 
 SELECT CASE WHEN a > b THEN c ELSE d END * e + CASE WHEN f < g THEN h ELSE i END / j FROM t
 SELECT a FROM t WHERE (b + CASE WHEN c > d THEN e ELSE f END) * g > h AND i < j
 SELECT a, COUNT(*) FROM t GROUP BY a HAVING COUNT(*) > CASE WHEN SUM(b) > c * d THEN e ELSE f + g END
+SELECT a.dept_id, SUM(CASE WHEN a.salary > (SELECT AVG(b.salary) FROM emp b WHERE b.dept_id = a.dept_id) THEN a.salary * 1.1 ELSE a.salary END) FROM emp a GROUP BY a.dept_id HAVING COUNT(DISTINCT CASE WHEN a.status = 'ACTIVE' AND (a.level > 3 OR a.role = 'LEAD') THEN a.emp_id ELSE NULL END) > 2
+SELECT DISTINCT t.category, COUNT(*) FROM orders t WHERE (CASE WHEN t.amount > 1000 THEN 1 WHEN t.amount BETWEEN 500 AND 1000 AND t.priority = 'HIGH' THEN 1 ELSE 0 END) = 1 AND t.customer_id IN (SELECT c.id FROM customers c WHERE c.region = 'EU' OR (c.vip = TRUE AND c.joined_year < 2020)) GROUP BY t.category
+SELECT ALL d.id, SUM(CASE WHEN e.score >= 90 THEN 5 WHEN e.score >= 75 THEN 3 WHEN e.score >= 50 THEN 1 ELSE 0 END) FROM dept d JOIN emp e ON d.id = e.dept_id GROUP BY d.id HAVING SUM(e.score) > ALL (SELECT AVG(x.score) FROM emp x GROUP BY x.dept_id) UNION ALL SELECT DISTINCT d2.id, COUNT(*) FROM dept d2 JOIN emp e2 ON d2.id = e2.dept_id GROUP BY d2.id
