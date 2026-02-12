@@ -88,21 +88,26 @@ void delete_dstring(dstring* s);
 /* SELECT query */
 %type <dql_query> select_query
 %type <ptr_list> projection_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_projection); } projection_list
 %type <projection> projection
 %type <rel_input> rel_input
 %type <ptr_list> join_clauses
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_join_with); } join_clauses
 %type <join_with> join_clause
 %type <expr> where_clause
 %type <ptr_list> group_by_clause
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_sql_expr); } group_by_clause
 %type <expr> having_clause
 %type <ptr_list> order_by_clause
 %type <ptr_list> order_by_expr_and_dir_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_order_by); } order_by_clause order_by_expr_and_dir_list
 %type <order_by> order_by_expr_and_dir
 %type <expr> offset_clause
 %type <expr> limit_clause
 
 %type <dql_query> values_query
 %type <ptr_list> values_rows_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_sql_expr); } values_rows_list
 
 %type <uval> set_op_mod
 
@@ -141,6 +146,7 @@ void delete_dstring(dstring* s);
 %type <uval> lateral_opt
 %type <uval> join_type
 %type <ptr_list> identifier_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_dstring); } identifier_list
 
 %token ASC
 %token DESC
@@ -158,12 +164,14 @@ void delete_dstring(dstring* s);
 %type <dml_query> update_query
 %type <ptr_list> set_clause
 %type <ptr_list> attribute_assignment_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_columns_to_be_set); } set_clause attribute_assignment_list
 %type <attribute_assignment> attribute_assignment
 
 %token UPDATE
 %token DEFAULT
 
 %type <ptr_list> defaultable_expr_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_sql_expr); } defaultable_expr_list
 %type <expr> defaultable_expr
 
 /* DELETE query */
@@ -202,10 +210,12 @@ void delete_dstring(dstring* s);
 /* SQL EXPRESSION */
 %type <expr> expr
 %type <ptr_list> expr_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_sql_expr); } expr_list
 %type <expr> bool_literal
 %type <expr> func_expr
 %type <expr> sub_query_expr
 %type <ptr_lists> when_then_lists
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$[0]), (void(*)(void*))delete_sql_expr); delete_all_and_deinitialize_arraylist_1d(&($$[1]), (void(*)(void*))delete_sql_expr); } when_then_lists
 %type <expr> else_opt
 
 %type <uval> aggregate_distinct_opt
@@ -631,7 +641,7 @@ expr :
 
 when_then_lists :
 			WHEN expr THEN expr 						{initialize_expr_list(&($$[0])); initialize_expr_list(&($$[1])); insert_in_expr_list(&($$[0]), $2); insert_in_expr_list(&($$[1]), $4);}
-			| when_then_lists WHEN expr THEN expr 		{insert_in_expr_list(&($$[0]), $3); insert_in_expr_list(&($$[1]), $5);}
+			| when_then_lists WHEN expr THEN expr 		{insert_in_expr_list(&($1[0]), $3); insert_in_expr_list(&($1[1]), $5); $$[0] = $1[0]; $$[1] = $1[1];}
 
 else_opt :
 								{$$ = NULL;}

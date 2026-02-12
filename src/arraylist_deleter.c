@@ -8,7 +8,7 @@ void delete_all_and_deinitialize_arraylist_1d(arraylist* a, void (*delete_object
 	{
 		void* o = (void*) get_from_front_of_arraylist(a, i);
 		if(o)
-			delete_join_with(o);
+			delete_object(o);
 	}
 	deinitialize_arraylist(a);
 }
