@@ -712,6 +712,8 @@ type_with_or_without_timezone : 						{$$.with_time_zone = 0;}
 
 /* Error handling */
 int sqlerror(void *scanner, struct sql** sql_ast, const char *msg) {
+	if((*sql_ast)) // there could be a partial tree, so we free it before reporting the error, this is required because our root has no rule
+		delete_sql((*sql_ast));
 	(*sql_ast) = NULL;
 	fprintf(stderr, "Error: %s\n", msg);
 	return 0;
