@@ -1,9 +1,4 @@
-
 PICKED TASKS
-
-* add %destructor rules
-%destructor { free($$); } non_terminal/terminal
-%destructor { delete_temp($$); } unioned_type
 
 
 TO BE PICKED TASKS
