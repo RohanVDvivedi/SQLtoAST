@@ -462,7 +462,7 @@ void print_dql(const sql_dql* dql)
 	}
 }
 
-static void destroy_relation_input(relation_input* ri_p)
+void destroy_relation_input(relation_input* ri_p)
 {
 	switch(ri_p->type)
 	{

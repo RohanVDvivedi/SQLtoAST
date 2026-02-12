@@ -8,6 +8,7 @@
 // destructor functions only needed here and nowhere else
 void delete_columns_to_be_set(columns_to_be_set* c);
 void delete_projection(projection* p);
+void destroy_relation_input(relation_input* ri_p);
 %}
 
 %code requires {
@@ -71,7 +72,7 @@ void delete_projection(projection* p);
 %destructor { delete_join_with($$); } <join_with>
 %destructor { delete_order_by($$); } <order_by>
 %destructor { delete_sql_expr($$); } <expr>
-%destructor { deinit_rel_input(&($$)); } <rel_input>
+%destructor { destroy_relation_input(&($$)); } <rel_input>
 %destructor { deinit_dstring(&($$)); } <sval>
 
 /* SQL */
