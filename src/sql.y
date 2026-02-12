@@ -4,6 +4,10 @@
 #include<string.h>
 
 #include<sqltoast/sqltoast.h>
+
+// destructor functions only needed here and nowhere else
+void delete_columns_to_be_set(columns_to_be_set* c);
+
 %}
 
 %code requires {
@@ -63,7 +67,7 @@
 %destructor { delete_dml($$); } <dml_query>
 %destructor { delete_columns_to_be_set($$); } <attribute_assignment>
 %destructor { delete_tcl($$); } <tcl_cmd>
-%destructor { delete_projection($$)); } <projection>
+%destructor { delete_projection($$); } <projection>
 %destructor { delete_join_with($$); } <join_with>
 %destructor { delete_order_by($$); } <order_by>
 %destructor { delete_sql_expr($$); } <expr>
