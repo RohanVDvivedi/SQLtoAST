@@ -1,5 +1,7 @@
 #include<sqltoast/sql_dql.h>
 
+#include<sqltoast/arraylist_deleter.h>
+
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -531,41 +533,21 @@ void delete_dql(sql_dql* dql)
 	{
 		case SELECT_QUERY :
 		{
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
-			{
-				projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
-				delete_projection(p);
-			}
-			deinitialize_arraylist(&(dql->select_query.projections));
+			delete_all_and_deinitialize_arraylist_1d(&(dql->select_query.projections), (void(*)(void*))delete_projection);
 
 			destroy_relation_input(&(dql->select_query.base_input));
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
-			{
-				join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
-				delete_join_with(j);
-			}
-			deinitialize_arraylist(&(dql->select_query.joins_with));
+			delete_all_and_deinitialize_arraylist_1d(&(dql->select_query.joins_with), (void(*)(void*))delete_join_with);
 
 			if(dql->select_query.where_expr)
 				delete_sql_expr(dql->select_query.where_expr);
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.group_by)); i++)
-			{
-				sql_expression* grouping_expr = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
-				delete_sql_expr(grouping_expr);
-			}
-			deinitialize_arraylist(&(dql->select_query.group_by));
+			delete_all_and_deinitialize_arraylist_1d(&(dql->select_query.group_by), (void(*)(void*))delete_sql_expr);
 
 			if(dql->select_query.having_expr)
 				delete_sql_expr(dql->select_query.having_expr);
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
-			{
-				order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
-				delete_order_by(o);
-			}
-			deinitialize_arraylist(&(dql->select_query.ordered_by));
+			delete_all_and_deinitialize_arraylist_1d(&(dql->select_query.ordered_by), (void(*)(void*))delete_order_by);
 
 			if(dql->select_query.offset_expr)
 				delete_sql_expr(dql->select_query.offset_expr);
@@ -577,19 +559,7 @@ void delete_dql(sql_dql* dql)
 		}
 		case VALUES_QUERY :
 		{
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->values_query.values)); i++)
-			{
-				arraylist* row = (arraylist*) get_from_front_of_arraylist(&(dql->values_query.values), i);
-				for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
-				{
-					sql_expression* expr = (sql_expression*) get_from_front_of_arraylist(row, j);
-					if(expr != NULL)
-						delete_sql_expr(expr);
-				}
-				deinitialize_arraylist(row);
-				free(row);
-			}
-			deinitialize_arraylist(&(dql->values_query.values));
+			delete_all_and_deinitialize_arraylist_2d(&(dql->values_query.values), (void(*)(void*))delete_sql_expr);
 			break;
 		}
 		case SET_OPERATION :

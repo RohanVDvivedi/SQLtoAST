@@ -1,5 +1,7 @@
 #include<sqltoast/sql_dml.h>
 
+#include<sqltoast/arraylist_deleter.h>
+
 #include<stdlib.h>
 #include<stdio.h>
 
@@ -254,7 +256,30 @@ void flatten_exprs_dml(sql_dml* dml)
 	}
 }
 
-void delete_columns_to_be_set(columns_to_be_set* c);
+void delete_columns_to_be_set(columns_to_be_set* c)
+{
+	for(cy_uint j = 0; j < get_element_count_arraylist(&(c->column_names)); j++)
+	{
+		dstring* column_name = (dstring*) get_from_front_of_arraylist(&(c->column_names), j);
+		deinit_dstring(column_name);
+		free(column_name);
+	}
+	deinitialize_arraylist(&(c->column_names));
+	for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
+	{
+		sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
+		if(value_expr)
+			delete_sql_expr(value_expr);
+	}
+	deinitialize_arraylist(&(c->value_exprs));
+	free(c);
+}
+
+void delete_dstring(dstring* d)
+{
+	deinit_dstring(d);
+	free(d);
+}
 
 void delete_dml(sql_dml* dml)
 {
@@ -264,13 +289,7 @@ void delete_dml(sql_dml* dml)
 		{
 			deinit_dstring(&(dml->insert_query.table_name));
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.column_name_list)); i++)
-			{
-				dstring* col_name = (dstring*) get_from_front_of_arraylist(&(dml->insert_query.column_name_list), i);
-				deinit_dstring(col_name);
-				free(col_name);
-			}
-			deinitialize_arraylist(&(dml->insert_query.column_name_list));
+			delete_all_and_deinitialize_arraylist_1d(&(dml->insert_query.column_name_list), (void(*)(void*))delete_dstring);
 
 			if(dml->insert_query.input_data_query)
 				delete_dql(dml->insert_query.input_data_query);
@@ -281,12 +300,7 @@ void delete_dml(sql_dml* dml)
 		{
 			deinit_dstring(&(dml->update_query.table_name));
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->update_query.values_to_be_set)); i++)
-			{
-				columns_to_be_set* c = (columns_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
-				delete_columns_to_be_set(c);
-			}
-			deinitialize_arraylist(&(dml->update_query.values_to_be_set));
+			delete_all_and_deinitialize_arraylist_1d(&(dml->update_query.values_to_be_set), (void(*)(void*))delete_columns_to_be_set);
 
 			if(dml->update_query.where_expr)
 				delete_sql_expr(dml->update_query.where_expr);
@@ -305,23 +319,4 @@ void delete_dml(sql_dml* dml)
 	}
 
 	free(dml);
-}
-
-void delete_columns_to_be_set(columns_to_be_set* c)
-{
-	for(cy_uint j = 0; j < get_element_count_arraylist(&(c->column_names)); j++)
-	{
-		dstring* column_name = (dstring*) get_from_front_of_arraylist(&(c->column_names), j);
-		deinit_dstring(column_name);
-		free(column_name);
-	}
-	deinitialize_arraylist(&(c->column_names));
-	for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
-	{
-		sql_expression* value_expr = (sql_expression*) get_from_front_of_arraylist(&(c->value_exprs), j);
-		if(value_expr)
-			delete_sql_expr(value_expr);
-	}
-	deinitialize_arraylist(&(c->value_exprs));
-	free(c);
 }
