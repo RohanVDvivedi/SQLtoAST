@@ -492,6 +492,33 @@ void delete_projection(projection* p)
 	free(p);
 }
 
+void delete_join_with(join_with* j)
+{
+	destroy_relation_input(&(j->input));
+	switch(j->condition_type)
+	{
+		case ON_EXPR_JOIN_CONDITION :
+		{
+			delete_sql_expr(j->on_expr);
+			break;
+		}
+		case USING_JOIN_CONDITION :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
+			{
+				dstring* col = (dstring*) get_from_front_of_arraylist(&(j->using_cols), i);
+				deinit_dstring(col);
+				free(col);
+			}
+			deinitialize_arraylist(&(j->using_cols));
+			break;
+		}
+		default :
+			break;
+	}
+	free(j);
+}
+
 void delete_dql(sql_dql* dql)
 {
 	switch(dql->type)
@@ -510,29 +537,7 @@ void delete_dql(sql_dql* dql)
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
 			{
 				join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
-				destroy_relation_input(&(j->input));
-				switch(j->condition_type)
-				{
-					case ON_EXPR_JOIN_CONDITION :
-					{
-						delete_sql_expr(j->on_expr);
-						break;
-					}
-					case USING_JOIN_CONDITION :
-					{
-						for(cy_uint i = 0; i < get_element_count_arraylist(&(j->using_cols)); i++)
-						{
-							dstring* col = (dstring*) get_from_front_of_arraylist(&(j->using_cols), i);
-							deinit_dstring(col);
-							free(col);
-						}
-						deinitialize_arraylist(&(j->using_cols));
-						break;
-					}
-					default :
-						break;
-				}
-				free(j);
+				delete_join_with(j);
 			}
 			deinitialize_arraylist(&(dql->select_query.joins_with));
 
