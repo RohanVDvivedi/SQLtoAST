@@ -57,6 +57,18 @@
 
 	dstring sval; // for any other lexeme
 }
+/* standard destructors */
+%destructor { delete_sql($$); } sql_query
+%destructor { delete_dql($$); } dql_query
+%destructor { delete_dml($$); } dml_query
+%destructor { delete_columns_to_be_set($$); } attribute_assignment
+%destructor { delete_tcl($$); } tcl_cmd
+%destructor { delete_projection($$)); } projection
+%destructor { delete_join_with($$); } join_with
+%destructor { delete_order_by($$); } order_by
+%destructor { delete_sql_expr($$); } expr
+%destructor { deinit_rel_input(&($$)); } rel_input
+%destructor { deinit_dstring(&($$)); } sval
 
 /* SQL */
 %type <sql_query> sql_query
