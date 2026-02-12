@@ -519,6 +519,12 @@ void delete_join_with(join_with* j)
 	free(j);
 }
 
+void delete_order_by(order_by* o)
+{
+	delete_sql_expr(o->ordering_expr);
+	free(o);
+}
+
 void delete_dql(sql_dql* dql)
 {
 	switch(dql->type)
@@ -557,8 +563,7 @@ void delete_dql(sql_dql* dql)
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
 			{
 				order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
-				delete_sql_expr(o->ordering_expr);
-				free(o);
+				delete_order_by(o);
 			}
 			deinitialize_arraylist(&(dql->select_query.ordered_by));
 

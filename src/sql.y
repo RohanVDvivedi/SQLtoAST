@@ -10,6 +10,7 @@ void delete_columns_to_be_set(columns_to_be_set* c);
 void delete_projection(projection* p);
 void destroy_relation_input(relation_input* ri_p);
 void delete_join_with(join_with* j);
+void delete_order_by(order_by* o);
 %}
 
 %code requires {
