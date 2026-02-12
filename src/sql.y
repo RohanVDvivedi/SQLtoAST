@@ -58,17 +58,17 @@
 	dstring sval; // for any other lexeme
 }
 /* standard destructors */
-%destructor { delete_sql($$); } sql_query
-%destructor { delete_dql($$); } dql_query
-%destructor { delete_dml($$); } dml_query
-%destructor { delete_columns_to_be_set($$); } attribute_assignment
-%destructor { delete_tcl($$); } tcl_cmd
-%destructor { delete_projection($$)); } projection
-%destructor { delete_join_with($$); } join_with
-%destructor { delete_order_by($$); } order_by
-%destructor { delete_sql_expr($$); } expr
-%destructor { deinit_rel_input(&($$)); } rel_input
-%destructor { deinit_dstring(&($$)); } sval
+%destructor { delete_sql($$); } <sql_query>
+%destructor { delete_dql($$); } <dql_query>
+%destructor { delete_dml($$); } <dml_query>
+%destructor { delete_columns_to_be_set($$); } <attribute_assignment>
+%destructor { delete_tcl($$); } <tcl_cmd>
+%destructor { delete_projection($$)); } <projection>
+%destructor { delete_join_with($$); } <join_with>
+%destructor { delete_order_by($$); } <order_by>
+%destructor { delete_sql_expr($$); } <expr>
+%destructor { deinit_rel_input(&($$)); } <rel_input>
+%destructor { deinit_dstring(&($$)); } <sval>
 
 /* SQL */
 %type <sql_query> sql_query
@@ -343,9 +343,9 @@
 %%
 
 sql_query :
-			dql_query 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DQL; (*sql_ast)->dql_query = $1;}
-			| dml_query 						{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = DML; (*sql_ast)->dml_query = $1;}
-			| tcl_cmd 							{(*sql_ast) = malloc(sizeof(sql)); (*sql_ast)->type = TCL; (*sql_ast)->tcl_cmd = $1;}
+			dql_query 							{$$ = malloc(sizeof(sql)); $$->type = DQL; $$->dql_query = $1; (*sql_ast) = $$;}
+			| dml_query 						{$$ = malloc(sizeof(sql)); $$->type = DML; $$->dml_query = $1; (*sql_ast) = $$;}
+			| tcl_cmd 							{$$ = malloc(sizeof(sql)); $$->type = TCL; $$->tcl_cmd = $1; (*sql_ast) = $$;}
 
 tcl_cmd :
 			start_tx_keywords tx_mods							{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $2[0]; $$->mode = $2[1];}
