@@ -12,6 +12,7 @@ void destroy_relation_input(relation_input* ri_p);
 void delete_join_with(join_with* j);
 void delete_order_by(order_by* o);
 void delete_dstring(dstring* s);
+#include<sqltoast/arraylist_deleter.h>
 %}
 
 %code requires {
