@@ -485,6 +485,13 @@ static void destroy_relation_input(relation_input* ri_p)
 	deinit_dstring(&(ri_p->as));
 }
 
+void delete_projection(projection* p)
+{
+	delete_sql_expr(p->projection_expr);
+	deinit_dstring(&(p->as));
+	free(p);
+}
+
 void delete_dql(sql_dql* dql)
 {
 	switch(dql->type)
@@ -494,9 +501,7 @@ void delete_dql(sql_dql* dql)
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
 			{
 				projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
-				delete_sql_expr(p->projection_expr);
-				deinit_dstring(&(p->as));
-				free(p);
+				delete_projection(p);
 			}
 			deinitialize_arraylist(&(dql->select_query.projections));
 

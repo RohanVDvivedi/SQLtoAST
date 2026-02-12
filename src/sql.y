@@ -7,7 +7,7 @@
 
 // destructor functions only needed here and nowhere else
 void delete_columns_to_be_set(columns_to_be_set* c);
-
+void delete_projection(projection* p);
 %}
 
 %code requires {
