@@ -30,7 +30,7 @@ void delete_dstring(dstring* s);
 %parse-param { void* scanner }
 %parse-param { struct sql** sql_ast }
 
-%start sql_query
+%start sql_root
 
 %union {
 	sql* sql_query;
@@ -361,10 +361,13 @@ void delete_dstring(dstring* s);
 
 %%
 
+sql_root :
+			sql_query 							{(*sql_ast) = $1;}
+
 sql_query :
-			dql_query 							{$$ = malloc(sizeof(sql)); $$->type = DQL; $$->dql_query = $1; (*sql_ast) = $$;}
-			| dml_query 						{$$ = malloc(sizeof(sql)); $$->type = DML; $$->dml_query = $1; (*sql_ast) = $$;}
-			| tcl_cmd 							{$$ = malloc(sizeof(sql)); $$->type = TCL; $$->tcl_cmd = $1; (*sql_ast) = $$;}
+			dql_query 							{$$ = malloc(sizeof(sql)); $$->type = DQL; $$->dql_query = $1;}
+			| dml_query 						{$$ = malloc(sizeof(sql)); $$->type = DML; $$->dml_query = $1;}
+			| tcl_cmd 							{$$ = malloc(sizeof(sql)); $$->type = TCL; $$->tcl_cmd = $1;}
 
 tcl_cmd :
 			start_tx_keywords tx_mods							{$$ = new_tcl(START_TX_TCL_CMD); $$->isolation_level = $2[0]; $$->mode = $2[1];}
