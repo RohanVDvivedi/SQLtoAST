@@ -709,6 +709,7 @@ type_with_or_without_timezone : 						{$$.with_time_zone = 0;}
 
 /* Error handling */
 int sqlerror(void *scanner, struct sql** sql_ast, const char *msg) {
+	(*sql_ast) = NULL;
 	fprintf(stderr, "Error: %s\n", msg);
 	return 0;
 }
