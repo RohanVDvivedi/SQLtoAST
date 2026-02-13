@@ -383,7 +383,7 @@ void print_sql_expr(const sql_expression* expr)
 	{
 		case SQL_MUL_INV :
 		{
-			printf("( 1.0 / ( ");
+			printf("( 1/( ");
 			print_sql_expr(expr->unary_of);
 			printf(" ) )");
 			break;
