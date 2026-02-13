@@ -234,7 +234,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 				free(right);
 			}
 			else // else insert right as is
-				insert_in_expr_list(&expr_list, right);
+				insert_in_expr_list(&expr_list, new_unary_sql_expr(SQL_NEG, right));
 
 			return new_flat_sql_expr(flat_type, expr_list);
 		}
