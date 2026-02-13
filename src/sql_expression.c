@@ -184,6 +184,20 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			return new_flat_sql_expr(flat_type, expr_list);
 		}
 
+		case SQL_SUB : // A - B to A + (-B)
+		{
+			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
+			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+			return expr;
+		}
+
+		case SQL_DIV : // A * B to A * (B^(-1))
+		{
+			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
+			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+			return expr;
+		}
+
 		case SQL_NEG :
 		case SQL_BITNOT :
 		case SQL_LOGNOT :
@@ -200,8 +214,6 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 				return expr;
 		}
 
-		case SQL_SUB :
-		case SQL_DIV :
 		case SQL_MOD :
 		case SQL_BITAND :
 		case SQL_BITOR :
