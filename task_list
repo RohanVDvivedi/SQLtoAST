@@ -5,9 +5,10 @@ TO BE PICKED TASKS
 
 * SQL QUERY
 DDL (create alter drop)
- * start with create table, database and index queries
- * start with alter table, database and index querires
- * start with drop table, database and index queries
+ * create table, database and index queries
+ * alter table, database and index querires
+ * drop table, database and index queries
+ * truncate too
 
 * add with keywork usage
 * add column aliases after table alias like
