@@ -1,5 +1,7 @@
 PICKED TASKS
 
+* flatten a - b expression into a + (-b) as flat addition list, 
+* and a/b to a * (1/b)
 
 TO BE PICKED TASKS
 
@@ -14,5 +16,4 @@ DDL (create alter drop)
 * add column aliases after table alias like
  * select * from (select * from v) as t(a,b,c)
 
-* flatten a - b expression into a + (-b) as flat addition list, if either a or b is a constant, do that same for a/b
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
