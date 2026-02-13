@@ -13,6 +13,8 @@ typedef struct sql_dql sql_dql;
 typedef enum sql_expression_type sql_expression_type;
 enum sql_expression_type
 {
+	SQL_MUL_INV, // multiplicative inverse i.e. A^(-1)
+
 	SQL_NEG,
 
 	SQL_BITNOT,

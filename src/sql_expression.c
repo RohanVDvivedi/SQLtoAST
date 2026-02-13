@@ -246,6 +246,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			return expr;
 		}
 
+		case SQL_MUL_INV :
 		case SQL_NEG :
 		case SQL_BITNOT :
 		case SQL_LOGNOT :
@@ -380,25 +381,32 @@ void print_sql_expr(const sql_expression* expr)
 {
 	switch(expr->type)
 	{
+		case SQL_MUL_INV :
+		{
+			printf("( 1.0 / ( ");
+			print_sql_expr(expr->unary_of);
+			printf(" ) )");
+			break;
+		}
 		case SQL_NEG :
 		{
-			printf("-( ");
+			printf("( -( ");
 			print_sql_expr(expr->unary_of);
-			printf(" )");
+			printf(" ) )");
 			break;
 		}
 		case SQL_BITNOT :
 		{
-			printf("~( ");
+			printf("( ~( ");
 			print_sql_expr(expr->unary_of);
-			printf(" )");
+			printf(" ) )");
 			break;
 		}
 		case SQL_LOGNOT :
 		{
-			printf("!( ");
+			printf("( !( ");
 			print_sql_expr(expr->unary_of);
-			printf(" )");
+			printf(" ) )");
 			break;
 		}
 
@@ -889,6 +897,7 @@ void delete_sql_expr(sql_expression* expr)
 {
 	switch(expr->type)
 	{
+		case SQL_MUL_INV :
 		case SQL_NEG :
 		case SQL_BITNOT :
 		case SQL_LOGNOT :
