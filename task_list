@@ -9,7 +9,7 @@ DDL (create alter drop)
  * start with alter table, database and index querires
  * start with drop table, database and index queries
 
-* add using and with clauses/statements
+* add with keywork usage
 * add column aliases after table alias like
  * select * from (select * from v) as t(a,b,c)
 
