@@ -241,9 +241,57 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 
 		case SQL_DIV : // A * B to A * (B^(-1))
 		{
-			expr->left = flatten_similar_associative_operators_in_sql_expression(expr->left);
-			expr->right = flatten_similar_associative_operators_in_sql_expression(expr->right);
-			return expr;
+			sql_expression* left = flatten_similar_associative_operators_in_sql_expression(expr->left);
+			sql_expression* right = flatten_similar_associative_operators_in_sql_expression(expr->right);
+
+			// the next type is always the flattenned operator
+			sql_expression_type flat_type = SQL_MUL_FLAT;
+
+			arraylist expr_list;
+			initialize_expr_list(&expr_list);
+
+			// free up the, memory for the old binary version of this operator
+			free(expr);
+
+			// only similar flat expression types can be made flat
+			if(left->type == flat_type)
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(left->expr_list)); i++)
+					insert_in_expr_list(&expr_list, (sql_expression*) get_from_front_of_arraylist(&(left->expr_list), i));
+
+				// destroy just the left child
+				deinitialize_arraylist(&(left->expr_list));
+				free(left);
+			}
+			else // else insert left as is
+				insert_in_expr_list(&expr_list, left);
+
+			// only similar flat expression types can be made flat
+			if(right->type == flat_type)
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(right->expr_list)); i++)
+				{
+					sql_expression* t = (sql_expression*) get_from_front_of_arraylist(&(right->expr_list), i);
+					sql_expression* neg_t = NULL;
+					if(t->type == SQL_MUL_INV) // remove (--) in sequence to just a flatenned +
+					{
+						neg_t = t->unary_of;
+						free(t);
+					}
+					else
+						neg_t = new_unary_sql_expr(SQL_MUL_INV, t);
+					// from here on t may not exist, and may have been deleted
+					insert_in_expr_list(&expr_list, neg_t);
+				}
+
+				// destroy just the right child
+				deinitialize_arraylist(&(right->expr_list));
+				free(right);
+			}
+			else // else insert right as is
+				insert_in_expr_list(&expr_list, new_unary_sql_expr(SQL_MUL_INV, right));
+
+			return new_flat_sql_expr(flat_type, expr_list);
 		}
 
 		case SQL_MUL_INV :
