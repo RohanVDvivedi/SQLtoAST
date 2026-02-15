@@ -8,10 +8,13 @@ DDL query
 
 TO BE PICKED TASKS
 
-* prepared statements and the dynamic sql
-
 * add WITH keywork usage
 * add column aliases after table alias like
  * select * from (select * from v) as t(a,b,c)
 
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
+
+* think if we still want this?
+* prepared statements and the dynamic sql
+ * named paramaters can be a problem, if we also do constant unfolding and we might loose the order of the params and may end up with wrong params at wring places
+ * we need to support just ?, ?1, ?2, etc and also :a, :b etc
