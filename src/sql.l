@@ -155,8 +155,10 @@
 (?i:TABLE)				{return TABLE;}
 (?i:VIEW)				{return VIEW;}
 (?i:INDEX)				{return INDEX;}
-(?i:DOMAIN)				{return DOMAIN;}
+(?i:FUNCTION)			{return FUNCTION;}
+(?i:PROCEDURE)			{return PROCEDURE;}
 (?i:TYPE)				{return TYPE;}
+(?i:DOMAIN)				{return DOMAIN;}
 (?i:SEQUENCE)			{return SEQUENCE;}
 (?i:TRIGGER)			{return TRIGGER;}
 (?i:ASSERTION)			{return ASSERTION;}

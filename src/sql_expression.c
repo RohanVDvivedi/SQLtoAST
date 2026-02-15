@@ -82,7 +82,7 @@ sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query,
 sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, arraylist param_expr_list)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_FUNCTION;
+	expr->type = SQL_FUNCTION_CALL;
 	expr->aggregate_mode = aggregate_mode;
 	expr->func_name = func_name;
 	expr->param_expr_list = param_expr_list;
@@ -380,7 +380,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 			return expr;
 		}
 
-		case SQL_FUNCTION :
+		case SQL_FUNCTION_CALL :
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 				set_from_front_in_arraylist(&(expr->param_expr_list), (sql_expression*) flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i)), i);
@@ -850,7 +850,7 @@ void print_sql_expr(const sql_expression* expr)
 			break;
 		}
 
-		case SQL_FUNCTION :
+		case SQL_FUNCTION_CALL :
 		{
 			printf("( ");
 			printf_dstring(&(expr->func_name));
@@ -1039,7 +1039,7 @@ void delete_sql_expr(sql_expression* expr)
 			break;
 		}
 
-		case SQL_FUNCTION :
+		case SQL_FUNCTION_CALL :
 		{
 			deinit_dstring(&(expr->func_name));
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)

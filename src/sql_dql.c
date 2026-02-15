@@ -59,7 +59,7 @@ static void flatten_exprs_relation_input(relation_input* ri_p)
 			flatten_exprs_dql(ri_p->sub_query);
 			break;
 		}
-		case FUNCTION :
+		case FUNCTION_CALL :
 		{
 			ri_p->function_call = flatten_similar_associative_operators_in_sql_expression(ri_p->function_call);
 			break;
@@ -185,7 +185,7 @@ static void print_relation_input(const relation_input* ri_p)
 			print_dql(ri_p->sub_query);
 			break;
 		}
-		case FUNCTION :
+		case FUNCTION_CALL :
 		{
 			printf("function_call( ( ");
 			print_sql_expr(ri_p->function_call);
@@ -478,7 +478,7 @@ void destroy_relation_input(relation_input* ri_p)
 			delete_dql(ri_p->sub_query);
 			break;
 		}
-		case FUNCTION :
+		case FUNCTION_CALL :
 		{
 			delete_sql_expr(ri_p->function_call);
 			break;

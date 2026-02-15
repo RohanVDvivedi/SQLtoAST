@@ -20,8 +20,10 @@ enum sql_object_type
 	SQL_TABLE,
 	SQL_VIEW,
 	SQL_INDEX,
-	SQL_DOMAIN,
+	SQL_FUNCTION,
+	SQL_PROCEDURE,
 	SQL_TYPE,
+	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
 	SQL_ASSERTION,
@@ -31,7 +33,7 @@ typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
 	DROP_RESTRICT,
-	CROP_CASCADE,
+	DROP_CASCADE,
 };
 
 typedef struct sql_ddl sql_ddl;

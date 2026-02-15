@@ -39,7 +39,7 @@ enum relation_input_type
 {
 	RELATION,
 	SUB_QUERY,
-	FUNCTION,
+	FUNCTION_CALL,
 };
 
 typedef struct relation_input relation_input;
@@ -186,7 +186,7 @@ sql_dql* new_dql(sql_dql_type type);
 
 #define new_relation_input(relation_name_, as_)                             ((relation_input){.type = RELATION, .relation_name = relation_name_, .as = as_})
 #define new_sub_query_relation_input(sub_query_, as_)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query_, .as = as_})
-#define new_function_call_relation_input(function_call_, as_)               ((relation_input){.type = FUNCTION, .function_call = function_call_, .as = as_})
+#define new_function_call_relation_input(function_call_, as_)               ((relation_input){.type = FUNCTION_CALL, .function_call = function_call_, .as = as_})
 
 void flatten_exprs_dql(sql_dql* dql);
 

@@ -82,7 +82,7 @@ enum sql_expression_type
 	SQL_NULL,
 	// null node
 
-	SQL_FUNCTION,
+	SQL_FUNCTION_CALL,
 
 	SQL_CAST,
 

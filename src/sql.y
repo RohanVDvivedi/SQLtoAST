@@ -39,6 +39,8 @@ void delete_dstring(dstring* s);
 
 	sql_dml* dml_query;
 
+	sql_ddl* ddl_query;
+
 	columns_to_be_set* attribute_assignment;
 
 	sql_tcl* tcl_cmd;
@@ -180,6 +182,14 @@ void delete_dstring(dstring* s);
 %token DELETE
 
 /* DDL queries */
+%type <ddl_query> ddl_query
+
+%type <ddl_query> drop_query
+%type <ddl_query> truncate_query
+
+%type <uval> object_type
+%type <uval> drop_behavior
+
 %token CREATE
 %token DROP
 %token ALTER
@@ -190,8 +200,10 @@ void delete_dstring(dstring* s);
 %token TABLE
 %token VIEW
 %token INDEX
-%token DOMAIN
+%token FUNCTION
+%token PROCEDURE
 %token TYPE
+%token DOMAIN
 %token SEQUENCE
 %token TRIGGER
 %token ASSERTION
@@ -387,6 +399,7 @@ sql_root :
 sql_query :
 			dql_query 							{$$ = malloc(sizeof(sql)); $$->type = DQL; $$->dql_query = $1;}
 			| dml_query 						{$$ = malloc(sizeof(sql)); $$->type = DML; $$->dml_query = $1;}
+			| ddl_query 						{$$ = malloc(sizeof(sql)); $$->type = DDL; $$->ddl_query = $1;}
 			| tcl_cmd 							{$$ = malloc(sizeof(sql)); $$->type = TCL; $$->tcl_cmd = $1;}
 
 tcl_cmd :
@@ -423,6 +436,35 @@ isolation_level :
 work_opt :
 						{}
 			| WORK 		{}
+
+ddl_query :
+			drop_query 				{$$ = $1;}
+			| truncate_query 		{$$ = $1;}
+
+drop_query :
+			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}
+
+drop_behavior :
+									{$$ = DROP_RESTRICT;}
+				| RESTRICT 			{$$ = DROP_RESTRICT;}
+				| CASCADE 			{$$ = DROP_CASCADE;}
+
+truncate_query :
+			TRUNCATE object_type IDENTIFIER 					{$$ = new_ddl(TRUNCATE_QUERY, $2); $$->object_name = $3;}
+
+object_type :
+			DATABASE 			{$$ = SQL_DATABASE;}
+			| SCHEMA 			{$$ = SQL_SCHEMA;}
+			| TABLE 			{$$ = SQL_TABLE;}
+			| VIEW 				{$$ = SQL_VIEW;}
+			| INDEX 			{$$ = SQL_INDEX;}
+			| FUNCTION 			{$$ = SQL_FUNCTION;}
+			| PROCEDURE 		{$$ = SQL_PROCEDURE;}
+			| TYPE 				{$$ = SQL_TYPE;}
+			| DOMAIN 			{$$ = SQL_DOMAIN;}
+			| SEQUENCE 			{$$ = SQL_SEQUENCE;}
+			| TRIGGER 			{$$ = SQL_TRIGGER;}
+			| ASSERTION 		{$$ = SQL_ASSERTION;}
 
 dml_query :
 			insert_query 			{$$ = $1;}
