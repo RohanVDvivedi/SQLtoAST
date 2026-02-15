@@ -68,7 +68,7 @@ void print_sql(const sql* sqlast)
 		}
 		case DDL :
 		{
-			//print_ddl(sqlast->ddl_query);
+			print_ddl(sqlast->ddl_query);
 			break;
 		}
 		case TCL :

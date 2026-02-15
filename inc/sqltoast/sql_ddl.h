@@ -51,6 +51,8 @@ struct sql_ddl
 
 sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type);
 
+void print_ddl(const sql_ddl* ddl);
+
 void delete_ddl(sql_ddl* ddl);
 
 #endif
