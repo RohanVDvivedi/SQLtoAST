@@ -179,6 +179,26 @@ void delete_dstring(dstring* s);
 
 %token DELETE
 
+/* DDL queries */
+%token CREATE
+%token DROP
+%token ALTER
+%token TRUNCATE
+
+%token DATABASE
+%token SCHEMA
+%token TABLE
+%token VIEW
+%token INDEX
+%token DOMAIN
+%token TYPE
+%token SEQUENCE
+%token TRIGGER
+%token ASSERTION
+
+%token RESTRICT
+%token CASCADE
+
 /* TCL command */
 %type <tcl_cmd> tcl_cmd
 

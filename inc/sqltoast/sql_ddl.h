@@ -30,8 +30,8 @@ enum sql_object_type
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
-	RESTRICT,
-	CASCADE,
+	DROP_RESTRICT,
+	CROP_CASCADE,
 };
 
 typedef struct sql_ddl sql_ddl;

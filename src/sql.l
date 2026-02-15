@@ -145,6 +145,25 @@
 
 (?i:DELETE)				{return DELETE;}
 
+(?i:CREATE)				{return CREATE;}
+(?i:DROP)				{return DROP;}
+(?i:ALTER)				{return ALTER;}
+(?i:TRUNCATE)			{return TRUNCATE;}
+
+(?i:DATABASE)			{return DATABASE;}
+(?i:SCHEMA)				{return SCHEMA;}
+(?i:TABLE)				{return TABLE;}
+(?i:VIEW)				{return VIEW;}
+(?i:INDEX)				{return INDEX;}
+(?i:DOMAIN)				{return DOMAIN;}
+(?i:TYPE)				{return TYPE;}
+(?i:SEQUENCE)			{return SEQUENCE;}
+(?i:TRIGGER)			{return TRIGGER;}
+(?i:ASSERTION)			{return ASSERTION;}
+
+(?i:RESTRICT)			{return RESTRICT;}
+(?i:CASCADE)			{return CASCADE;}
+
 (?i:START)				{return START;}
 (?i:BEGIN)				{return _BEGIN_;}
 (?i:TRANSACTION)		{return TRANSACTION;}
