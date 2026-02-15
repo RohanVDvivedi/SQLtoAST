@@ -72,6 +72,7 @@ void delete_dstring(dstring* s);
 %destructor { delete_sql($$); } <sql_query>
 %destructor { delete_dql($$); } <dql_query>
 %destructor { delete_dml($$); } <dml_query>
+%destructor { delete_ddl($$); } <ddl_query>
 %destructor { delete_columns_to_be_set($$); } <attribute_assignment>
 %destructor { delete_tcl($$); } <tcl_cmd>
 %destructor { delete_projection($$); } <projection>
