@@ -1,13 +1,14 @@
 PICKED TASKS
 
+DDL query
+ * each one for table, index (with index type and optional where clause for create), database, schema, view
+ * drop/truncate queries
+ * create queries
+ * alter queries
+
 TO BE PICKED TASKS
 
-* SQL QUERY
-DDL (create alter drop)
- * create table, database and index queries
- * alter table, database and index querires
- * drop table, database and index queries
- * truncate too
+* prepared statements and the dynamic sql
 
 * add WITH keywork usage
 * add column aliases after table alias like
