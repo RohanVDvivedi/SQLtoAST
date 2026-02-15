@@ -156,6 +156,8 @@ void print_ddl(const sql_ddl* ddl)
 		}
 		clauses_printed++;
 	}
+
+	printf(" )");
 }
 
 void delete_ddl(sql_ddl* ddl)
