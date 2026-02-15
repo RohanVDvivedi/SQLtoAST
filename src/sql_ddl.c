@@ -7,6 +7,9 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 {
 	sql_ddl* ddl = malloc(sizeof(sql_ddl));
 
+	ddl->type = type;
+	ddl->object_type = object_type;
+
 	// every ddl query has an object name
 	init_empty_dstring(&(ddl->object_name), 0);
 
