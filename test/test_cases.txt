@@ -143,3 +143,8 @@ select * from t where a * b * c / d * e * f / g * h / i * j * k * l * m / n
 select * from t where a + b + c - d + e + f - g + h - i + j + k + l + m - n
 select * from t where a + b + c - d + e + f - g * h / i * j * k * l * m / n
 select * from t where a * b * c / d * e + f - g + h - i + j + k + l + m - n
+select * from t where a/(b/(c/(d)))
+select * from t where a -----------b
+select * from t where a ------------b
+select * from t where a +-----------b
+select * from t where a +------------b

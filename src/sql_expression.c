@@ -233,8 +233,18 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 				deinitialize_arraylist(&(right->expr_list));
 				free(right);
 			}
-			else // else insert right as is
-				insert_in_expr_list(&expr_list, new_unary_sql_expr(SQL_NEG, right));
+			else // else insert negative of right
+			{
+				sql_expression* neg_right = NULL;
+				if(right->type == SQL_NEG)
+				{
+					neg_right = right->unary_of;
+					free(right);
+				}
+				else
+					neg_right = new_unary_sql_expr(SQL_NEG, right);
+				insert_in_expr_list(&expr_list, neg_right);
+			}
 
 			return new_flat_sql_expr(flat_type, expr_list);
 		}
@@ -272,24 +282,34 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(right->expr_list)); i++)
 				{
 					sql_expression* t = (sql_expression*) get_from_front_of_arraylist(&(right->expr_list), i);
-					sql_expression* neg_t = NULL;
+					sql_expression* inv_t = NULL;
 					if(t->type == SQL_MUL_INV) // remove (--) in sequence to just a flatenned +
 					{
-						neg_t = t->unary_of;
+						inv_t = t->unary_of;
 						free(t);
 					}
 					else
-						neg_t = new_unary_sql_expr(SQL_MUL_INV, t);
+						inv_t = new_unary_sql_expr(SQL_MUL_INV, t);
 					// from here on t may not exist, and may have been deleted
-					insert_in_expr_list(&expr_list, neg_t);
+					insert_in_expr_list(&expr_list, inv_t);
 				}
 
 				// destroy just the right child
 				deinitialize_arraylist(&(right->expr_list));
 				free(right);
 			}
-			else // else insert right as is
-				insert_in_expr_list(&expr_list, new_unary_sql_expr(SQL_MUL_INV, right));
+			else // else insert inverse of right
+			{
+				sql_expression* inv_right = NULL;
+				if(right->type == SQL_MUL_INV)
+				{
+					inv_right = right->unary_of;
+					free(right);
+				}
+				else
+					inv_right = new_unary_sql_expr(SQL_MUL_INV, right);
+				insert_in_expr_list(&expr_list, inv_right);
+			}
 
 			return new_flat_sql_expr(flat_type, expr_list);
 		}
