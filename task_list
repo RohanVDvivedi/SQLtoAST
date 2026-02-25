@@ -1,8 +1,6 @@
 PICKED TASKS
 
 DDL query
- * each one for table, index (with index type and optional where clause for create), database, schema, view
- * drop/truncate queries
  * create queries
  * alter queries
 
