@@ -451,7 +451,7 @@ drop_behavior :
 				| CASCADE 			{$$ = DROP_CASCADE;}
 
 truncate_query :
-			TRUNCATE object_type IDENTIFIER 					{$$ = new_ddl(TRUNCATE_QUERY, $2); $$->object_name = $3;}
+			TRUNCATE TABLE IDENTIFIER 							{$$ = new_ddl(TRUNCATE_QUERY, SQL_TABLE); $$->object_name = $3;}
 
 object_type :
 			DATABASE 			{$$ = SQL_DATABASE;}
