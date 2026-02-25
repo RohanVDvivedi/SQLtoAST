@@ -14,5 +14,5 @@ TO BE PICKED TASKS
 
 * think if we still want this?
 * prepared statements and the dynamic sql
- * named paramaters can be a problem, if we also do constant unfolding and we might loose the order of the params and may end up with wrong params at wring places
+ * named paramaters can be a problem, if we also do constant unfolding and we might loose the order of the params and may end up with wrong params at wrong places
  * we need to support just ?, ?1, ?2, etc and also :a, :b etc
