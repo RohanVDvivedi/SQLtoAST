@@ -552,15 +552,17 @@ projection :
 					| expr IDENTIFIER 										{$$ = malloc(sizeof(projection)); (*$$) = (projection){$1, $2};}
 
 rel_input :
-			IDENTIFIER 																{init_relation_input(&$$, $1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| IDENTIFIER AS IDENTIFIER												{init_relation_input(&$$, $1, $3);}
-			| IDENTIFIER IDENTIFIER													{init_relation_input(&$$, $1, $2);}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET 									{init_sub_query_relation_input(&$$, $2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER					{init_sub_query_relation_input(&$$, $2, $5);}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER						{init_sub_query_relation_input(&$$, $2, $4);}
-			| func_expr 															{init_function_call_relation_input(&$$, $1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
-			| func_expr AS IDENTIFIER												{init_function_call_relation_input(&$$, $1, $3);}
-			| func_expr IDENTIFIER													{init_function_call_relation_input(&$$, $1, $2);}
+			IDENTIFIER 																								{init_relation_input(&$$, $1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| IDENTIFIER AS IDENTIFIER																				{init_relation_input(&$$, $1, $3);}
+			| IDENTIFIER IDENTIFIER																					{init_relation_input(&$$, $1, $2);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET 																	{init_sub_query_relation_input(&$$, $2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET			{init_sub_query_relation_input(&$$, $2, $5); $$.columns_as = $7;}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET			{init_sub_query_relation_input(&$$, $2, $4); $$.columns_as = $6;}
+			| func_expr 																							{init_function_call_relation_input(&$$, $1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| func_expr AS IDENTIFIER																				{init_function_call_relation_input(&$$, $1, $3);}
+			| func_expr IDENTIFIER																					{init_function_call_relation_input(&$$, $1, $2);}
+			| func_expr AS IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET									{init_function_call_relation_input(&$$, $1, $3); $$.columns_as = $5;}
+			| func_expr IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET										{init_function_call_relation_input(&$$, $1, $2); $$.columns_as = $4;}
 
 join_clauses :
 												{initialize_arraylist(&($$), 0);}
