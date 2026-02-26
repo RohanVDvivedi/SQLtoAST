@@ -556,6 +556,8 @@ rel_input :
 			| IDENTIFIER AS IDENTIFIER																				{init_relation_input(&$$, $1, $3);}
 			| IDENTIFIER IDENTIFIER																					{init_relation_input(&$$, $1, $2);}
 			| OPEN_BRACKET dql_query CLOSE_BRACKET 																	{init_sub_query_relation_input(&$$, $2, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER 													{init_sub_query_relation_input(&$$, $2, $5);}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER 														{init_sub_query_relation_input(&$$, $2, $4);}
 			| OPEN_BRACKET dql_query CLOSE_BRACKET AS IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET			{init_sub_query_relation_input(&$$, $2, $5); $$.columns_as = $7;}
 			| OPEN_BRACKET dql_query CLOSE_BRACKET IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET			{init_sub_query_relation_input(&$$, $2, $4); $$.columns_as = $6;}
 			| func_expr 																							{init_function_call_relation_input(&$$, $1, new_copy_dstring(&get_dstring_pointing_to_cstring("")));}
