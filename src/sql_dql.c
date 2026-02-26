@@ -200,6 +200,20 @@ static void print_relation_input(const relation_input* ri_p)
 		printf("\"");
 		printf_dstring(&(ri_p->as));
 		printf("\"");
+		if(get_element_count_arraylist(&(ri_p->columns_as)) > 0)
+		{
+			printf("( ");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(ri_p->columns_as)); i++)
+			{
+				if(i != 0)
+					printf(" , ");
+				printf("\"");
+				const dstring* c_as = get_from_front_of_arraylist(&(ri_p->columns_as), i);
+				printf_dstring(c_as);
+				printf("\"");
+			}
+			printf(" )");
+		}
 	}
 	printf(" )");
 }
@@ -485,6 +499,13 @@ void destroy_relation_input(relation_input* ri_p)
 		}
 	}
 	deinit_dstring(&(ri_p->as));
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(ri_p->columns_as)); i++)
+	{
+		dstring* c_as = (dstring*) get_from_front_of_arraylist(&(ri_p->columns_as), i);
+		deinit_dstring(c_as);
+		free(c_as);
+	}
+	deinitialize_arraylist(&(ri_p->columns_as));
 }
 
 void delete_projection(projection* p)

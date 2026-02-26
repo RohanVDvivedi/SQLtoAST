@@ -58,6 +58,10 @@ struct relation_input
 
 	// if empty, ignore
 	dstring as;
+
+	// if empty, ignore
+	// valid only for type = SUB_QUERY or FUNCTION_CALL
+	arraylist columns_as;
 };
 
 typedef enum join_type join_type;
@@ -184,9 +188,9 @@ struct sql_dql
 
 sql_dql* new_dql(sql_dql_type type);
 
-#define new_relation_input(relation_name_, as_)                             ((relation_input){.type = RELATION, .relation_name = relation_name_, .as = as_})
-#define new_sub_query_relation_input(sub_query_, as_)                       ((relation_input){.type = SUB_QUERY, .sub_query = sub_query_, .as = as_})
-#define new_function_call_relation_input(function_call_, as_)               ((relation_input){.type = FUNCTION_CALL, .function_call = function_call_, .as = as_})
+#define init_relation_input(ri_p, relation_name_, as_)                             {ri_p->type = RELATION; ri_p->relation_name = relation_name_; ri_p->as = as_; initialize_arraylist(ri_p->columns_as, 0);}
+#define init_sub_query_relation_input(ri_p, sub_query_, as_)                       {ri_p->type = SUB_QUERY; ri_p->sub_query = sub_query_; ri_p->as = as_; initialize_arraylist(ri_p->columns_as, 0);}
+#define inti_function_call_relation_input(ri_p, function_call_, as_)               {ri_p->type = FUNCTION_CALL; ri_p->function_call = function_call_; ri_p->as = as_; initialize_arraylist(ri_p->columns_as, 0);}
 
 void flatten_exprs_dql(sql_dql* dql);
 
