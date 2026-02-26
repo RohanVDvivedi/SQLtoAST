@@ -1,5 +1,10 @@
 PICKED TASKS
 
+* add column aliases after table alias like
+ * possible grammar allowed given below
+  * FROM (SELECT ...) AS t(a,b)
+  * FROM (VALUES ...) AS t(a,b)
+
 DDL query
  * create queries
  * alter queries
@@ -7,10 +12,6 @@ DDL query
 TO BE PICKED TASKS
 
 * add WITH keywork usage
-* add column aliases after table alias like
- * possible grammar allowed given below
-  * FROM (SELECT ...) AS t(a,b)
-  * FROM (VALUES ...) AS t(a,b)
 
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
 
