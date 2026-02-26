@@ -188,9 +188,9 @@ struct sql_dql
 
 sql_dql* new_dql(sql_dql_type type);
 
-#define init_relation_input(ri_p, relation_name_, as_)                             {ri_p->type = RELATION; ri_p->relation_name = relation_name_; ri_p->as = as_; initialize_arraylist(ri_p->columns_as, 0);}
-#define init_sub_query_relation_input(ri_p, sub_query_, as_)                       {ri_p->type = SUB_QUERY; ri_p->sub_query = sub_query_; ri_p->as = as_; initialize_arraylist(ri_p->columns_as, 0);}
-#define inti_function_call_relation_input(ri_p, function_call_, as_)               {ri_p->type = FUNCTION_CALL; ri_p->function_call = function_call_; ri_p->as = as_; initialize_arraylist(ri_p->columns_as, 0);}
+#define init_relation_input(ri_p, relation_name_, as_)                             {(ri_p)->type = RELATION; (ri_p)->relation_name = relation_name_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
+#define init_sub_query_relation_input(ri_p, sub_query_, as_)                       {(ri_p)->type = SUB_QUERY; (ri_p)->sub_query = sub_query_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
+#define init_function_call_relation_input(ri_p, function_call_, as_)               {(ri_p)->type = FUNCTION_CALL; (ri_p)->function_call = function_call_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
 
 void flatten_exprs_dql(sql_dql* dql);
 
