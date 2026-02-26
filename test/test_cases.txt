@@ -148,3 +148,8 @@ select * from t where a -----------b
 select * from t where a ------------b
 select * from t where a +-----------b
 select * from t where a +------------b
+SELECT dept, AVG(salary) AS avg_salary FROM (VALUES ('ENG',10000),('ENG',12000),('HR',8000),('HR',9000)) AS v (dept,salary) GROUP BY dept HAVING AVG(salary) > 9000
+SELECT e.emp_name, d.dept_name FROM (SELECT emp_id,name,dept_id FROM employees WHERE active = TRUE) AS e (emp_id,emp_name,dept_id) JOIN (SELECT id,dept_name FROM departments) AS d (dept_id,dept_name) ON e.dept_id = d.dept_id
+SELECT id, score, RANK() OVER (ORDER BY score DESC) AS rnk FROM (VALUES (1,90),(2,85),(3,90),(4,70)) AS t (id,score)
+SELECT region, SUM(amount) FROM (SELECT region,amount FROM sales WHERE amount > 1000 UNION ALL SELECT region,amount FROM refunds) AS x (region,amount) GROUP BY region
+SELECT u.user_id, u.total_orders FROM (SELECT user_id,COUNT(*) FROM orders GROUP BY user_id) AS u (user_id,total_orders) WHERE u.total_orders >= 5
