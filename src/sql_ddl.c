@@ -66,9 +66,10 @@ void print_ddl(const sql_ddl* ddl)
 
 	switch(ddl->object_type)
 	{
+		//case SQL_CATALOG :
 		case SQL_DATABASE :
 		{
-			printf("DATABASE");
+			printf("DATABASE/CATALOG");
 			break;
 		}
 		case SQL_SCHEMA :

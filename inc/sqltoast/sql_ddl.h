@@ -15,7 +15,8 @@ enum sql_ddl_type
 typedef enum sql_object_type sql_object_type;
 enum sql_object_type
 {
-	SQL_DATABASE,
+	SQL_CATALOG,
+	SQL_DATABASE = SQL_CATALOG, // same as SQL_CATALOG
 	SQL_SCHEMA,
 	SQL_TABLE,
 	SQL_VIEW,
@@ -28,6 +29,9 @@ enum sql_object_type
 	SQL_TRIGGER,
 	SQL_ASSERTION,
 };
+
+// hierarchially 
+// catalog -> schema -> tables/views -> indices
 
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
@@ -45,7 +49,7 @@ struct sql_ddl
 
 	dstring object_name;
 
-	// only used if the query context required dropping, ither directly as a drop query or as a part of alter table
+	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column
 	sql_drop_behavior drop_behavior;
 };
 
