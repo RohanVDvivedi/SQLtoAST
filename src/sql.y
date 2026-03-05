@@ -196,6 +196,7 @@ void delete_dstring(dstring* s);
 %token ALTER
 %token TRUNCATE
 
+%token CATALOG
 %token DATABASE
 %token SCHEMA
 %token TABLE

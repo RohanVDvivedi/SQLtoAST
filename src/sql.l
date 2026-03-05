@@ -150,6 +150,7 @@
 (?i:ALTER)				{return ALTER;}
 (?i:TRUNCATE)			{return TRUNCATE;}
 
+(?i:CATALOG)			{return CATALOG;}
 (?i:DATABASE)			{return DATABASE;}
 (?i:SCHEMA)				{return SCHEMA;}
 (?i:TABLE)				{return TABLE;}
