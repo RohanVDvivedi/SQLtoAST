@@ -455,7 +455,8 @@ truncate_query :
 			TRUNCATE TABLE IDENTIFIER 							{$$ = new_ddl(TRUNCATE_QUERY, SQL_TABLE); $$->object_name = $3;}
 
 object_type :
-			DATABASE 			{$$ = SQL_DATABASE;}
+			CATALOG 			{$$ = SQL_CATALOG;}
+			| DATABASE 			{$$ = SQL_DATABASE;}
 			| SCHEMA 			{$$ = SQL_SCHEMA;}
 			| TABLE 			{$$ = SQL_TABLE;}
 			| VIEW 				{$$ = SQL_VIEW;}
