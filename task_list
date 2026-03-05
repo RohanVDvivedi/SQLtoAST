@@ -2,7 +2,6 @@ PICKED TASKS
 
 DDL query
  * create queries
-	SQL_SCHEMA,
 	SQL_TABLE,
 	SQL_VIEW,
 	SQL_INDEX,
