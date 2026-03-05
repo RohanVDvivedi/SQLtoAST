@@ -5,7 +5,7 @@ DDL query
 	SQL_TABLE,
 	SQL_VIEW,
 	SQL_INDEX,
-	SQL_FUNCTION,
+	SQL_FUNCTION, // only create and drop for function and procedure
 	SQL_PROCEDURE,
 	SQL_TYPE,
 	SQL_DOMAIN,
@@ -16,8 +16,6 @@ DDL query
 	SQL_TABLE,
 	SQL_VIEW,
 	SQL_INDEX, // only support -> ALTER INDEX idx_name RENAME TO new_idx_name
-	SQL_FUNCTION,
-	SQL_PROCEDURE,
 	SQL_TYPE,
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
