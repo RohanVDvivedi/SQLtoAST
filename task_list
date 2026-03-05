@@ -15,7 +15,7 @@ DDL query
  	SQL_SCHEMA,
 	SQL_TABLE,
 	SQL_VIEW,
-	SQL_INDEX,
+	SQL_INDEX, // only support -> ALTER INDEX idx_name RENAME TO new_idx_name
 	SQL_FUNCTION,
 	SQL_PROCEDURE,
 	SQL_TYPE,
