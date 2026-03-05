@@ -185,6 +185,7 @@ void delete_dstring(dstring* s);
 /* DDL queries */
 %type <ddl_query> ddl_query
 
+%type <ddl_query> create_query
 %type <ddl_query> drop_query
 %type <ddl_query> truncate_query
 
@@ -440,8 +441,13 @@ work_opt :
 			| WORK 		{}
 
 ddl_query :
-			drop_query 				{$$ = $1;}
+			create_query 			{$$ = $1;}
+			| drop_query 			{$$ = $1;}
 			| truncate_query 		{$$ = $1;}
+
+create_query :
+			CREATE CATALOG IDENTIFIER 						{$$ = new_ddl(CREATE_QUERY, SQL_CATALOG); $$->object_name = $3;}
+			| CREATE DATABASE IDENTIFIER 					{$$ = new_ddl(CREATE_QUERY, SQL_DATABASE); $$->object_name = $3;}
 
 drop_query :
 			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}
