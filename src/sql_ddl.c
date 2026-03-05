@@ -134,11 +134,6 @@ void print_ddl(const sql_ddl* ddl)
 			printf("TRIGGER");
 			break;
 		}
-		case SQL_ASSERTION :
-		{
-			printf("ASSERTION");
-			break;
-		}
 	}
 
 	printf("( ");
@@ -157,13 +152,24 @@ void print_ddl(const sql_ddl* ddl)
 	{
 		case CREATE_QUERY :
 		{
-			if(!is_empty_dstring(&(ddl->create_schema_query.authorization)))
+			switch(ddl->object_type)
 			{
-				if(clauses_printed != 0)
-					printf(" , ");
-				printf("authorization = ");
-				printf_dstring(&(ddl->create_schema_query.authorization));
-				clauses_printed++;
+				case SQL_SCHEMA :
+				{
+					if(!is_empty_dstring(&(ddl->create_schema_query.authorization)))
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("authorization = ");
+						printf_dstring(&(ddl->create_schema_query.authorization));
+						clauses_printed++;
+					}
+					break;
+				}
+				default :
+				{
+					break;
+				}
 			}
 			break;
 		}

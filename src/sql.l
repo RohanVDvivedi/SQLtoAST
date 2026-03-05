@@ -162,7 +162,6 @@
 (?i:DOMAIN)				{return DOMAIN;}
 (?i:SEQUENCE)			{return SEQUENCE;}
 (?i:TRIGGER)			{return TRIGGER;}
-(?i:ASSERTION)			{return ASSERTION;}
 
 (?i:AUTHORIZATION)		{return AUTHORIZATION;}
 

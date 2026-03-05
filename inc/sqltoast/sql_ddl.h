@@ -27,7 +27,6 @@ enum sql_object_type
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
-	SQL_ASSERTION,
 };
 
 // hierarchially 

@@ -211,7 +211,6 @@ void delete_dstring(dstring* s);
 %token DOMAIN
 %token SEQUENCE
 %token TRIGGER
-%token ASSERTION
 
 %token AUTHORIZATION
 
@@ -483,7 +482,6 @@ object_type :
 			| DOMAIN 			{$$ = SQL_DOMAIN;}
 			| SEQUENCE 			{$$ = SQL_SEQUENCE;}
 			| TRIGGER 			{$$ = SQL_TRIGGER;}
-			| ASSERTION 		{$$ = SQL_ASSERTION;}
 
 dml_query :
 			insert_query 			{$$ = $1;}
