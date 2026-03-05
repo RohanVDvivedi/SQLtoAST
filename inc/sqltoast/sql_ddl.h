@@ -33,6 +33,12 @@ enum sql_object_type
 // hierarchially 
 // catalog -> schema -> tables/views -> indices
 
+typedef struct sql_create_schema sql_create_schema;
+struct sql_create_schema
+{
+	dstring authorization; // if empty, then not set
+};
+
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
@@ -48,6 +54,11 @@ struct sql_ddl
 	sql_object_type object_type;
 
 	dstring object_name;
+
+	union
+	{
+		sql_create_schema create_schema_query;
+	};
 
 	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column
 	sql_drop_behavior drop_behavior;

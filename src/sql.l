@@ -164,6 +164,8 @@
 (?i:TRIGGER)			{return TRIGGER;}
 (?i:ASSERTION)			{return ASSERTION;}
 
+(?i:AUTHORIZATION)		{return AUTHORIZATION;}
+
 (?i:RESTRICT)			{return RESTRICT;}
 (?i:CASCADE)			{return CASCADE;}
 

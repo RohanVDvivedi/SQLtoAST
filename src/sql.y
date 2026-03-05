@@ -189,6 +189,8 @@ void delete_dstring(dstring* s);
 %type <ddl_query> drop_query
 %type <ddl_query> truncate_query
 
+%type <ddl_query> create_schema_query
+
 %type <uval> object_type
 %type <uval> drop_behavior
 
@@ -210,6 +212,8 @@ void delete_dstring(dstring* s);
 %token SEQUENCE
 %token TRIGGER
 %token ASSERTION
+
+%token AUTHORIZATION
 
 %token RESTRICT
 %token CASCADE
@@ -448,6 +452,12 @@ ddl_query :
 create_query :
 			CREATE CATALOG IDENTIFIER 						{$$ = new_ddl(CREATE_QUERY, SQL_CATALOG); $$->object_name = $3;}
 			| CREATE DATABASE IDENTIFIER 					{$$ = new_ddl(CREATE_QUERY, SQL_DATABASE); $$->object_name = $3;}
+			| create_schema_query							{$$ = $1;}
+
+create_schema_query :
+					CREATE SCHEMA IDENTIFIER 											{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $3;}
+					| CREATE SCHEMA IDENTIFIER AUTHORIZATION IDENTIFIER					{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $3; $$->create_schema_query.authorization = $5;}
+					| CREATE SCHEMA AUTHORIZATION IDENTIFIER 							{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $4; init_copy_dstring(&($$->create_schema_query.authorization), &($4));}
 
 drop_query :
 			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}
