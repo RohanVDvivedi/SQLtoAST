@@ -14,7 +14,7 @@ DDL query
  * alter queries
  	SQL_SCHEMA,
 	SQL_TABLE,
-	SQL_VIEW,
+	SQL_VIEW, // to change view query use drop and create, alter to nly rename OR change schema it belongs to
 	SQL_INDEX, // only support -> ALTER INDEX idx_name RENAME TO new_idx_name
 	SQL_TYPE,
 	SQL_DOMAIN,
