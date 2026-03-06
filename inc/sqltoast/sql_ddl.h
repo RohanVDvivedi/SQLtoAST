@@ -103,6 +103,31 @@ struct sql_table_element
 	};
 };
 
+#define init_table_element(te_p, type) {                                           \
+	te_p->type = type;                                                             \
+	switch(type)                                                                   \
+	{                                                                              \
+		case SQL_COLUMN :                                                          \
+		{                                                                          \
+			init_empty_dstring(&(te_p->column_def.column_name), 0);                \
+			init_empty_dstring(&(te_p->column_def.foreign_table), 0);              \
+			init_empty_dstring(&(te_p->column_def.foreign_column), 0);             \
+			te_p->column_def.default_value = NULL;                                 \
+			initialize_arraylist(&(te_p->column_def.constraint_check), 0);         \
+			break;                                                                 \
+		}                                                                          \
+		case SQL_CONSTRAINT :                                                      \
+		{                                                                          \
+			init_empty_dstring(&(te_p->constraint_def.constraint_name), 0);        \
+			initialize_arraylist(&(te_p->constraint_def.column_list), 0);          \
+			init_empty_dstring(&(te_p->constraint_def.foreign_table), 0);          \
+			initialize_arraylist(&(te_p->constraint_def.foreign_column_list), 0);  \
+			te_p->constraint_def.constraint_check = NULL;                          \
+			break;                                                                 \
+		}                                                                          \
+	}                                                                              \
+}
+
 typedef struct sql_create_table sql_create_table;
 struct sql_create_table
 {
