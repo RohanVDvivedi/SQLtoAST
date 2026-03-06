@@ -24,6 +24,10 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 					init_empty_dstring(&(ddl->create_schema_query.authorization), 0);
 					break;
 				}
+				case SQL_TABLE :
+				{
+					break;
+				}
 				default :
 				{
 					break;

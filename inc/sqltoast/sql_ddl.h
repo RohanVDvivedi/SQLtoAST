@@ -38,6 +38,77 @@ struct sql_create_schema
 	dstring authorization; // if empty, then not set
 };
 
+typedef enum sql_table_element_type sql_table_element_type;
+enum sql_table_element_type
+{
+	SQL_COLUMN,
+	SQL_CONSTRAINT,
+};
+
+typedef struct sql_column_def sql_column_def;
+struct sql_column_def
+{
+	dstring column_name;
+
+	sql_type data_type;
+
+	int is_not_null:1;
+	int is_primary_key:1;
+	int is_unique:1;
+	int is_foreign_key:1;
+	dstring foreign_table;
+	dstring foreign_column; // if absent, you are bound to reference the primary key of the foreign_table
+	// TODO: add on delete/update clauses
+	sql_expression* default_value;
+	arraylist constraint_check;
+};
+
+typedef enum sql_constraint_type sql_constraint_type;
+enum sql_constraint_type
+{
+	SQL_UNIQUE,
+	SQL_PRIMARY_KEY,
+	SQL_FOREIGN_KEY,
+	SQL_CONSTRAINT_CHECK,
+};
+
+typedef struct sql_constraint_def sql_constraint_def;
+struct sql_constraint_def
+{
+	sql_constraint_type type;
+
+	// every constarint has a constraint name
+	dstring constraint_name;
+
+	// used for SQL_PRIMARY_KEY, SQL_UNIQUE and SQL_FORIEGN_KEY
+	arraylist column_list;
+
+	// used for SQL_FORIEGN_KEY
+	dstring foreign_table;
+	arraylist foreign_column_list;
+
+	// used for SQL_CONSTRAINT_CHECK
+	sql_expression* constraint_check;
+};
+
+typedef struct sql_table_element sql_table_element;
+struct sql_table_element
+{
+	sql_table_element_type type;
+
+	union
+	{
+		sql_column_def column_def;
+		sql_constraint_def constraint_def;
+	};
+};
+
+typedef struct sql_create_table sql_create_table;
+struct sql_create_table
+{
+	arraylist table_elements;
+};
+
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
@@ -57,6 +128,7 @@ struct sql_ddl
 	union
 	{
 		sql_create_schema create_schema_query;
+		sql_create_table create_table_query;
 	};
 
 	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column
