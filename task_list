@@ -1,8 +1,12 @@
 PICKED TASKS
 
+ * print for constraint_def
+  * rules for column_def wih column constraints
+ * rules for constraint_def
+  * you may use identifier_list rule here for unique, primary key and foreign key references
+
 DDL query
  * create queries
-	SQL_TABLE,
 	SQL_VIEW,
 	SQL_INDEX,
 	SQL_FUNCTION, // only create and drop for function and procedure
@@ -14,7 +18,7 @@ DDL query
  * alter queries
  	SQL_SCHEMA,
 	SQL_TABLE,
-	SQL_VIEW, // to change view query use drop and create, alter to nly rename OR change schema it belongs to
+	SQL_VIEW, // to change view query use drop and create, alter to only rename OR change schema it belongs to
 	SQL_INDEX, // only support -> ALTER INDEX idx_name RENAME TO new_idx_name
 	SQL_TYPE,
 	SQL_DOMAIN,
