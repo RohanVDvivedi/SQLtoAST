@@ -165,6 +165,12 @@
 
 (?i:AUTHORIZATION)		{return AUTHORIZATION;}
 
+(?i:CONSTRAINT) 				{return CONSTRAINT;}
+(?i:PRIMARY[[:space:]]+KEY)		{return PRIMARY_KEY;}
+(?i:FOREGN[[:space:]]+KEY)		{return FOREGN_KEY;}
+(?i:REFERENCES)					{return REFERENCES;}
+(?i:CHECK)						{return CHECK;}
+
 (?i:RESTRICT)			{return RESTRICT;}
 (?i:CASCADE)			{return CASCADE;}
 

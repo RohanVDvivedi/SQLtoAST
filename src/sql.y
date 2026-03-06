@@ -12,7 +12,7 @@ void destroy_relation_input(relation_input* ri_p);
 void delete_join_with(join_with* j);
 void delete_order_by(order_by* o);
 void delete_dstring(dstring* s);
-void delete_table_element(table_element* te_p);
+void delete_table_element(sql_table_element* te_p);
 #include<sqltoast/arraylist_deleter.h>
 %}
 
@@ -42,7 +42,7 @@ void delete_table_element(table_element* te_p);
 
 	sql_ddl* ddl_query;
 
-	table_element* tab_element;
+	sql_table_element* tab_element;
 
 	columns_to_be_set* attribute_assignment;
 
@@ -193,6 +193,13 @@ void delete_table_element(table_element* te_p);
 %type <ddl_query> drop_query
 %type <ddl_query> truncate_query
 
+%type <ptr_list> table_elements
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_table_element); } table_elements
+
+%type <tab_element> table_element
+%type <tab_element> column_def
+%type <tab_element> constraint_def
+
 %type <ddl_query> create_schema_query
 
 %type <uval> object_type
@@ -217,6 +224,12 @@ void delete_table_element(table_element* te_p);
 %token TRIGGER
 
 %token AUTHORIZATION
+
+%token CONSTRAINT
+%token PRIMARY_KEY
+%token FOREGN_KEY
+%token REFERENCES
+%token CHECK
 
 %token RESTRICT
 %token CASCADE
@@ -453,9 +466,24 @@ ddl_query :
 			| truncate_query 		{$$ = $1;}
 
 create_query :
-			CREATE CATALOG IDENTIFIER 						{$$ = new_ddl(CREATE_QUERY, SQL_CATALOG); $$->object_name = $3;}
-			| CREATE DATABASE IDENTIFIER 					{$$ = new_ddl(CREATE_QUERY, SQL_DATABASE); $$->object_name = $3;}
-			| create_schema_query							{$$ = $1;}
+			CREATE CATALOG IDENTIFIER 												{$$ = new_ddl(CREATE_QUERY, SQL_CATALOG); $$->object_name = $3;}
+			| CREATE DATABASE IDENTIFIER 											{$$ = new_ddl(CREATE_QUERY, SQL_DATABASE); $$->object_name = $3;}
+			| create_schema_query													{$$ = $1;}
+			| CREATE TABLE IDENTIFIER OPEN_BRACKET table_elements CLOSE_BRACKET 	{$$ = new_ddl(CREATE_QUERY, SQL_TABLE); $$->object_name = $3; $$->create_table_query.table_elements = $5;}
+
+table_elements :
+			table_element 								{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
+			| table_elements COMMA table_element 		{if(is_full_arraylist(&($1)) && !expand_arraylist(&($1))) exit(-1); push_back_to_arraylist(&($1), $3); $$ = $1;}
+
+table_element :
+			column_def 				{$$ = $1;}
+			| constraint_def 		{$$ = $1;}
+
+column_def :
+			IDENTIFIER type 		{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_COLUMN); $$->column_def.column_name = $1; $$->column_def.type = $2;}
+
+constraint_def :
+			CONSTRAINT IDENTIFIER 	{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_CONSTRAINT); $$->constraint_def.constraint_name = $2;}
 
 create_schema_query :
 					CREATE SCHEMA IDENTIFIER 											{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $3;}

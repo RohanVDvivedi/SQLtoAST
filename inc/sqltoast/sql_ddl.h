@@ -50,7 +50,7 @@ struct sql_column_def
 {
 	dstring column_name;
 
-	sql_type data_type;
+	sql_type type;
 
 	int is_not_null:1;
 	int is_primary_key:1;
@@ -103,9 +103,9 @@ struct sql_table_element
 	};
 };
 
-#define init_table_element(te_p, type) {                                           \
-	te_p->type = type;                                                             \
-	switch(type)                                                                   \
+#define init_table_element(te_p, _type) {                                           \
+	te_p->type = _type;                                                             \
+	switch(_type)                                                                   \
 	{                                                                              \
 		case SQL_COLUMN :                                                          \
 		{                                                                          \
