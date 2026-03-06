@@ -26,6 +26,7 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 				}
 				case SQL_TABLE :
 				{
+					initialize_arraylist(&(ddl->create_table_query.table_elements), 0);
 					break;
 				}
 				default :
@@ -212,6 +213,58 @@ void print_ddl(const sql_ddl* ddl)
 	printf(" )");
 }
 
+void delete_table_element(sql_table_element* table_element)
+{
+	switch(table_element->type)
+	{
+		case SQL_COLUMN :
+		{
+			sql_column_def* c = &(table_element->column_def);
+
+			deinit_dstring(&(c->column_name));
+			deinit_dstring(&(c->foreign_table));
+			deinit_dstring(&(c->foreign_column));
+			if(c->default_value)
+				delete_sql_expr(c->default_value);
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check)); i++)
+				delete_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check), i));
+			deinitialize_arraylist(&(c->constraint_check));
+
+			break;
+		}
+		case SQL_CONSTRAINT :
+		{
+			sql_constraint_def* c = &(table_element->constraint_def);
+
+			deinit_dstring(&(c->constraint_name));
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
+			{
+				dstring* col_name = (dstring*) get_from_front_of_arraylist(&(c->column_list), i);
+				deinit_dstring(col_name);
+				free(col_name);
+			}
+			deinitialize_arraylist(&(c->column_list));
+
+			deinit_dstring(&(c->foreign_table));
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->foreign_column_list)); i++)
+			{
+				dstring* col_name = (dstring*) get_from_front_of_arraylist(&(c->foreign_column_list), i);
+				deinit_dstring(col_name);
+				free(col_name);
+			}
+			deinitialize_arraylist(&(c->foreign_column_list));
+
+			if(c->constraint_check)
+				delete_sql_expr(c->constraint_check);
+
+			break;
+		}
+	}
+	free(table_element);
+}
+
 void delete_ddl(sql_ddl* ddl)
 {
 	switch(ddl->type)
@@ -223,6 +276,16 @@ void delete_ddl(sql_ddl* ddl)
 				case SQL_SCHEMA :
 				{
 					deinit_dstring(&(ddl->create_schema_query.authorization));
+					break;
+				}
+				case SQL_TABLE :
+				{
+					for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_table_query.table_elements)); i++)
+					{
+						sql_table_element* table_element = (sql_table_element*) get_from_front_of_arraylist(&(ddl->create_table_query.table_elements), i);
+						delete_table_element(table_element);
+					}
+					deinitialize_arraylist(&(ddl->create_table_query.table_elements));
 					break;
 				}
 				default :
