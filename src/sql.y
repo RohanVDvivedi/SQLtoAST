@@ -12,6 +12,7 @@ void destroy_relation_input(relation_input* ri_p);
 void delete_join_with(join_with* j);
 void delete_order_by(order_by* o);
 void delete_dstring(dstring* s);
+void delete_table_element(table_element* te_p);
 #include<sqltoast/arraylist_deleter.h>
 %}
 
@@ -40,6 +41,8 @@ void delete_dstring(dstring* s);
 	sql_dml* dml_query;
 
 	sql_ddl* ddl_query;
+
+	table_element* tab_element;
 
 	columns_to_be_set* attribute_assignment;
 
@@ -73,6 +76,7 @@ void delete_dstring(dstring* s);
 %destructor { delete_dql($$); } <dql_query>
 %destructor { delete_dml($$); } <dml_query>
 %destructor { delete_ddl($$); } <ddl_query>
+%destructor { delete_table_element($$); } <tab_element>
 %destructor { delete_columns_to_be_set($$); } <attribute_assignment>
 %destructor { delete_tcl($$); } <tcl_cmd>
 %destructor { delete_projection($$); } <projection>
