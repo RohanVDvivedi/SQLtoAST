@@ -171,6 +171,71 @@ void print_ddl(const sql_ddl* ddl)
 					}
 					break;
 				}
+				case SQL_TABLE :
+				{
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("( ");
+						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_table_query.table_elements)); i++)
+						{
+							if(i != 0)
+								printf(" , ");
+							const sql_table_element* te_p = get_from_front_of_arraylist(&(ddl->create_table_query.table_elements), i);
+							switch(te_p->type)
+							{
+								case SQL_COLUMN :
+								{
+									const sql_column_def* c = &(te_p->column_def);
+
+									printf_dstring(&(c->column_name));
+									printf(" ");
+									print_sql_type(&(c->type));
+									if(c->is_not_null)
+										printf(" NOT NULL ");
+									if(c->is_primary_key)
+										printf(" PRIMARY KEY ");
+									if(c->is_unique)
+										printf(" UNIQUE ");
+									if(c->is_foreign_key)
+									{
+										printf(" FOREIGN_REFERENCE ");
+										printf_dstring(&(c->foreign_table));
+										if(is_empty_dstring(&(c->foreign_column)))
+										{
+											printf("(");
+											printf_dstring(&(c->foreign_column));
+											printf(")");
+										}
+										printf(" ");
+									}
+									if(c->default_value)
+									{
+										printf(" DEFAULT ");
+										print_sql_expr(c->default_value);
+									}
+									for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check)); i++)
+									{
+										printf(" CHECK ( ");
+										print_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check), i));
+										printf(" )");
+									}
+									break;
+								}
+								case SQL_CONSTRAINT :
+								{
+									const sql_constraint_def* c = &(te_p->constraint_def);
+
+									printf_dstring(&(c->constraint_name));
+									break;
+								}
+							}
+						}
+						printf(" )");
+						clauses_printed++;
+					}
+					break;
+				}
 				default :
 				{
 					break;
