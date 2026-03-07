@@ -153,3 +153,13 @@ SELECT e.emp_name, d.dept_name FROM (SELECT emp_id,name,dept_id FROM employees W
 SELECT id, score, RANK(id) AS rnk FROM (VALUES (1,90),(2,85),(3,90),(4,70)) AS t (id,score)
 SELECT region, SUM(amount) FROM (SELECT region,amount FROM sales WHERE amount > 1000 UNION ALL SELECT region,amount FROM refunds) AS x (region,amount) GROUP BY region
 SELECT u.user_id, u.total_orders FROM (SELECT user_id,COUNT(*) FROM orders GROUP BY user_id) AS u (user_id,total_orders) WHERE u.total_orders >= 5
+CREATE TABLE users (id INT PRIMARY KEY NOT NULL, email VARCHAR(255) UNIQUE NOT NULL CHECK (email <> ''), age INT CHECK (age >= 13 AND age <= 120), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+CREATE TABLE accounts (account_id INT PRIMARY KEY, user_id INT NOT NULL REFERENCES users(id), balance DECIMAL(10,2) DEFAULT 0 CHECK (balance >= 0), status VARCHAR(20) NOT NULL CHECK (status IN ('active','suspended','closed')))
+CREATE TABLE orders (order_id INT PRIMARY KEY, user_id INT NOT NULL REFERENCES users(id), total INT NOT NULL CHECK (total >= 0), status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending','paid','shipped','cancelled')))
+CREATE TABLE order_items (order_id INT NOT NULL, product_id INT NOT NULL, quantity INT NOT NULL CHECK (quantity > 0), price INT NOT NULL CHECK (price >= 0), PRIMARY KEY (order_id, product_id), FOREIGN KEY (order_id) REFERENCES orders(order_id))
+CREATE TABLE products (product_id INT PRIMARY KEY, name VARCHAR(200) NOT NULL CHECK (name <> ''), price INT NOT NULL CHECK (price > 0), stock INT DEFAULT 0 CHECK (stock >= 0))
+CREATE TABLE enrollments (student_id INT NOT NULL, course_id INT NOT NULL, enrolled_at DATE DEFAULT CURRENT_DATE, grade INT CHECK (grade BETWEEN 0 AND 100), PRIMARY KEY (student_id, course_id), FOREIGN KEY (student_id) REFERENCES students(id), FOREIGN KEY (course_id) REFERENCES courses(id))
+CREATE TABLE payments (payment_id INT PRIMARY KEY, order_id INT NOT NULL REFERENCES orders(order_id), amount INT NOT NULL CHECK (amount > 0), method VARCHAR(20) CHECK (method IN ('card','cash','transfer')))
+CREATE TABLE inventory (product_id INT NOT NULL REFERENCES products(product_id), warehouse_id INT NOT NULL, quantity INT DEFAULT 0 CHECK (quantity >= 0), PRIMARY KEY (product_id, warehouse_id))
+CREATE TABLE employees (id INT PRIMARY KEY, manager_id INT REFERENCES employees(id), salary INT NOT NULL CHECK (salary > 0), age INT CHECK (age >= 18), department VARCHAR(50) NOT NULL)
+CREATE TABLE shipments (shipment_id INT PRIMARY KEY, order_id INT NOT NULL REFERENCES orders(order_id), shipped_at DATE, delivered_at DATE, CHECK (delivered_at IS NULL OR delivered_at >= shipped_at))
