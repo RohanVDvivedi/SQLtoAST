@@ -60,7 +60,7 @@ struct sql_column_def
 	dstring foreign_column; // if absent, you are bound to reference the primary key of the foreign_table
 	// TODO: add on delete/update clauses
 	sql_expression* default_value;
-	arraylist constraint_check;
+	arraylist constraint_check_exprs;
 };
 
 typedef enum sql_constraint_type sql_constraint_type;
@@ -88,7 +88,7 @@ struct sql_constraint_def
 	arraylist foreign_column_list;
 
 	// used for SQL_CONSTRAINT_CHECK
-	sql_expression* constraint_check;
+	sql_expression* constraint_check_expr;
 };
 
 typedef struct sql_table_element sql_table_element;
@@ -103,9 +103,9 @@ struct sql_table_element
 	};
 };
 
-#define init_table_element(te_p, _type) {                                           \
-	te_p->type = _type;                                                             \
-	switch(_type)                                                                   \
+#define init_table_element(te_p, _type) {                                          \
+	te_p->type = _type;                                                            \
+	switch(_type)                                                                  \
 	{                                                                              \
 		case SQL_COLUMN :                                                          \
 		{                                                                          \
@@ -113,7 +113,7 @@ struct sql_table_element
 			init_empty_dstring(&(te_p->column_def.foreign_table), 0);              \
 			init_empty_dstring(&(te_p->column_def.foreign_column), 0);             \
 			te_p->column_def.default_value = NULL;                                 \
-			initialize_arraylist(&(te_p->column_def.constraint_check), 0);         \
+			initialize_arraylist(&(te_p->column_def.constraint_check_exprs), 0);   \
 			break;                                                                 \
 		}                                                                          \
 		case SQL_CONSTRAINT :                                                      \
@@ -122,7 +122,7 @@ struct sql_table_element
 			initialize_arraylist(&(te_p->constraint_def.column_list), 0);          \
 			init_empty_dstring(&(te_p->constraint_def.foreign_table), 0);          \
 			initialize_arraylist(&(te_p->constraint_def.foreign_column_list), 0);  \
-			te_p->constraint_def.constraint_check = NULL;                          \
+			te_p->constraint_def.constraint_check_expr = NULL;                     \
 			break;                                                                 \
 		}                                                                          \
 	}                                                                              \

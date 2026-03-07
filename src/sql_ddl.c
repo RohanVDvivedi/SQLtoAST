@@ -214,10 +214,10 @@ void print_ddl(const sql_ddl* ddl)
 										printf(" DEFAULT ");
 										print_sql_expr(c->default_value);
 									}
-									for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check)); i++)
+									for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check_exprs)); i++)
 									{
 										printf(" CHECK ( ");
-										print_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check), i));
+										print_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
 										printf(" )");
 									}
 									break;
@@ -226,7 +226,58 @@ void print_ddl(const sql_ddl* ddl)
 								{
 									const sql_constraint_def* c = &(te_p->constraint_def);
 
+									printf(" CONSTRAINT ");
+
 									printf_dstring(&(c->constraint_name));
+
+									switch(c->type)
+									{
+										case SQL_UNIQUE :
+										{
+											printf(" UNIQUE_CONSTRAINT ");
+											printf_dstring(&(c->constraint_name));
+											printf(" ( ");
+											for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
+												printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
+											printf(" )");
+											break;
+										}
+										case SQL_PRIMARY_KEY :
+										{
+											printf(" PRIMARY_KEY_CONSTRAINT ");
+											printf_dstring(&(c->constraint_name));
+											printf(" ( ");
+											for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
+												printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
+											printf(" )");
+											break;
+										}
+										case SQL_FOREIGN_KEY :
+										{
+											printf(" FOREIGN_KEY_CONSTRAINT ");
+											printf_dstring(&(c->constraint_name));
+											printf(" ( ");
+											for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
+												printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
+											printf(" ) ");
+											printf_dstring(&(c->foreign_table));
+											printf(" ( ");
+											for(cy_uint i = 0; i < get_element_count_arraylist(&(c->foreign_column_list)); i++)
+												printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->foreign_column_list), i));
+											printf(" )");
+											break;
+										}
+										case SQL_CONSTRAINT_CHECK :
+										{
+											printf(" CHECK_CONSTRAINT ");
+											printf_dstring(&(c->constraint_name));
+											printf(" ( ");
+											print_sql_expr(c->constraint_check_expr);
+											printf(" )");
+											break;
+										}
+									}
+
 									break;
 								}
 							}
@@ -291,9 +342,9 @@ void delete_table_element(sql_table_element* table_element)
 			deinit_dstring(&(c->foreign_column));
 			if(c->default_value)
 				delete_sql_expr(c->default_value);
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check)); i++)
-				delete_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check), i));
-			deinitialize_arraylist(&(c->constraint_check));
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check_exprs)); i++)
+				delete_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
+			deinitialize_arraylist(&(c->constraint_check_exprs));
 
 			break;
 		}
@@ -321,8 +372,8 @@ void delete_table_element(sql_table_element* table_element)
 			}
 			deinitialize_arraylist(&(c->foreign_column_list));
 
-			if(c->constraint_check)
-				delete_sql_expr(c->constraint_check);
+			if(c->constraint_check_expr)
+				delete_sql_expr(c->constraint_check_expr);
 
 			break;
 		}
