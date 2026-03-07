@@ -483,12 +483,12 @@ table_element :
 
 column_def :
 			IDENTIFIER type 																	{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_COLUMN); $$->column_def.column_name = $1; $$->column_def.type = $2;}
-			| column_def L_NOT _NULL_ 															{if($1->column_def.is_not_null){YYERROR;}            $1->column_def.is_not_null = 1; $$ = $1;}
-			| column_def PRIMARY_KEY 															{if($1->column_def.is_primary_key){YYERROR;}         $1->column_def.is_primary_key = 1; $$ = $1;}
-			| column_def UNIQUE 																{if($1->column_def.is_unique){YYERROR;}              $1->column_def.is_unique = 1; $$ = $1;}
-			| column_def REFERENCES IDENTIFIER OPEN_BRACKET IDENTIFIER CLOSE_BRACKET 			{if($1->column_def.is_foreign_key){YYERROR;}         $1->column_def.is_foreign_key = 1; $$->column_def.foreign_table = $3; $$->column_def.foreign_column = $5; $$ = $1;}
-			| column_def REFERENCES IDENTIFIER  												{if($1->column_def.is_foreign_key){YYERROR;}         $1->column_def.is_foreign_key = 1; $$->column_def.foreign_table = $3; $$ = $1;}
-			| column_def DEFAULT expr 															{if($1->column_def.default_value != NULL){YYERROR;}  $1->column_def.default_value = $3; $$ = $1;}
+			| column_def L_NOT _NULL_ 															{if($1->column_def.is_not_null){delete_table_element($1); YYABORT;}            $1->column_def.is_not_null = 1; $$ = $1;}
+			| column_def PRIMARY_KEY 															{if($1->column_def.is_primary_key){delete_table_element($1); YYABORT;}         $1->column_def.is_primary_key = 1; $$ = $1;}
+			| column_def UNIQUE 																{if($1->column_def.is_unique){delete_table_element($1); YYABORT;}              $1->column_def.is_unique = 1; $$ = $1;}
+			| column_def REFERENCES IDENTIFIER OPEN_BRACKET IDENTIFIER CLOSE_BRACKET 			{if($1->column_def.is_foreign_key){delete_table_element($1); deinit_dstring(&($3)); deinit_dstring(&($5)); YYABORT;}         $1->column_def.is_foreign_key = 1; $$->column_def.foreign_table = $3; $$->column_def.foreign_column = $5; $$ = $1;}
+			| column_def REFERENCES IDENTIFIER  												{if($1->column_def.is_foreign_key){delete_table_element($1); deinit_dstring(&($3)); YYABORT;}         $1->column_def.is_foreign_key = 1; $$->column_def.foreign_table = $3; $$ = $1;}
+			| column_def DEFAULT expr 															{if($1->column_def.default_value != NULL){delete_table_element($1); delete_sql_expr($3); YYABORT;}  $1->column_def.default_value = $3; $$ = $1;}
 			| column_def CHECK OPEN_BRACKET expr CLOSE_BRACKET 									{if(is_full_arraylist(&($1->column_def.constraint_check_exprs)) && !expand_arraylist(&($1->column_def.constraint_check_exprs))) exit(-1); push_back_to_arraylist(&($1->column_def.constraint_check_exprs), $4); $$ = $1;}
 
 constraint_def :
