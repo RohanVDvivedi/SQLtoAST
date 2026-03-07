@@ -1,10 +1,5 @@
 PICKED TASKS
 
- * print for constraint_def
-  * rules for column_def wih column constraints
- * rules for constraint_def
-  * you may use identifier_list rule here for unique, primary key and foreign key references
-
 DDL query
  * create queries
 	SQL_VIEW,
