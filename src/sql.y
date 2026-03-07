@@ -202,6 +202,8 @@ void delete_table_element(sql_table_element* te_p);
 
 %type <ddl_query> create_schema_query
 
+%type <sval> constraint_name_opt
+
 %type <uval> object_type
 %type <uval> drop_behavior
 
@@ -227,7 +229,7 @@ void delete_table_element(sql_table_element* te_p);
 
 %token CONSTRAINT
 %token PRIMARY_KEY
-%token FOREGN_KEY
+%token FOREIGN_KEY
 %token REFERENCES
 %token CHECK
 
@@ -490,7 +492,14 @@ column_def :
 			| column_def CHECK OPEN_BRACKET expr CLOSE_BRACKET 									{if(is_full_arraylist(&($1->column_def.constraint_check_exprs)) && !expand_arraylist(&($1->column_def.constraint_check_exprs))) exit(-1); push_back_to_arraylist(&($1->column_def.constraint_check_exprs), $4); $$ = $1;}
 
 constraint_def :
-			CONSTRAINT IDENTIFIER 	{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_CONSTRAINT); $$->constraint_def.constraint_name = $2;}
+			constraint_name_opt PRIMARY_KEY OPEN_BRACKET identifier_list CLOSE_BRACKET																			{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_CONSTRAINT); $$->constraint_def.type = SQL_PRIMARY_KEY; $$->constraint_def.constraint_name = $1; $$->constraint_def.column_list = $4;}
+			| constraint_name_opt UNIQUE OPEN_BRACKET identifier_list CLOSE_BRACKET																				{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_CONSTRAINT); $$->constraint_def.type = SQL_UNIQUE_KEY; $$->constraint_def.constraint_name = $1; $$->constraint_def.column_list = $4;}
+			| constraint_name_opt FOREIGN_KEY OPEN_BRACKET identifier_list CLOSE_BRACKET REFERENCES IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET		{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_CONSTRAINT); $$->constraint_def.type = SQL_FOREIGN_KEY; $$->constraint_def.constraint_name = $1; $$->constraint_def.column_list = $4; $$->constraint_def.foreign_table = $7; $$->constraint_def.foreign_column_list = $9;}
+			| constraint_name_opt CHECK OPEN_BRACKET expr CLOSE_BRACKET 																						{$$ = malloc(sizeof(sql_table_element)); init_table_element($$, SQL_CONSTRAINT); $$->constraint_def.type = SQL_CONSTRAINT_CHECK; $$->constraint_def.constraint_name = $1; $$->constraint_def.constraint_check_expr = $4;}
+
+constraint_name_opt :
+										{init_empty_dstring(&($$), 0);}
+			| CONSTRAINT IDENTIFIER 	{$$ = $2;}
 
 create_schema_query :
 					CREATE SCHEMA IDENTIFIER 											{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $3;}

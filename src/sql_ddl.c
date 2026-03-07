@@ -232,9 +232,9 @@ void print_ddl(const sql_ddl* ddl)
 
 									switch(c->type)
 									{
-										case SQL_UNIQUE :
+										case SQL_UNIQUE_KEY :
 										{
-											printf(" UNIQUE_CONSTRAINT ");
+											printf(" UNIQUE_KEY_CONSTRAINT ");
 											printf_dstring(&(c->constraint_name));
 											printf(" ( ");
 											for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)

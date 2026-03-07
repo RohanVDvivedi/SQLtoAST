@@ -66,7 +66,7 @@ struct sql_column_def
 typedef enum sql_constraint_type sql_constraint_type;
 enum sql_constraint_type
 {
-	SQL_UNIQUE,
+	SQL_UNIQUE_KEY,
 	SQL_PRIMARY_KEY,
 	SQL_FOREIGN_KEY,
 	SQL_CONSTRAINT_CHECK,
@@ -80,7 +80,7 @@ struct sql_constraint_def
 	// every constarint has a constraint name
 	dstring constraint_name;
 
-	// used for SQL_PRIMARY_KEY, SQL_UNIQUE and SQL_FORIEGN_KEY
+	// used for SQL_PRIMARY_KEY, SQL_UNIQUE_KEY and SQL_FORIEGN_KEY
 	arraylist column_list;
 
 	// used for SQL_FORIEGN_KEY
@@ -103,29 +103,29 @@ struct sql_table_element
 	};
 };
 
-#define init_table_element(te_p, _type) {                                          \
-	te_p->type = _type;                                                            \
-	switch(_type)                                                                  \
-	{                                                                              \
-		case SQL_COLUMN :                                                          \
-		{                                                                          \
-			init_empty_dstring(&(te_p->column_def.column_name), 0);                \
-			init_empty_dstring(&(te_p->column_def.foreign_table), 0);              \
-			init_empty_dstring(&(te_p->column_def.foreign_column), 0);             \
-			te_p->column_def.default_value = NULL;                                 \
-			initialize_arraylist(&(te_p->column_def.constraint_check_exprs), 0);   \
-			break;                                                                 \
-		}                                                                          \
-		case SQL_CONSTRAINT :                                                      \
-		{                                                                          \
-			init_empty_dstring(&(te_p->constraint_def.constraint_name), 0);        \
-			initialize_arraylist(&(te_p->constraint_def.column_list), 0);          \
-			init_empty_dstring(&(te_p->constraint_def.foreign_table), 0);          \
-			initialize_arraylist(&(te_p->constraint_def.foreign_column_list), 0);  \
-			te_p->constraint_def.constraint_check_expr = NULL;                     \
-			break;                                                                 \
-		}                                                                          \
-	}                                                                              \
+#define init_table_element(te_p, _type) {                                            \
+	(te_p)->type = _type;                                                            \
+	switch(_type)                                                                    \
+	{                                                                                \
+		case SQL_COLUMN :                                                            \
+		{                                                                            \
+			init_empty_dstring(&((te_p)->column_def.column_name), 0);                \
+			init_empty_dstring(&((te_p)->column_def.foreign_table), 0);              \
+			init_empty_dstring(&((te_p)->column_def.foreign_column), 0);             \
+			(te_p)->column_def.default_value = NULL;                                 \
+			initialize_arraylist(&((te_p)->column_def.constraint_check_exprs), 0);   \
+			break;                                                                   \
+		}                                                                            \
+		case SQL_CONSTRAINT :                                                        \
+		{                                                                            \
+			init_empty_dstring(&((te_p)->constraint_def.constraint_name), 0);        \
+			initialize_arraylist(&((te_p)->constraint_def.column_list), 0);          \
+			init_empty_dstring(&((te_p)->constraint_def.foreign_table), 0);          \
+			initialize_arraylist(&((te_p)->constraint_def.foreign_column_list), 0);  \
+			(te_p)->constraint_def.constraint_check_expr = NULL;                     \
+			break;                                                                   \
+		}                                                                            \
+	}                                                                                \
 }
 
 typedef struct sql_create_table sql_create_table;

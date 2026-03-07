@@ -167,7 +167,7 @@
 
 (?i:CONSTRAINT) 				{return CONSTRAINT;}
 (?i:PRIMARY[[:space:]]+KEY)		{return PRIMARY_KEY;}
-(?i:FOREGN[[:space:]]+KEY)		{return FOREGN_KEY;}
+(?i:FOREIGN[[:space:]]+KEY)		{return FOREIGN_KEY;}
 (?i:REFERENCES)					{return REFERENCES;}
 (?i:CHECK)						{return CHECK;}
 
