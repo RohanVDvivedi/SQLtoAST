@@ -110,6 +110,10 @@ struct sql_table_element
 		case SQL_COLUMN :                                                            \
 		{                                                                            \
 			init_empty_dstring(&((te_p)->column_def.column_name), 0);                \
+			&(te_p)->column_def.is_not_null = 0;                                     \
+			&(te_p)->column_def.is_primary_key = 0;                                  \
+			&(te_p)->column_def.is_unique = 0;                                       \
+			&(te_p)->column_def.is_foreign_key = 0;                                  \
 			init_empty_dstring(&((te_p)->column_def.foreign_table), 0);              \
 			init_empty_dstring(&((te_p)->column_def.foreign_column), 0);             \
 			(te_p)->column_def.default_value = NULL;                                 \
