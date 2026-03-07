@@ -271,7 +271,7 @@ void print_ddl(const sql_ddl* ddl)
 													printf(" , ");
 												printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 											}
-											printf(" ) ");
+											printf(" ) REFERENCES ");
 											printf_dstring(&(c->foreign_table));
 											printf(" ( ");
 											for(cy_uint i = 0; i < get_element_count_arraylist(&(c->foreign_column_list)); i++)
