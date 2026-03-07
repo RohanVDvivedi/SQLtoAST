@@ -23,6 +23,7 @@ DDL query
 TO BE PICKED TASKS
 
 * add WITH keywork usage
+* column_definition in create table, the constraint may be allowed to have an optional name
 
 * make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
 
