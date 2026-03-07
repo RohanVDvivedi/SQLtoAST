@@ -201,7 +201,7 @@ void print_ddl(const sql_ddl* ddl)
 									{
 										printf(" FOREIGN_REFERENCE ");
 										printf_dstring(&(c->foreign_table));
-										if(is_empty_dstring(&(c->foreign_column)))
+										if(!is_empty_dstring(&(c->foreign_column)))
 										{
 											printf("(");
 											printf_dstring(&(c->foreign_column));
