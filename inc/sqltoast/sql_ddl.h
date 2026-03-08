@@ -159,7 +159,7 @@ struct sql_create_view
 	// initialized to NULL, but must be present in successfully parsed query
 	dql_query* view_query;
 
-	int with_check_option;
+	sql_view_check_option check_option;
 };
 
 typedef enum sql_drop_behavior sql_drop_behavior;
@@ -182,6 +182,7 @@ struct sql_ddl
 	{
 		sql_create_schema create_schema_query;
 		sql_create_table create_table_query;
+		sql_create_view create_view_query;
 	};
 
 	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column

@@ -29,6 +29,12 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 					initialize_arraylist(&(ddl->create_table_query.table_elements), 0);
 					break;
 				}
+				case SQL_VIEW :
+				{
+					initialize_arraylist(&(ddl->create_view_query.column_list), 0);
+					ddl->create_view_query.view_query = NULL;
+					break;
+				}
 				default :
 				{
 					break;
@@ -176,7 +182,7 @@ void print_ddl(const sql_ddl* ddl)
 					{
 						if(clauses_printed != 0)
 							printf(" , ");
-						printf("( ");
+						printf("table_elements = ( ");
 						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_table_query.table_elements)); i++)
 						{
 							if(i != 0)
@@ -303,6 +309,57 @@ void print_ddl(const sql_ddl* ddl)
 					}
 					break;
 				}
+				case SQL_VIEW :
+				{
+					if(get_element_count_arraylist(&(ddl->create_view_query.column_list)) > 0)
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("column_list = ( ");
+						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_view_query.column_list)); i++)
+						{
+							if(i != 0)
+								printf(" , ");
+							printf_dstring((const dstring*)get_from_front_of_arraylist(&(ddl->create_view_query.column_list), i));
+						}
+						printf(" )");
+						clauses_printed++;
+					}
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("view_query = ( ");
+						print_dql(ddl->create_view_query.view_query);
+						printf(" )");
+						clauses_printed++;
+					}
+					if(ddl->create_view_query.check_option != CHECK_OPTION_NONE)
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("check_option = ");
+						switch(ddl->create_view_query.check_option)
+						{
+							case CHECK_OPTION_NONE :
+							{
+								printf("NONE");
+								break;
+							}
+							case CHECK_OPTION_LOCAL :
+							{
+								printf("LOCAL");
+								break;
+							}
+							case CHECK_OPTION_CASCADED :
+							{
+								printf("CASCADED");
+								break;
+							}
+						}
+						clauses_printed++;
+					}
+					break;
+				}
 				default :
 				{
 					break;
@@ -418,6 +475,18 @@ void delete_ddl(sql_ddl* ddl)
 						delete_table_element(table_element);
 					}
 					deinitialize_arraylist(&(ddl->create_table_query.table_elements));
+					break;
+				}
+				case SQL_VIEW :
+				{
+					for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_view_query.column_list)); i++)
+					{
+						dstring* c = (dstring*) get_from_front_of_arraylist(&(ddl->create_view_query.column_list), i);
+						deinit_dstring(c);
+						free(c);
+					}
+					deinitialize_arraylist(&(ddl->create_view_query.column_list));
+					delete_dql(ddl->create_view_query.view_query);
 					break;
 				}
 				default :
