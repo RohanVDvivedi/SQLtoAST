@@ -163,6 +163,24 @@ struct sql_create_view
 	sql_view_check_option check_option;
 };
 
+typedef order_by index_key_expr;
+
+typedef struct sql_create_index sql_create_index;
+struct sql_create_index
+{
+	int is_unique; // if it is a unique for the key_exprs
+
+	dstring table_name; // on clause
+
+	arraylist key_exprs; // array of index_key_expr structs, same as order_by struct in sql_dql.h
+
+	arraylist include_expr; // additional columns that get stored as value for the index
+
+	sql_expression* where_expr; // for partial indexing, index column only if the where_expr resolved into tre
+
+	dstring using_index_type; // btree, hash, rtree, inverted
+};
+
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
@@ -184,6 +202,7 @@ struct sql_ddl
 		sql_create_schema create_schema_query;
 		sql_create_table create_table_query;
 		sql_create_view create_view_query;
+		sql_create_index create_index_query;
 	};
 
 	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column
