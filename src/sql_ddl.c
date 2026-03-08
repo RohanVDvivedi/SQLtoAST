@@ -371,6 +371,66 @@ void print_ddl(const sql_ddl* ddl)
 					}
 					break;
 				}
+				case SQL_INDEX :
+				{
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("on_table = ");
+						printf_dstring(&(ddl->create_index_query.table_name));
+						clauses_printed++;
+					}
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("keys = ( ");
+						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_index_query.key_exprs)); i++)
+						{
+							if(i != 0)
+								printf(" , ");
+							index_key_expr* k = (index_key_expr*) get_from_front_of_arraylist(&(ddl->create_index_query.key_exprs), i);
+							printf("( ( ");
+							print_sql_expr(k->ordering_expr);
+							printf(" ) in %s order )", ((k->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
+						}
+						clauses_printed++;
+					}
+					if(get_element_count_arraylist(&(ddl->create_index_query.include_exprs)) > 0)
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("include = ( ");
+						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_index_query.include_exprs)); i++)
+						{
+							if(i != 0)
+								printf(" , ");
+							sql_expression* x = (sql_expression*) get_from_front_of_arraylist(&(ddl->create_index_query.include_exprs), i);
+							printf("( ");
+							print_sql_expr(x);
+							printf(" )");
+						}
+						printf(" )");
+						clauses_printed++;
+					}
+					if(ddl->create_index_query.where_expr != NULL)
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("where = ( ");
+						printf_dstring(&(ddl->create_index_query.table_name));
+						printf(" )");
+						clauses_printed++;
+					}
+					if(!is_empty_dstring(&(ddl->create_index_query.using_index_type)))
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("using_index_type = ");
+						printf_dstring(&(ddl->create_index_query.using_index_type));
+						clauses_printed++;
+					}
+					break;
+				}
 				default :
 				{
 					break;
