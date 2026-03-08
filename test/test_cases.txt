@@ -168,3 +168,13 @@ CREATE VIEW working_age_users AS SELECT id, name, age FROM users WHERE age >= 18
 CREATE VIEW user_order_summary (user_id, order_count, total_spent) AS SELECT user_id, COUNT(*), SUM(total) FROM orders WHERE status = 'paid' GROUP BY user_id
 CREATE VIEW product_inventory_status (product_id, product_name, stock_value) AS SELECT p.product_id, p.name, p.price * i.quantity FROM products p JOIN inventory i ON p.product_id = i.product_id WHERE i.quantity >= 0 WITH CASCADED CHECK OPTION
 CREATE VIEW high_value_orders AS SELECT order_id, user_id, total FROM orders WHERE total > (SELECT AVG(total) FROM orders)
+CREATE UNIQUE INDEX idx_users_email_active ON users (LOWER(email) ASC) WHERE status = 'active' USING btree
+CREATE INDEX idx_orders_user_status_date ON orders (user_id, status ASC, created_at DESC) INCLUDE (total_amount, tax) USING btree
+CREATE INDEX idx_products_price_stock_expr ON products ((price * stock) DESC, category_id) WHERE stock > 0
+CREATE UNIQUE INDEX idx_accounts_user_currency ON accounts (user_id ASC, currency DESC) INCLUDE (balance) USING hash
+CREATE INDEX idx_employees_dept_salary ON employees (department ASC, salary DESC) WHERE salary > 50000 INCLUDE (age, manager_id)
+CREATE INDEX idx_orders_expr_total ON orders ((subtotal + tax + shipping) DESC) USING btree
+CREATE INDEX idx_inventory_lookup ON inventory (product_id, warehouse_id ASC) WHERE quantity > 10 USING hash
+CREATE UNIQUE INDEX idx_payments_method_amount ON payments (method ASC, amount DESC) INCLUDE (payment_id, order_id) USING inverted
+CREATE INDEX idx_shipments_delivery_check ON shipments ((delivered_at - shipped_at) DESC) WHERE delivered_at IS NOT NULL INCLUDE (shipment_id) USING rtree
+CREATE INDEX idx_users_name_age_mix ON users (last_name ASC, first_name ASC, age DESC) WHERE age >= 18 INCLUDE (email, created_at) USING btree

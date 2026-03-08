@@ -399,6 +399,7 @@ void print_ddl(const sql_ddl* ddl)
 							print_sql_expr(k->ordering_expr);
 							printf(" ) in %s order )", ((k->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
 						}
+						printf(" )");
 						clauses_printed++;
 					}
 					if(get_element_count_arraylist(&(ddl->create_index_query.include_exprs)) > 0)
