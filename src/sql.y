@@ -531,9 +531,9 @@ view_check_option_opt :
 
 create_index_query :
 					CREATE unique_index_opt INDEX IDENTIFIER ON IDENTIFIER OPEN_BRACKET order_by_expr_and_dir_list CLOSE_BRACKET 	{$$ = new_ddl(CREATE_QUERY, SQL_INDEX); $$->object_name = $4; $$->create_index_query.is_unique = $2; $$->create_index_query.table_name = $6; $$->create_index_query.key_exprs = $8;}
-					| create_index_query INCLUDE OPEN_BRACKET expr_list CLOSE_BRACKET 								{if(get_element_count_arraylist(&($1->create_index_query.include_exprs))){delete_ddl($1); delete_all_and_deinitialize_arraylist_1d(&($4), (void(*)(void*))delete_sql_expr);} $1->create_index_query.include_exprs = $4; $$ = $1;}
-					| create_index_query WHERE expr 																	{if($1->create_index_query.where_expr != NULL){delete_ddl($1); delete_sql_expr($3);} $1->create_index_query.where_expr = $3; $$ = $1;}
-					| create_index_query USING IDENTIFIER 															{if(!is_empty_dstring(&($1->create_index_query.using_index_type))){delete_ddl($1); deinit_dstring(&($3));} $1->create_index_query.using_index_type = $3; $$ = $1;}
+					| create_index_query INCLUDE OPEN_BRACKET expr_list CLOSE_BRACKET 								{if(get_element_count_arraylist(&($1->create_index_query.include_exprs)) > 0){delete_ddl($1); delete_all_and_deinitialize_arraylist_1d(&($4), (void(*)(void*))delete_sql_expr); YYABORT;} $1->create_index_query.include_exprs = $4; $$ = $1;}
+					| create_index_query WHERE expr 																	{if($1->create_index_query.where_expr != NULL){delete_ddl($1); delete_sql_expr($3); YYABORT;} $1->create_index_query.where_expr = $3; $$ = $1;}
+					| create_index_query USING IDENTIFIER 															{if(!is_empty_dstring(&($1->create_index_query.using_index_type))){delete_ddl($1); deinit_dstring(&($3)); YYABORT;} $1->create_index_query.using_index_type = $3; $$ = $1;}
 
 unique_index_opt :
 								{$$ = 0;}
