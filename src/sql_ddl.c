@@ -417,7 +417,7 @@ void print_ddl(const sql_ddl* ddl)
 						if(clauses_printed != 0)
 							printf(" , ");
 						printf("where = ( ");
-						printf_sql_expr(ddl->create_index_query.where_expr);
+						print_sql_expr(ddl->create_index_query.where_expr);
 						printf(" )");
 						clauses_printed++;
 					}
