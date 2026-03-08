@@ -376,6 +376,12 @@ void print_ddl(const sql_ddl* ddl)
 					{
 						if(clauses_printed != 0)
 							printf(" , ");
+						printf("is_unique = %d", !!(ddl->create_index_query.is_unique));
+						clauses_printed++;
+					}
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
 						printf("on_table = ");
 						printf_dstring(&(ddl->create_index_query.table_name));
 						clauses_printed++;
