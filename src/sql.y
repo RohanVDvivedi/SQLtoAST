@@ -521,8 +521,8 @@ create_view_query :
 view_check_option_opt :
 														{$$ = CHECK_OPTION_NONE;}
 					| WITH CHECK OPTION  				{$$ = CHECK_OPTION_CASCADED;}
-					| WITH CHECK LOCAL OPTION  			{$$ = CHECK_OPTION_LOCAL;}
-					| WITH CHECK CASCADED OPTION  		{$$ = CHECK_OPTION_CASCADED;}
+					| WITH LOCAL CHECK OPTION  			{$$ = CHECK_OPTION_LOCAL;}
+					| WITH CASCADED CHECK OPTION  		{$$ = CHECK_OPTION_CASCADED;}
 
 drop_query :
 			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}
