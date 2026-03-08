@@ -1,6 +1,7 @@
 #ifndef SQL_DDL_H
 #define SQL_DDL_H
 
+#include<sqltoast/sql_dql.h>
 #include<sqltoast/sql_expression.h>
 
 typedef enum sql_ddl_type sql_ddl_type;
@@ -157,7 +158,7 @@ struct sql_create_view
 	arraylist column_list;
 
 	// initialized to NULL, but must be present in successfully parsed query
-	dql_query* view_query;
+	sql_dql* view_query;
 
 	sql_view_check_option check_option;
 };

@@ -201,11 +201,13 @@ void delete_table_element(sql_table_element* te_p);
 %type <tab_element> constraint_def
 
 %type <ddl_query> create_schema_query
+%type <ddl_query> create_view_query
 
 %type <sval> constraint_name_opt
 
 %type <uval> object_type
 %type <uval> drop_behavior
+%type <uval> view_check_option_opt
 
 %token CREATE
 %token DROP
@@ -232,6 +234,10 @@ void delete_table_element(sql_table_element* te_p);
 %token FOREIGN_KEY
 %token REFERENCES
 %token CHECK
+
+%token OPTION
+%token LOCAL
+%token CASCADED
 
 %token RESTRICT
 %token CASCADE
@@ -377,8 +383,9 @@ void delete_table_element(sql_table_element* te_p);
 %token TIME
 %token TIMESTAMP
 
-%token WITH_TZ
-%token WITHOUT_TZ
+%token WITH
+%token WITHOUT
+%token ZONE
 
 /* Precedence + Associativity */
 
@@ -472,6 +479,7 @@ create_query :
 			| CREATE DATABASE IDENTIFIER 											{$$ = new_ddl(CREATE_QUERY, SQL_DATABASE); $$->object_name = $3;}
 			| create_schema_query													{$$ = $1;}
 			| CREATE TABLE IDENTIFIER OPEN_BRACKET table_elements CLOSE_BRACKET 	{$$ = new_ddl(CREATE_QUERY, SQL_TABLE); $$->object_name = $3; $$->create_table_query.table_elements = $5;}
+			| create_view_query 													{$$ = $1;}
 
 table_elements :
 			table_element 								{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
@@ -505,6 +513,16 @@ create_schema_query :
 					CREATE SCHEMA IDENTIFIER 											{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $3;}
 					| CREATE SCHEMA IDENTIFIER AUTHORIZATION IDENTIFIER					{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $3; $$->create_schema_query.authorization = $5;}
 					| CREATE SCHEMA AUTHORIZATION IDENTIFIER 							{$$ = new_ddl(CREATE_QUERY, SQL_SCHEMA); $$->object_name = $4; init_copy_dstring(&($$->create_schema_query.authorization), &($4));}
+
+create_view_query :
+					CREATE VIEW IDENTIFIER AS dql_query view_check_option_opt 			{$$ = new_ddl(CREATE_QUERY, SQL_VIEW); $$->object_name = $3; $$->create_view_query.view_query = $5; $$->create_view_query.check_option = $6;}
+					| CREATE VIEW IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET AS dql_query view_check_option_opt 			{$$ = new_ddl(CREATE_QUERY, SQL_VIEW); $$->object_name = $3; $$->create_view_query.column_list = $5; $$->create_view_query.view_query = $8; $$->create_view_query.check_option = $9;}
+
+view_check_option_opt :
+														{$$ = CHECK_OPTION_NONE;}
+					| WITH CHECK OPTION  				{$$ = CHECK_OPTION_CASCADED;}
+					| WITH CHECK LOCAL OPTION  			{$$ = CHECK_OPTION_LOCAL;}
+					| WITH CHECK CASCADED OPTION  		{$$ = CHECK_OPTION_CASCADED;}
 
 drop_query :
 			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}
@@ -835,9 +853,9 @@ type_specs : 																												{$$.spec_size = 0;}
 
 type_spec : INTEGER  			{unsigned long long int res = 0; get_unsigned_long_long_int_from_dstring(&($1), 10, &res); $$ = res; deinit_dstring(&($1));}
 
-type_with_or_without_timezone : 						{$$.with_time_zone = 0;}
-									| WITH_TZ 			{$$.with_time_zone = 1;}
-									| WITHOUT_TZ 		{$$.with_time_zone = 0;}
+type_with_or_without_timezone : 								{$$.with_time_zone = 0;}
+									| WITH TIME ZONE 			{$$.with_time_zone = 1;}
+									| WITHOUT TIME ZONE 		{$$.with_time_zone = 0;}
 
 %%
 

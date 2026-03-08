@@ -171,6 +171,10 @@
 (?i:REFERENCES)					{return REFERENCES;}
 (?i:CHECK)						{return CHECK;}
 
+(?i:OPTION)				{return OPTION;}
+(?i:LOCAL)				{return LOCAL;}
+(?i:CASCADED)			{return CASCADED;}
+
 (?i:RESTRICT)			{return RESTRICT;}
 (?i:CASCADE)			{return CASCADE;}
 
@@ -195,8 +199,9 @@
 (?i:REPEATABLE)			{return REPEATABLE;}
 (?i:SERIALIZABLE)		{return SERIALIZABLE;}
 
-(?i:WITH[[:space:]]+TIME[[:space:]]+ZONE)						{return WITH_TZ;}
-(?i:WITHOUT[[:space:]]+TIME[[:space:]]+ZONE)					{return WITHOUT_TZ;}
+(?i:WITH)				{return WITH;}
+(?i:WITHOUT)			{return WITHOUT;}
+(?i:ZONE)				{return ZONE;}
 
 [-+]?[0-9]+														{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return INTEGER;}
 
