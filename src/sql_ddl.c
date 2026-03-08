@@ -1,5 +1,7 @@
 #include<sqltoast/sql_ddl.h>
 
+#include<sqltoast/arraylist_deleter.h>
+
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -33,6 +35,15 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 				{
 					initialize_arraylist(&(ddl->create_view_query.column_list), 0);
 					ddl->create_view_query.view_query = NULL;
+					break;
+				}
+				case SQL_INDEX :
+				{
+					init_empty_dstring(&(ddl->create_index_query.table_name), 0);
+					initialize_arraylist(&(ddl->create_index_query.key_exprs), 0);
+					initialize_arraylist(&(ddl->create_index_query.include_exprs), 0);
+					ddl->create_index_query.where_expr = NULL;
+					init_empty_dstring(&(ddl->create_index_query.using_index_type), 0);
 					break;
 				}
 				default :
@@ -454,6 +465,8 @@ void delete_table_element(sql_table_element* table_element)
 	free(table_element);
 }
 
+void delete_order_by(order_by* o);
+
 void delete_ddl(sql_ddl* ddl)
 {
 	switch(ddl->type)
@@ -487,6 +500,15 @@ void delete_ddl(sql_ddl* ddl)
 					}
 					deinitialize_arraylist(&(ddl->create_view_query.column_list));
 					delete_dql(ddl->create_view_query.view_query);
+					break;
+				}
+				case SQL_INDEX :
+				{
+					deinit_dstring(&(ddl->create_index_query.table_name));
+					delete_all_and_deinitialize_arraylist_1d(&(ddl->create_index_query.key_exprs), (void(*)(void*))delete_order_by);
+					delete_all_and_deinitialize_arraylist_1d(&(ddl->create_index_query.include_exprs), (void(*)(void*))delete_sql_expr);
+					delete_sql_expr(ddl->create_index_query.where_expr);
+					deinit_dstring(&(ddl->create_index_query.using_index_type));
 					break;
 				}
 				default :

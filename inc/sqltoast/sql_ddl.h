@@ -174,7 +174,7 @@ struct sql_create_index
 
 	arraylist key_exprs; // array of index_key_expr structs, same as order_by struct in sql_dql.h
 
-	arraylist include_expr; // additional columns that get stored as value for the index
+	arraylist include_exprs; // additional columns that get stored as value for the index
 
 	sql_expression* where_expr; // for partial indexing, index column only if the where_expr resolved into tre
 
