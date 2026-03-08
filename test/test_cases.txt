@@ -163,3 +163,8 @@ CREATE TABLE payments (payment_id INT PRIMARY KEY, order_id INT NOT NULL REFEREN
 CREATE TABLE inventory (product_id INT NOT NULL REFERENCES products(product_id), warehouse_id INT NOT NULL, quantity INT DEFAULT 0 CHECK (quantity >= 0), PRIMARY KEY (product_id, warehouse_id))
 CREATE TABLE employees (id INT PRIMARY KEY, manager_id INT REFERENCES employees(id), salary INT NOT NULL CHECK (salary > 0), age INT CHECK (age >= 18), department VARCHAR(50) NOT NULL)
 CREATE TABLE shipments (shipment_id INT PRIMARY KEY, order_id INT NOT NULL REFERENCES orders(order_id), shipped_at DATE, delivered_at DATE, CHECK (delivered_at IS NULL OR delivered_at >= shipped_at))
+CREATE VIEW active_user_orders (user_id, email, order_total) AS SELECT u.id, u.email, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status = 'active' WITH CHECK OPTION
+CREATE VIEW working_age_users AS SELECT id, name, age FROM users WHERE age >= 18 AND age <= 65 WITH LOCAL CHECK OPTION
+CREATE VIEW user_order_summary (user_id, order_count, total_spent) AS SELECT user_id, COUNT(*), SUM(total) FROM orders WHERE status = 'paid' GROUP BY user_id
+CREATE VIEW product_inventory_status (product_id, product_name, stock_value) AS SELECT p.product_id, p.name, p.price * i.quantity FROM products p JOIN inventory i ON p.product_id = i.product_id WHERE i.quantity >= 0 WITH CASCADED CHECK OPTION
+CREATE VIEW high_value_orders AS SELECT order_id, user_id, total FROM orders WHERE total > (SELECT AVG(total) FROM orders)
