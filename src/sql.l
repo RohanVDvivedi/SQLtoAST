@@ -175,6 +175,8 @@
 (?i:LOCAL)				{return LOCAL;}
 (?i:CASCADED)			{return CASCADED;}
 
+(?i:INCLUDE)			{return INCLUDE;}
+
 (?i:RESTRICT)			{return RESTRICT;}
 (?i:CASCADE)			{return CASCADE;}
 

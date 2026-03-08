@@ -202,12 +202,14 @@ void delete_table_element(sql_table_element* te_p);
 
 %type <ddl_query> create_schema_query
 %type <ddl_query> create_view_query
+%type <ddl_query> create_index_query
 
 %type <sval> constraint_name_opt
 
 %type <uval> object_type
 %type <uval> drop_behavior
 %type <uval> view_check_option_opt
+%type <uval> unique_index_opt
 
 %token CREATE
 %token DROP
@@ -238,6 +240,8 @@ void delete_table_element(sql_table_element* te_p);
 %token OPTION
 %token LOCAL
 %token CASCADED
+
+%token INCLUDE
 
 %token RESTRICT
 %token CASCADE
@@ -480,6 +484,7 @@ create_query :
 			| create_schema_query													{$$ = $1;}
 			| CREATE TABLE IDENTIFIER OPEN_BRACKET table_elements CLOSE_BRACKET 	{$$ = new_ddl(CREATE_QUERY, SQL_TABLE); $$->object_name = $3; $$->create_table_query.table_elements = $5;}
 			| create_view_query 													{$$ = $1;}
+			| create_index_query 													{$$ = $1;}
 
 table_elements :
 			table_element 								{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
@@ -523,6 +528,16 @@ view_check_option_opt :
 					| WITH CHECK OPTION  				{$$ = CHECK_OPTION_CASCADED;}
 					| WITH LOCAL CHECK OPTION  			{$$ = CHECK_OPTION_LOCAL;}
 					| WITH CASCADED CHECK OPTION  		{$$ = CHECK_OPTION_CASCADED;}
+
+create_index_query :
+					CREATE unique_index_opt INDEX IDENTIFIER ON IDENTIFIER OPEN_BRACKET order_by_expr_and_dir_list CLOSE_BRACKET 	{$$ = new_ddl(CREATE_QUERY, SQL_INDEX); $$->object_name = $4; $$->create_index_query.is_unique = $2; $$->create_index_query.table_name = $6; $$->create_index_query.key_exprs = $8;}
+					| create_index_query INCLUDE OPEN_BRACKET expr_list CLOSE_BRACKET 								{if(get_element_count_arraylist(&($1->create_index_query.include_exprs))){delete_ddl($1); delete_all_and_deinitialize_arraylist_1d(&($4), (void(*)(void*))delete_sql_expr);} $1->create_index_query.include_exprs = $4; $$ = $1;}
+					| create_index_query WHERE expr 																	{if($1->create_index_query.where_expr != NULL){delete_ddl($1); delete_sql_expr($3);} $1->create_index_query.where_expr = $3; $$ = $1;}
+					| create_index_query USING IDENTIFIER 															{if(!is_empty_dstring(&($1->create_index_query.using_index_type))){delete_ddl($1); deinit_dstring(&($3));} $1->create_index_query.using_index_type = $3; $$ = $1;}
+
+unique_index_opt :
+								{$$ = 0;}
+				| UNIQUE 		{$$ = 1;}
 
 drop_query :
 			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}
