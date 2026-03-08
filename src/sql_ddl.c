@@ -567,7 +567,8 @@ void delete_ddl(sql_ddl* ddl)
 					deinit_dstring(&(ddl->create_index_query.table_name));
 					delete_all_and_deinitialize_arraylist_1d(&(ddl->create_index_query.key_exprs), (void(*)(void*))delete_order_by);
 					delete_all_and_deinitialize_arraylist_1d(&(ddl->create_index_query.include_exprs), (void(*)(void*))delete_sql_expr);
-					delete_sql_expr(ddl->create_index_query.where_expr);
+					if(ddl->create_index_query.where_expr != NULL)
+						delete_sql_expr(ddl->create_index_query.where_expr);
 					deinit_dstring(&(ddl->create_index_query.using_index_type));
 					break;
 				}
