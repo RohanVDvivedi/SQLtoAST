@@ -138,6 +138,30 @@ struct sql_create_table
 	arraylist table_elements;
 };
 
+typedef enum sql_view_check_option sql_view_check_option;
+enum sql_view_check_option
+{
+	CHECK_OPTION_NONE,
+
+	// Ensures that INSERT or UPDATE performed through the view
+	// produces rows that satisfy this view's WHERE condition.
+	CHECK_OPTION_LOCAL,
+	CHECK_OPTION_CASCADED // implicit is cascaded, if the check option does not have local or cascaded, specified
+};
+
+typedef struct sql_create_view sql_create_view;
+struct sql_create_view
+{
+	// dstring containing the names of columns
+	// if empty none was passed
+	arraylist column_list;
+
+	// initialized to NULL, but must be present in successfully parsed query
+	dql_query* view_query;
+
+	int with_check_option;
+};
+
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
