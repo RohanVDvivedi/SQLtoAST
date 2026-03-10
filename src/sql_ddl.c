@@ -55,6 +55,24 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 		}
 		case ALTER_QUERY :
 		{
+			switch(object_type)
+			{
+				//case SQL_CATALOG :
+				case SQL_DATABASE :
+				case SQL_SCHEMA :
+				case SQL_TABLE :
+				case SQL_INDEX :
+				case SQL_FUNCTION :
+				case SQL_PROCEDURE :
+				{
+					init_empty_dstring(&(ddl->alter_rename_only.new_name), 0);
+					break;
+				}
+				default:
+				{
+					break;
+				}
+			}
 			break;
 		}
 		case DROP_QUERY :
@@ -447,6 +465,30 @@ void print_ddl(const sql_ddl* ddl)
 		}
 		case ALTER_QUERY :
 		{
+			switch(ddl->object_type)
+			{
+				//case SQL_CATALOG :
+				case SQL_DATABASE :
+				case SQL_SCHEMA :
+				case SQL_TABLE :
+				case SQL_INDEX :
+				case SQL_FUNCTION :
+				case SQL_PROCEDURE :
+				{
+					{
+						if(clauses_printed != 0)
+							printf(" , ");
+						printf("new_name = ");
+						printf_dstring(&(ddl->alter_rename_only.new_name));
+						clauses_printed++;
+					}
+					break;
+				}
+				default :
+				{
+					break;
+				}
+			}
 			break;
 		}
 		case DROP_QUERY :
@@ -588,6 +630,24 @@ void delete_ddl(sql_ddl* ddl)
 		}
 		case ALTER_QUERY :
 		{
+			switch(ddl->object_type)
+			{
+				//case SQL_CATALOG :
+				case SQL_DATABASE :
+				case SQL_SCHEMA :
+				case SQL_TABLE :
+				case SQL_INDEX :
+				case SQL_FUNCTION :
+				case SQL_PROCEDURE :
+				{
+					deinit_dstring(&(ddl->alter_rename_only.new_name));
+					break;
+				}
+				default :
+				{
+					break;
+				}
+			}
 			break;
 		}
 		case DROP_QUERY :

@@ -181,6 +181,12 @@ struct sql_create_index
 	dstring using_index_type; // btree, hash, rtree, inverted
 };
 
+typedef struct sql_alter_catalog_schema_index_function_procedure sql_alter_catalog_schema_index_function_procedure;
+struct sql_alter_catalog_schema_index_function_procedure
+{
+	dstring new_name;
+};
+
 typedef enum sql_drop_behavior sql_drop_behavior;
 enum sql_drop_behavior
 {
@@ -203,6 +209,13 @@ struct sql_ddl
 		sql_create_table create_table_query;
 		sql_create_view create_view_query;
 		sql_create_index create_index_query;
+
+		sql_alter_catalog_schema_index_function_procedure alter_rename_only;
+		sql_alter_catalog_schema_index_function_procedure alter_catalog_query;
+		sql_alter_catalog_schema_index_function_procedure alter_schema_query;
+		sql_alter_catalog_schema_index_function_procedure alter_index_query;
+		sql_alter_catalog_schema_index_function_procedure alter_function_query;
+		sql_alter_catalog_schema_index_function_procedure alter_procedure_query;
 	};
 
 	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column
