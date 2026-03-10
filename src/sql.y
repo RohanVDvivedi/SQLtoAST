@@ -190,6 +190,7 @@ void delete_table_element(sql_table_element* te_p);
 %type <ddl_query> ddl_query
 
 %type <ddl_query> create_query
+%type <ddl_query> alter_query
 %type <ddl_query> drop_query
 %type <ddl_query> truncate_query
 
@@ -203,6 +204,12 @@ void delete_table_element(sql_table_element* te_p);
 %type <ddl_query> create_schema_query
 %type <ddl_query> create_view_query
 %type <ddl_query> create_index_query
+
+%type <ddl_query> alter_database_catalog_schema_query
+%type <ddl_query> alter_view_index_function_procedure_query
+
+%type <uval> alterable_database_catalog_schema
+%type <uval> alterable_view_index_function_procedure
 
 %type <sval> constraint_name_opt
 
@@ -242,6 +249,8 @@ void delete_table_element(sql_table_element* te_p);
 %token CASCADED
 
 %token INCLUDE
+
+%token RENAME
 
 %token RESTRICT
 %token CASCADE
@@ -475,6 +484,7 @@ work_opt :
 
 ddl_query :
 			create_query 			{$$ = $1;}
+			| alter_query 			{$$ = $1;}
 			| drop_query 			{$$ = $1;}
 			| truncate_query 		{$$ = $1;}
 
@@ -538,6 +548,28 @@ create_index_query :
 unique_index_opt :
 								{$$ = 0;}
 				| UNIQUE 		{$$ = 1;}
+
+alter_query :
+			alter_database_catalog_schema_query 					{$$ = $1;}
+			| alter_view_index_function_procedure_query 			{$$ = $1;}
+
+alter_database_catalog_schema_query :
+									ALTER alterable_database_catalog_schema IDENTIFIER RENAME TO IDENTIFIER 		{$$ = new_ddl(ALTER_QUERY, $2); $$->object_name = $3; $$->alter_rename_only.new_name = $6;}
+
+alterable_database_catalog_schema :
+						CATALOG 			{$$ = SQL_CATALOG;}
+						| DATABASE 			{$$ = SQL_DATABASE;}
+						| SCHEMA 			{$$ = SQL_SCHEMA;}
+
+alter_view_index_function_procedure_query :
+									ALTER alterable_view_index_function_procedure IDENTIFIER RENAME TO IDENTIFIER 			{$$ = new_ddl(ALTER_QUERY, $2); $$->object_name = $3; $$->alter_rename_and_set_schema_query.type = SQL_ALTER_RENAME; $$->alter_rename_and_set_schema_query.new_name = $6;}
+									| ALTER alterable_view_index_function_procedure IDENTIFIER SET SCHEMA IDENTIFIER 		{$$ = new_ddl(ALTER_QUERY, $2); $$->object_name = $3; $$->alter_rename_and_set_schema_query.type = SQL_ALTER_SET_SCHEMA; $$->alter_rename_and_set_schema_query.new_name = $6;}
+
+alterable_view_index_function_procedure :
+							VIEW 				{$$ = SQL_VIEW;}
+							| INDEX 			{$$ = SQL_INDEX;}
+							| FUNCTION 			{$$ = SQL_FUNCTION;}
+							| PROCEDURE 		{$$ = SQL_PROCEDURE;}
 
 drop_query :
 			DROP object_type IDENTIFIER drop_behavior 			{$$ = new_ddl(DROP_QUERY, $2); $$->object_name = $3; $$->drop_behavior = $4;}

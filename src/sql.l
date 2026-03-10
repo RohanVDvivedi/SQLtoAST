@@ -177,6 +177,8 @@
 
 (?i:INCLUDE)			{return INCLUDE;}
 
+(?i:RENAME)				{return RENAME;}
+
 (?i:RESTRICT)			{return RESTRICT;}
 (?i:CASCADE)			{return CASCADE;}
 

@@ -206,7 +206,7 @@ struct sql_alter_view_index_function_procedure
 	union
 	{
 		dstring new_name;
-		dstring new_schema
+		dstring new_schema;
 	};
 };
 
