@@ -9,10 +9,7 @@ DDL query
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
  * alter queries
- 	SQL_SCHEMA,
 	SQL_TABLE,
-	SQL_VIEW, // to change view query use drop and create, alter to only rename OR change schema it belongs to
-	SQL_INDEX, SQL_FUNCTION and SQL_PROCEDURE // only support -> ALTER INDEX idx_name RENAME TO new_idx_name
 	SQL_TYPE,
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
