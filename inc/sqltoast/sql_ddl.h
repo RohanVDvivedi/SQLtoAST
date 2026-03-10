@@ -181,10 +181,33 @@ struct sql_create_index
 	dstring using_index_type; // btree, hash, rtree, inverted
 };
 
-typedef struct sql_alter_catalog_schema_index_function_procedure sql_alter_catalog_schema_index_function_procedure;
-struct sql_alter_catalog_schema_index_function_procedure
+typedef enum alter_query_type alter_query_type;
+enum alter_query_type
 {
+	SQL_ALTER_RENAME,
+	SQL_ALTER_SET_SCHEMA,
+};
+
+typedef struct sql_alter_catalog_database_schema sql_alter_catalog_database_schema;
+struct sql_alter_catalog_database_schema
+{
+	alter_query_type type;
+
+	// only SQL_ALTER_RENAME supported
 	dstring new_name;
+};
+
+typedef struct sql_alter_view_index_function_procedure sql_alter_view_index_function_procedure;
+struct sql_alter_view_index_function_procedure
+{
+	alter_query_type type;
+
+	// only SQL_ALTER_RENAME and SQL_ALTER_SET_SCHEMA supported
+	union
+	{
+		dstring new_name;
+		dstring new_schema
+	};
 };
 
 typedef enum sql_drop_behavior sql_drop_behavior;
@@ -210,12 +233,16 @@ struct sql_ddl
 		sql_create_view create_view_query;
 		sql_create_index create_index_query;
 
-		sql_alter_catalog_schema_index_function_procedure alter_rename_only;
-		sql_alter_catalog_schema_index_function_procedure alter_catalog_query;
-		sql_alter_catalog_schema_index_function_procedure alter_schema_query;
-		sql_alter_catalog_schema_index_function_procedure alter_index_query;
-		sql_alter_catalog_schema_index_function_procedure alter_function_query;
-		sql_alter_catalog_schema_index_function_procedure alter_procedure_query;
+		sql_alter_catalog_database_schema alter_rename_only;
+		sql_alter_catalog_database_schema alter_catalog_query;
+		sql_alter_catalog_database_schema alter_database_query;
+		sql_alter_catalog_database_schema alter_schema_query;
+
+		sql_alter_view_index_function_procedure alter_rename_and_set_schema_query;
+		sql_alter_view_index_function_procedure alter_view_query;
+		sql_alter_view_index_function_procedure alter_index_query;
+		sql_alter_view_index_function_procedure alter_function_query;
+		sql_alter_view_index_function_procedure alter_procedure_query;
 	};
 
 	// only used if the query context required dropping, either directly as a drop query or as a part of alter table drop column

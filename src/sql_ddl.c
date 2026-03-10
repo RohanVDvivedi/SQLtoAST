@@ -60,12 +60,16 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 				//case SQL_CATALOG :
 				case SQL_DATABASE :
 				case SQL_SCHEMA :
-				case SQL_TABLE :
+				{
+					init_empty_dstring(&(ddl->alter_rename_only.new_name), 0);
+					break;
+				}
+				case SQL_VIEW :
 				case SQL_INDEX :
 				case SQL_FUNCTION :
 				case SQL_PROCEDURE :
 				{
-					init_empty_dstring(&(ddl->alter_rename_only.new_name), 0);
+					init_empty_dstring(&(ddl->alter_rename_and_set_schema_query.new_name), 0); // initializes new schema also
 					break;
 				}
 				default:
@@ -470,17 +474,49 @@ void print_ddl(const sql_ddl* ddl)
 				//case SQL_CATALOG :
 				case SQL_DATABASE :
 				case SQL_SCHEMA :
-				case SQL_TABLE :
-				case SQL_INDEX :
-				case SQL_FUNCTION :
-				case SQL_PROCEDURE :
 				{
 					{
 						if(clauses_printed != 0)
 							printf(" , ");
-						printf("new_name = ");
+						printf("rename = ");
 						printf_dstring(&(ddl->alter_rename_only.new_name));
 						clauses_printed++;
+					}
+					break;
+				}
+				case SQL_VIEW :
+				case SQL_INDEX :
+				case SQL_FUNCTION :
+				case SQL_PROCEDURE :
+				{
+					switch(ddl->alter_rename_and_set_schema_query.type)
+					{
+						case SQL_ALTER_RENAME :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("rename = ");
+								printf_dstring(&(ddl->alter_rename_and_set_schema_query.new_name));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_SET_SCHEMA :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("set_schema = ");
+								printf_dstring(&(ddl->alter_rename_and_set_schema_query.new_schema));
+								clauses_printed++;
+							}
+							break;
+						}
+						default :
+						{
+							break;
+						}
 					}
 					break;
 				}
@@ -635,12 +671,32 @@ void delete_ddl(sql_ddl* ddl)
 				//case SQL_CATALOG :
 				case SQL_DATABASE :
 				case SQL_SCHEMA :
-				case SQL_TABLE :
+				{
+					deinit_dstring(&(ddl->alter_rename_only.new_name));
+					break;
+				}
+				case SQL_VIEW :
 				case SQL_INDEX :
 				case SQL_FUNCTION :
 				case SQL_PROCEDURE :
 				{
-					deinit_dstring(&(ddl->alter_rename_only.new_name));
+					switch(ddl->alter_rename_and_set_schema_query.type)
+					{
+						case SQL_ALTER_RENAME :
+						{
+							deinit_dstring(&(ddl->alter_rename_and_set_schema_query.new_name));
+							break;
+						}
+						case SQL_ALTER_SET_SCHEMA :
+						{
+							deinit_dstring(&(ddl->alter_rename_and_set_schema_query.new_schema));
+							break;
+						}
+						default :
+						{
+							break;
+						}
+					}
 					break;
 				}
 				default :
