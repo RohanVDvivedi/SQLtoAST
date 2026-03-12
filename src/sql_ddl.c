@@ -230,6 +230,7 @@ void print_ddl(const sql_ddl* ddl)
 									printf_dstring(&(c->column_name));
 									printf(" ");
 									print_sql_type(&(c->type));
+									printf(" ");
 									if(c->is_not_null)
 									{
 										if(!is_empty_dstring(&(c->is_not_null_constraint_name)))
