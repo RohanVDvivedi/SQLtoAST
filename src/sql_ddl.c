@@ -558,6 +558,8 @@ void print_ddl(const sql_ddl* ddl)
 	printf(" )");
 }
 
+void delete_dstring(dstring* d);
+
 void delete_table_element(sql_table_element* table_element)
 {
 	switch(table_element->type)
@@ -574,6 +576,12 @@ void delete_table_element(sql_table_element* table_element)
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check_exprs)); i++)
 				delete_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
 			deinitialize_arraylist(&(c->constraint_check_exprs));
+
+			deinit_dstring(&(c->is_not_null_constraint_name));
+			deinit_dstring(&(c->is_primary_key_constraint_name));
+			deinit_dstring(&(c->is_unique_constraint_name));
+			deinit_dstring(&(c->is_foreign_key_constraint_name));
+			delete_all_and_deinitialize_arraylist_1d(&(c->constraint_check_names), (void(*)(void*))delete_dstring);
 
 			break;
 		}

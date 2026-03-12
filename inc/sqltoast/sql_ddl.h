@@ -62,6 +62,13 @@ struct sql_column_def
 	// TODO: add on delete/update clauses
 	sql_expression* default_value;
 	arraylist constraint_check_exprs;
+
+	// constraint names
+	dstring is_not_null_constraint_name;
+	dstring is_primary_key_constraint_name;
+	dstring is_unique_constraint_name;
+	dstring is_foreign_key_constraint_name;
+	arraylist constraint_check_names;
 };
 
 typedef enum sql_constraint_type sql_constraint_type;
@@ -104,33 +111,38 @@ struct sql_table_element
 	};
 };
 
-#define init_table_element(te_p, _type) {                                            \
-	(te_p)->type = _type;                                                            \
-	switch(_type)                                                                    \
-	{                                                                                \
-		case SQL_COLUMN :                                                            \
-		{                                                                            \
-			init_empty_dstring(&((te_p)->column_def.column_name), 0);                \
-			(te_p)->column_def.is_not_null = 0;                                      \
-			(te_p)->column_def.is_primary_key = 0;                                   \
-			(te_p)->column_def.is_unique = 0;                                        \
-			(te_p)->column_def.is_foreign_key = 0;                                   \
-			init_empty_dstring(&((te_p)->column_def.foreign_table), 0);              \
-			init_empty_dstring(&((te_p)->column_def.foreign_column), 0);             \
-			(te_p)->column_def.default_value = NULL;                                 \
-			initialize_arraylist(&((te_p)->column_def.constraint_check_exprs), 0);   \
-			break;                                                                   \
-		}                                                                            \
-		case SQL_CONSTRAINT :                                                        \
-		{                                                                            \
-			init_empty_dstring(&((te_p)->constraint_def.constraint_name), 0);        \
-			initialize_arraylist(&((te_p)->constraint_def.column_list), 0);          \
-			init_empty_dstring(&((te_p)->constraint_def.foreign_table), 0);          \
-			initialize_arraylist(&((te_p)->constraint_def.foreign_column_list), 0);  \
-			(te_p)->constraint_def.constraint_check_expr = NULL;                     \
-			break;                                                                   \
-		}                                                                            \
-	}                                                                                \
+#define init_table_element(te_p, _type) {                                                 \
+	(te_p)->type = _type;                                                                 \
+	switch(_type)                                                                         \
+	{                                                                                     \
+		case SQL_COLUMN :                                                                 \
+		{                                                                                 \
+			init_empty_dstring(&((te_p)->column_def.column_name), 0);                     \
+			(te_p)->column_def.is_not_null = 0;                                           \
+			(te_p)->column_def.is_primary_key = 0;                                        \
+			(te_p)->column_def.is_unique = 0;                                             \
+			(te_p)->column_def.is_foreign_key = 0;                                        \
+			init_empty_dstring(&((te_p)->column_def.foreign_table), 0);                   \
+			init_empty_dstring(&((te_p)->column_def.foreign_column), 0);                  \
+			(te_p)->column_def.default_value = NULL;                                      \
+			initialize_arraylist(&((te_p)->column_def.constraint_check_exprs), 0);        \
+			init_empty_dstring(&((te_p)->column_def.is_not_null_constraint_name), 0);     \
+			init_empty_dstring(&((te_p)->column_def.is_primary_key_constraint_name), 0);  \
+			init_empty_dstring(&((te_p)->column_def.is_unique_constraint_name), 0);       \
+			init_empty_dstring(&((te_p)->column_def.is_foreign_key_constraint_name), 0);  \
+			initialize_arraylist(&((te_p)->column_def.constraint_check_names), 0);        \
+			break;                                                                        \
+		}                                                                                 \
+		case SQL_CONSTRAINT :                                                             \
+		{                                                                                 \
+			init_empty_dstring(&((te_p)->constraint_def.constraint_name), 0);             \
+			initialize_arraylist(&((te_p)->constraint_def.column_list), 0);               \
+			init_empty_dstring(&((te_p)->constraint_def.foreign_table), 0);               \
+			initialize_arraylist(&((te_p)->constraint_def.foreign_column_list), 0);       \
+			(te_p)->constraint_def.constraint_check_expr = NULL;                          \
+			break;                                                                        \
+		}                                                                                 \
+	}                                                                                     \
 }
 
 typedef struct sql_create_table sql_create_table;
