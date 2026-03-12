@@ -231,13 +231,43 @@ void print_ddl(const sql_ddl* ddl)
 									printf(" ");
 									print_sql_type(&(c->type));
 									if(c->is_not_null)
+									{
+										if(!is_empty_dstring(&(c->is_not_null_constraint_name)))
+										{
+											printf("( ");
+											printf_dstring(&(c->is_not_null_constraint_name));
+											printf(" )");
+										}
 										printf(" NOT NULL ");
+									}
 									if(c->is_primary_key)
+									{
+										if(!is_empty_dstring(&(c->is_primary_key_constraint_name)))
+										{
+											printf("( ");
+											printf_dstring(&(c->is_primary_key_constraint_name));
+											printf(" )");
+										}
 										printf(" PRIMARY KEY ");
+									}
 									if(c->is_unique)
+									{
+										if(!is_empty_dstring(&(c->is_unique_constraint_name)))
+										{
+											printf("( ");
+											printf_dstring(&(c->is_unique_constraint_name));
+											printf(" )");
+										}
 										printf(" UNIQUE ");
+									}
 									if(c->is_foreign_key)
 									{
+										if(!is_empty_dstring(&(c->is_foreign_key_constraint_name)))
+										{
+											printf("( ");
+											printf_dstring(&(c->is_foreign_key_constraint_name));
+											printf(" )");
+										}
 										printf(" FOREIGN_REFERENCE ");
 										printf_dstring(&(c->foreign_table));
 										if(!is_empty_dstring(&(c->foreign_column)))
@@ -255,8 +285,15 @@ void print_ddl(const sql_ddl* ddl)
 									}
 									for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check_exprs)); i++)
 									{
+										const dstring* name = get_from_front_of_arraylist(&(c->constraint_check_names), i);
+										if(!is_empty_dstring(name))
+										{
+											printf("( ");
+											printf_dstring(name);
+											printf(" )");
+										}
 										printf(" CHECK ( ");
-										print_sql_expr((sql_expression*) get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
+										print_sql_expr(get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
 										printf(" )");
 									}
 									break;
