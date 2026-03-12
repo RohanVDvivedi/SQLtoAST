@@ -283,6 +283,7 @@ void print_ddl(const sql_ddl* ddl)
 									{
 										printf(" DEFAULT ");
 										print_sql_expr(c->default_value);
+										printf(" ");
 									}
 									for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check_exprs)); i++)
 									{
