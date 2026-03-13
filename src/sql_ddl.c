@@ -673,6 +673,7 @@ void print_ddl(const sql_ddl* ddl)
 								printf_dstring(&(ddl->alter_table_query.new_column_name));
 								clauses_printed++;
 							}
+							break;
 						}
 						case SQL_ALTER_TABLE_RENAME_CONSTRAINT :
 						{
@@ -690,6 +691,7 @@ void print_ddl(const sql_ddl* ddl)
 								printf_dstring(&(ddl->alter_table_query.new_constraint_name));
 								clauses_printed++;
 							}
+							break;
 						}
 						case SQL_ALTER_TABLE_DROP_COLUMN :
 						{
