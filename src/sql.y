@@ -578,6 +578,8 @@ alter_table_query :
 					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER SET L_NOT _NULL_			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
 					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP DROP L_NOT _NULL_ 	{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
 
+					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER TYPE type					{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_TYPE; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_type = $8;}
+
 					| ALTER TABLE IDENTIFIER RENAME column_opt IDENTIFIER TO IDENTIFIER				{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_COLUMN; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_name = $8;}
 					| ALTER TABLE IDENTIFIER RENAME CONSTRAINT IDENTIFIER TO IDENTIFIER 			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->alter_table_query.new_constraint_name = $8;}
 
