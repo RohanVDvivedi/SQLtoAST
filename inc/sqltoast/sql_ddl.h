@@ -198,6 +198,19 @@ enum alter_query_type
 {
 	SQL_ALTER_RENAME,
 	SQL_ALTER_SET_SCHEMA,
+
+	// only for alter table
+	SQL_ALTER_TABLE_ADD_COLUMN,
+	SQL_ALTER_TABLE_ADD_CONSTRAINT,
+	SQL_ALTER_TABLE_SET_COLUMN_DEFAULT,
+	SQL_ALTER_TABLE_DROP_COLUMN_DEFAULT,
+	SQL_ALTER_TABLE_SET_COLUMN_NOT_NULL,
+	SQL_ALTER_TABLE_DROP_COLUMN_NOT_NULL,
+	SQL_ALTER_TABLE_SET_COLUMN_TYPE,
+	SQL_ALTER_TABLE_RENAME_COLUMN,
+	SQL_ALTER_TABLE_RENAME_CONSTRAINT,
+	SQL_ALTER_TABLE_DROP_COLUMN,
+	SQL_ALTER_TABLE_DROP_CONSTRAINT,
 };
 
 typedef struct sql_alter_catalog_database_schema sql_alter_catalog_database_schema;
@@ -207,6 +220,55 @@ struct sql_alter_catalog_database_schema
 
 	// only SQL_ALTER_RENAME supported
 	dstring new_name;
+};
+
+typedef struct sql_alter_table sql_alter_table;
+struct sql_alter_table
+{
+	alter_query_type type;
+
+	union
+	{
+		// rename table
+		dstring new_name;
+
+		// set new schema
+		dstring new_schema;
+	};
+
+	union
+	{
+		// add a new column
+		sql_column_def* add_column;
+
+		// add new constraint
+		sql_constraint_def* add_constraint_def;
+	};
+
+	// when related to column
+	union
+	{
+		// drop or rename this column
+		dstring column_name;
+
+		// drop or rename this constraint
+		dstring constraint_name;
+	};
+
+	union
+	{
+		// new name to rename a column to
+		dstring new_column_name;
+
+		// new name to rename a constraint to
+		dstring new_constraint_name;
+	};
+
+	// set a new type for the column
+	sql_type new_column_type;
+
+	// set default value for the column
+	sql_expression* new_column_default_value;
 };
 
 typedef struct sql_alter_view_index_function_procedure sql_alter_view_index_function_procedure;
