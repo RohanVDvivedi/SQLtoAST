@@ -1,6 +1,9 @@
 PICKED TASKS
 
-DDL query
+TO BE PICKED TASKS
+
+*0
+ remaining parts of parsing DDL query
  * create queries
 	SQL_FUNCTION, // only create and drop for function and procedure
 	SQL_PROCEDURE,
@@ -14,13 +17,10 @@ DDL query
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
 
-TO BE PICKED TASKS
+*1 add WITH keyword in CTEs
 
-* add WITH keywork usage
-
-* make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
-
-* think if we still want this?
-* prepared statements and the dynamic sql
+*2 prepared statements and the dynamic sql
  * named paramaters can be a problem, if we also do constant unfolding and we might loose the order of the params and may end up with wrong params at wrong places
  * we need to support just ?, ?1, ?2, etc and also :a, :b etc
+
+*3 make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
