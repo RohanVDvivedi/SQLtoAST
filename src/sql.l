@@ -179,6 +179,9 @@
 
 (?i:RENAME)				{return RENAME;}
 
+(?i:COLUMN)				{return COLUMN;}
+(?i:ADD) 				{return ADD_STRING;}
+
 (?i:RESTRICT)			{return RESTRICT;}
 (?i:CASCADE)			{return CASCADE;}
 

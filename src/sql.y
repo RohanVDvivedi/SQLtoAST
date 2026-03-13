@@ -206,6 +206,7 @@ void delete_table_element(sql_table_element* te_p);
 %type <ddl_query> create_index_query
 
 %type <ddl_query> alter_database_catalog_schema_query
+%type <ddl_query> alter_table_query
 %type <ddl_query> alter_view_index_function_procedure_query
 
 %type <uval> alterable_database_catalog_schema
@@ -251,6 +252,8 @@ void delete_table_element(sql_table_element* te_p);
 %token INCLUDE
 
 %token RENAME
+%token COLUMN
+%token ADD_STRING
 
 %token RESTRICT
 %token CASCADE
@@ -551,6 +554,7 @@ unique_index_opt :
 
 alter_query :
 			alter_database_catalog_schema_query 					{$$ = $1;}
+			| alter_table_query 									{$$ = $1;}
 			| alter_view_index_function_procedure_query 			{$$ = $1;}
 
 alter_database_catalog_schema_query :
@@ -560,6 +564,23 @@ alterable_database_catalog_schema :
 						CATALOG 			{$$ = SQL_CATALOG;}
 						| DATABASE 			{$$ = SQL_DATABASE;}
 						| SCHEMA 			{$$ = SQL_SCHEMA;}
+
+alter_table_query :
+					ALTER TABLE IDENTIFIER RENAME TO IDENTIFIER 								{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_RENAME; $$->alter_table_query.new_name = $6;}
+					| ALTER TABLE IDENTIFIER SET SCHEMA IDENTIFIER 								{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_SET_SCHEMA; $$->alter_table_query.new_name = $6;}
+
+					| ALTER TABLE IDENTIFIER ADD_STRING column_opt column_def					{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_ADD_COLUMN; $$->alter_table_query.add_table_element = $6;}
+					| ALTER TABLE IDENTIFIER ADD_STRING constraint_def 							{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_ADD_CONSTRAINT; $$->alter_table_query.add_table_element = $5;}
+
+					| ALTER TABLE IDENTIFIER RENAME column_opt IDENTIFIER TO IDENTIFIER			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_COLUMN; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_name = $8;}
+					| ALTER TABLE IDENTIFIER RENAME CONSTRAINT IDENTIFIER TO IDENTIFIER 		{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->alter_table_query.new_constraint_name = $8;}
+
+					| ALTER TABLE IDENTIFIER DROP column_opt IDENTIFIER drop_behavior			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN; $$->alter_table_query.column_name = $6; $$->drop_behavior = $7;}
+					| ALTER TABLE IDENTIFIER DROP CONSTRAINT IDENTIFIER drop_behavior 			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->drop_behavior = $7;}
+
+column_opt :
+							{}
+			| COLUMN 		{}
 
 alter_view_index_function_procedure_query :
 									ALTER alterable_view_index_function_procedure IDENTIFIER RENAME TO IDENTIFIER 			{$$ = new_ddl(ALTER_QUERY, $2); $$->object_name = $3; $$->alter_rename_and_set_schema_query.type = SQL_ALTER_RENAME; $$->alter_rename_and_set_schema_query.new_name = $6;}
