@@ -64,6 +64,15 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 					init_empty_dstring(&(ddl->alter_rename_only.new_name), 0);
 					break;
 				}
+				case SQL_TABLE :
+				{
+					init_empty_dstring(&(ddl->alter_table_query.new_name), 0); // initializes both new_name and new_schema
+					ddl->alter_table_query.add_table_element = NULL;
+					init_empty_dstring(&(ddl->alter_table_query.column_name), 0); // initializes both column_name and constraint_name
+					init_empty_dstring(&(ddl->alter_table_query.new_column_name), 0); // initializes both new_column_name and new_constraint_name
+					ddl->alter_table_query.new_column_default_value = NULL;
+					break;
+				}
 				case SQL_VIEW :
 				case SQL_INDEX :
 				case SQL_FUNCTION :
@@ -720,6 +729,17 @@ void delete_ddl(sql_ddl* ddl)
 				case SQL_SCHEMA :
 				{
 					deinit_dstring(&(ddl->alter_rename_only.new_name));
+					break;
+				}
+				case SQL_TABLE :
+				{
+					deinit_dstring(&(ddl->alter_table_query.new_name));
+					if(ddl->alter_table_query.add_table_element)
+						delete_table_element(ddl->alter_table_query.add_table_element);
+					deinit_dstring(&(ddl->alter_table_query.column_name));
+					deinit_dstring(&(ddl->alter_table_query.new_column_name));
+					if(ddl->alter_table_query.new_column_default_value != NULL)
+						delete_sql_expr(ddl->alter_table_query.new_column_default_value);
 					break;
 				}
 				case SQL_VIEW :

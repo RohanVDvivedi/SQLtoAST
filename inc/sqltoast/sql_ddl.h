@@ -236,14 +236,8 @@ struct sql_alter_table
 		dstring new_schema;
 	};
 
-	union
-	{
-		// add a new column
-		sql_column_def* add_column;
-
-		// add new constraint
-		sql_constraint_def* add_constraint_def;
-	};
+	// add a new column or constraint
+	sql_table_element* add_table_element;
 
 	// when related to column
 	union
@@ -311,6 +305,8 @@ struct sql_ddl
 		sql_alter_catalog_database_schema alter_catalog_query;
 		sql_alter_catalog_database_schema alter_database_query;
 		sql_alter_catalog_database_schema alter_schema_query;
+
+		sql_alter_table alter_table_query;
 
 		sql_alter_view_index_function_procedure alter_rename_and_set_schema_query;
 		sql_alter_view_index_function_procedure alter_view_query;
