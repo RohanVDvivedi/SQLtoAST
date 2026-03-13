@@ -566,20 +566,23 @@ alterable_database_catalog_schema :
 						| SCHEMA 			{$$ = SQL_SCHEMA;}
 
 alter_table_query :
-					ALTER TABLE IDENTIFIER RENAME TO IDENTIFIER 								{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_RENAME; $$->alter_table_query.new_name = $6;}
-					| ALTER TABLE IDENTIFIER SET SCHEMA IDENTIFIER 								{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_SET_SCHEMA; $$->alter_table_query.new_name = $6;}
+					ALTER TABLE IDENTIFIER RENAME TO IDENTIFIER 									{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_RENAME; $$->alter_table_query.new_name = $6;}
+					| ALTER TABLE IDENTIFIER SET SCHEMA IDENTIFIER 									{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_SET_SCHEMA; $$->alter_table_query.new_name = $6;}
 
-					| ALTER TABLE IDENTIFIER ADD_STRING column_opt column_def					{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_ADD_COLUMN; $$->alter_table_query.add_table_element = $6;}
-					| ALTER TABLE IDENTIFIER ADD_STRING constraint_def 							{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_ADD_CONSTRAINT; $$->alter_table_query.add_table_element = $5;}
+					| ALTER TABLE IDENTIFIER ADD_STRING column_opt column_def						{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_ADD_COLUMN; $$->alter_table_query.add_table_element = $6;}
+					| ALTER TABLE IDENTIFIER ADD_STRING constraint_def 								{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_ADD_CONSTRAINT; $$->alter_table_query.add_table_element = $5;}
 
-					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER SET DEFAULT expr		{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_DEFAULT; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_default_value = $9;}
-					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP DEFAULT 			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_DEFAULT; $$->alter_table_query.column_name = $6;}
+					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER SET DEFAULT expr			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_DEFAULT; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_default_value = $9;}
+					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP DEFAULT 				{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_DEFAULT; $$->alter_table_query.column_name = $6;}
 
-					| ALTER TABLE IDENTIFIER RENAME column_opt IDENTIFIER TO IDENTIFIER			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_COLUMN; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_name = $8;}
-					| ALTER TABLE IDENTIFIER RENAME CONSTRAINT IDENTIFIER TO IDENTIFIER 		{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->alter_table_query.new_constraint_name = $8;}
+					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER SET L_NOT _NULL_			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
+					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP DROP L_NOT _NULL_ 	{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
 
-					| ALTER TABLE IDENTIFIER DROP column_opt IDENTIFIER drop_behavior			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN; $$->alter_table_query.column_name = $6; $$->drop_behavior = $7;}
-					| ALTER TABLE IDENTIFIER DROP CONSTRAINT IDENTIFIER drop_behavior 			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->drop_behavior = $7;}
+					| ALTER TABLE IDENTIFIER RENAME column_opt IDENTIFIER TO IDENTIFIER				{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_COLUMN; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_name = $8;}
+					| ALTER TABLE IDENTIFIER RENAME CONSTRAINT IDENTIFIER TO IDENTIFIER 			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_RENAME_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->alter_table_query.new_constraint_name = $8;}
+
+					| ALTER TABLE IDENTIFIER DROP column_opt IDENTIFIER drop_behavior				{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN; $$->alter_table_query.column_name = $6; $$->drop_behavior = $7;}
+					| ALTER TABLE IDENTIFIER DROP CONSTRAINT IDENTIFIER drop_behavior 				{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_CONSTRAINT; $$->alter_table_query.constraint_name = $6; $$->drop_behavior = $7;}
 
 column_opt :
 							{}
