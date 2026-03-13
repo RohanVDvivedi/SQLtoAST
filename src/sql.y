@@ -576,7 +576,7 @@ alter_table_query :
 					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP DEFAULT 				{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_DEFAULT; $$->alter_table_query.column_name = $6;}
 
 					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER SET L_NOT _NULL_			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
-					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP DROP L_NOT _NULL_ 	{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
+					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER DROP L_NOT _NULL_ 			{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_DROP_COLUMN_NOT_NULL; $$->alter_table_query.column_name = $6;}
 
 					| ALTER TABLE IDENTIFIER ALTER column_opt IDENTIFIER TYPE type					{$$ = new_ddl(ALTER_QUERY, SQL_TABLE); $$->object_name = $3; $$->alter_table_query.type = SQL_ALTER_TABLE_SET_COLUMN_TYPE; $$->alter_table_query.column_name = $6; $$->alter_table_query.new_column_type = $8;}
 
