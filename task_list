@@ -9,7 +9,6 @@ DDL query
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
  * alter queries
-	SQL_TABLE,
 	SQL_TYPE,
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
