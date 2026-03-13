@@ -181,3 +181,28 @@ CREATE INDEX idx_users_name_age_mix ON users (last_name ASC, first_name ASC, age
 CREATE INDEX idx_orders_case_expr ON orders ((CASE WHEN status = 'cancelled' THEN 0 WHEN status = 'pending' THEN 1 ELSE 2 END) DESC, (LOWER(customer_email)) ASC) WHERE (total_amount * quantity) > 100 AND (status <> 'draft' OR created_at >= CURRENT_DATE) INCLUDE (order_id, total_amount, created_at) USING btree
 CREATE UNIQUE INDEX idx_users_complex_expr ON users (((LENGTH(TRIM(first_name)) + LENGTH(TRIM(last_name))) * age) DESC, (LOWER(email)) ASC) WHERE (age >= 18 AND email IS NOT NULL) OR (created_at >= CURRENT_TIMESTAMP AND status IN ('active','verified')) INCLUDE (id, created_at, status) USING hash
 CREATE TABLE employees (id INTEGER CONSTRAINT emp_id_pk PRIMARY KEY, email VARCHAR(255) CONSTRAINT emp_email_unique UNIQUE CONSTRAINT emp_email_not_null NOT NULL, age INTEGER CONSTRAINT emp_age_check CHECK (age >= 18) DEFAULT 18, department_id INTEGER CONSTRAINT emp_dept_fk REFERENCES departments(dept_id), salary INTEGER DEFAULT 0 CONSTRAINT emp_salary_positive CHECK (salary >= 0) CONSTRAINT emp_salary_not_null NOT NULL, username VARCHAR(100) CONSTRAINT emp_username_unique UNIQUE CONSTRAINT emp_username_not_null NOT NULL)
+ALTER TABLE employees ADD COLUMN middle_name VARCHAR(100)
+ALTER TABLE employees ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+ALTER TABLE employees ADD COLUMN age INTEGER CONSTRAINT emp_age_check CHECK (age >= 18)
+ALTER TABLE employees ADD COLUMN manager_id INTEGER CONSTRAINT emp_manager_fk REFERENCES employees(id)
+ALTER TABLE employees ADD COLUMN salary INTEGER DEFAULT 0 CONSTRAINT emp_salary_positive CHECK (salary >= 0)
+ALTER TABLE employees DROP COLUMN middle_name
+ALTER TABLE employees DROP COLUMN manager_id CASCADE
+ALTER TABLE employees DROP COLUMN age RESTRICT
+ALTER TABLE employees ALTER COLUMN salary SET DEFAULT 1000
+ALTER TABLE employees ALTER COLUMN salary DROP DEFAULT
+ALTER TABLE employees ALTER COLUMN email SET NOT NULL
+ALTER TABLE employees ALTER COLUMN email DROP NOT NULL
+ALTER TABLE employees ALTER COLUMN salary TYPE BIGINT
+ALTER TABLE employees ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE
+ALTER TABLE employees ADD CONSTRAINT emp_email_unique UNIQUE (email)
+ALTER TABLE employees ADD CONSTRAINT emp_pk PRIMARY KEY (id)
+ALTER TABLE employees ADD CONSTRAINT emp_salary_check CHECK (salary > 0)
+ALTER TABLE employees ADD CONSTRAINT emp_dept_fk FOREIGN KEY (department_id) REFERENCES departments(id)
+ALTER TABLE employees DROP CONSTRAINT emp_salary_check
+ALTER TABLE employees DROP CONSTRAINT emp_dept_fk CASCADE
+ALTER TABLE employees DROP CONSTRAINT emp_email_unique RESTRICT
+ALTER TABLE employees RENAME COLUMN salary TO monthly_salary
+ALTER TABLE employees RENAME COLUMN created_at TO created_timestamp
+ALTER TABLE employees RENAME TO staff
+ALTER TABLE staff SET SCHEMA hr
