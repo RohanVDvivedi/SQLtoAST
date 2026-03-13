@@ -539,6 +539,219 @@ void print_ddl(const sql_ddl* ddl)
 					}
 					break;
 				}
+				case SQL_TABLE :
+				{
+					switch(ddl->alter_table_query.type)
+					{
+						case SQL_ALTER_RENAME :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("rename = ");
+								printf_dstring(&(ddl->alter_table_query.new_name));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_SET_SCHEMA :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("set_schema = ");
+								printf_dstring(&(ddl->alter_table_query.new_schema));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_ADD_COLUMN :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("add_column = ");
+								print_table_element(ddl->alter_table_query.add_table_element);
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_ADD_CONSTRAINT :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("add_constraint = ");
+								print_table_element(ddl->alter_table_query.add_table_element);
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_SET_COLUMN_DEFAULT :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("for_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("new_default_value = ( ");
+								print_sql_expr(ddl->alter_table_query.new_column_default_value);
+								printf(" )");
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_DROP_COLUMN_DEFAULT :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("drop_default for_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_SET_COLUMN_NOT_NULL :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("set_not_null for_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_DROP_COLUMN_NOT_NULL :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("drop_not_null for_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_SET_COLUMN_TYPE :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("for_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("new_type = ");
+								print_sql_type(&(ddl->alter_table_query.new_column_type));
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_RENAME_COLUMN :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("rename_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("new_name = ");
+								printf_dstring(&(ddl->alter_table_query.new_column_name));
+								clauses_printed++;
+							}
+						}
+						case SQL_ALTER_TABLE_RENAME_CONSTRAINT :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("rename_constraint = ");
+								printf_dstring(&(ddl->alter_table_query.constraint_name));
+								clauses_printed++;
+							}
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("new_name = ");
+								printf_dstring(&(ddl->alter_table_query.new_constraint_name));
+								clauses_printed++;
+							}
+						}
+						case SQL_ALTER_TABLE_DROP_COLUMN :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("drop_column = ");
+								printf_dstring(&(ddl->alter_table_query.column_name));
+								clauses_printed++;
+							}
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								switch(ddl->drop_behavior)
+								{
+									case DROP_RESTRICT :
+									{
+										printf("RESTRICT");
+										break;
+									}
+									case DROP_CASCADE :
+									{
+										printf("CASCADE");
+										break;
+									}
+								}
+								clauses_printed++;
+							}
+							break;
+						}
+						case SQL_ALTER_TABLE_DROP_CONSTRAINT :
+						{
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								printf("drop_constraint = ");
+								printf_dstring(&(ddl->alter_table_query.constraint_name));
+								clauses_printed++;
+							}
+							{
+								if(clauses_printed != 0)
+									printf(" , ");
+								switch(ddl->drop_behavior)
+								{
+									case DROP_RESTRICT :
+									{
+										printf("RESTRICT");
+										break;
+									}
+									case DROP_CASCADE :
+									{
+										printf("CASCADE");
+										break;
+									}
+								}
+								clauses_printed++;
+							}
+							break;
+						}
+					}
+					break;
+				}
 				case SQL_VIEW :
 				case SQL_INDEX :
 				case SQL_FUNCTION :
