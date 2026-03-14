@@ -70,6 +70,7 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 					ddl->alter_table_query.add_table_element = NULL;
 					init_empty_dstring(&(ddl->alter_table_query.column_name), 0); // initializes both column_name and constraint_name
 					init_empty_dstring(&(ddl->alter_table_query.new_column_name), 0); // initializes both new_column_name and new_constraint_name
+					ddl->alter_table_query.new_column_type = NULL;
 					ddl->alter_table_query.new_column_default_value = NULL;
 					break;
 				}
