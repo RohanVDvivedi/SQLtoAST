@@ -48,6 +48,11 @@ struct sql_type
 		// only valid for custom_type
 		dstring custom_type_name;
 	};
+
+	int for_array:1;
+
+	int64_t array_dims[8];
+	uint8_t array_dims_size;
 };
 
 sql_type* new_sql_type(sql_type_name type_name);

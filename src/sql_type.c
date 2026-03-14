@@ -37,6 +37,10 @@ sql_type* new_sql_type(sql_type_name type_name)
 	{
 		init_empty_dstring(&(t->custom_type_name), 0);
 	}
+
+	t->for_array = 0;
+	t->array_dims_size = 0;
+
 	return t;
 }
 
@@ -66,6 +70,18 @@ void print_sql_type(const sql_type* t)
 	}
 	else
 		printf_dstring(&(t->custom_type_name));
+
+	if(t->for_array)
+	{
+		printf(" ARRAY");
+		for(int i = 0; i < t->array_dims_size; i++)
+		{
+			if(t->array_dims[i] == -1)
+				printf("[]");
+			else
+				printf("[%"PRId64"]", t->array_dims[i]);
+		}
+	}
 }
 
 void delete_sql_type(sql_type* t)
