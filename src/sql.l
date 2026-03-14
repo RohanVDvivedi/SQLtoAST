@@ -24,6 +24,8 @@
 
 "("						{return OPEN_BRACKET;}
 ")"						{return CLOSE_BRACKET;}
+"["						{return OPEN_SQUARE_BRACKET;}
+"]"						{return CLOSE_SQUARE_BRACKET;}
 
 "-" 					{return NEG;}
 "~" 					{return B_NOT;}
@@ -209,6 +211,8 @@
 (?i:WITH)				{return WITH;}
 (?i:WITHOUT)			{return WITHOUT;}
 (?i:ZONE)				{return ZONE;}
+
+(?i:ARRAY)				{return ARRAY;}
 
 [-+]?[0-9]+														{yylval->sval = new_dstring(sqlget_text(yyscanner), strlen(sqlget_text(yyscanner))); return INTEGER;}
 

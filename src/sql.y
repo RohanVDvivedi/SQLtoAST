@@ -304,6 +304,7 @@ void delete_table_element(sql_table_element* te_p);
 /* SQL DATA TYPE */
 %type <data_type> type
 %type <uval> type_name
+%type <ivals> dims_list
 %type <ivals> integer_list
 %type <ival> integer
 %type <uval> with_or_without_timezone
@@ -404,6 +405,11 @@ void delete_table_element(sql_table_element* te_p);
 %token WITH
 %token WITHOUT
 %token ZONE
+
+%token ARRAY
+
+%token OPEN_SQUARE_BRACKET
+%token CLOSE_SQUARE_BRACKET
 
 /* Precedence + Associativity */
 
@@ -902,9 +908,19 @@ expr_list :
 			| expr_list COMMA expr 				{insert_in_expr_list(&($1), $3); $$ = $1;}
 
 type :
-		type_name with_or_without_timezone												{$$ = new_sql_type($1); $$->with_time_zone = $2;}
-		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone	{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5;}
-		| IDENTIFIER 																	{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1;}
+		type_name with_or_without_timezone																	{$$ = new_sql_type($1); $$->with_time_zone = $2;}
+		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone						{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5;}
+		| IDENTIFIER 																						{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1;}
+		| type_name with_or_without_timezone ARRAY dims_list												{$$ = new_sql_type($1); $$->with_time_zone = $2; $$->for_array = 1; $$->spec_size = $4[0]; memcpy($$->spec, &($4[1]), sizeof(int64_t) * $4[0]);}
+		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone ARRAY dims_list		{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5; $$->for_array = 1; $$->spec_size = $7[0]; memcpy($$->spec, &($7[1]), sizeof(int64_t) * $7[0]);}
+		| IDENTIFIER ARRAY dims_list 																		{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1; $$->for_array = 1; $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]);}
+
+dims_list :
+																					{$$[0] = 0;}
+			| OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET 								{$$[0] = 0; $$[++$$[0]] = -1;}
+			| OPEN_SQUARE_BRACKET integer CLOSE_SQUARE_BRACKET 						{$$[0] = 0; $$[++$$[0]] = $2;}
+			| dims_list OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET 					{$1[++$1[0]] = -1; memcpy($$, $1, sizeof($$));}
+			| dims_list OPEN_SQUARE_BRACKET integer CLOSE_SQUARE_BRACKET 			{$1[++$1[0]] = $3; memcpy($$, $1, sizeof($$));}
 
 type_name : 	BOOL 					{$$ = SQL_BOOL;}
 				| BIT 					{$$ = SQL_BIT;}
