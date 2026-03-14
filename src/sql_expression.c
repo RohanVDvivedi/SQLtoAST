@@ -89,7 +89,7 @@ sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, 
 	return expr;
 }
 
-sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type)
+sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type* cast_type)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = SQL_CAST;
@@ -892,7 +892,7 @@ void print_sql_expr(const sql_expression* expr)
 			printf("( CAST ( ");
 			print_sql_expr(expr->cast_expr);
 			printf(" ) AS ( ");
-			print_sql_type(&(expr->cast_type));
+			print_sql_type(expr->cast_type);
 			printf(" ) )");
 			break;
 		}
@@ -1071,6 +1071,7 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_CAST :
 		{
 			delete_sql_expr(expr->cast_expr);
+			delete_sql_type(expr->cast_type);
 			break;
 		}
 

@@ -166,7 +166,7 @@ struct sql_expression
 		struct
 		{
 			sql_expression* cast_expr;
-			sql_type cast_type;
+			sql_type* cast_type;
 		};
 
 		// for sql_sub_query and sql_exists
@@ -205,7 +205,7 @@ sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query,
 
 sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, arraylist param_expr_list);
 
-sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type cast_type);
+sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type* cast_type);
 
 sql_expression* new_sub_query_sql_expr(sql_expression_type type, sql_dql* sub_query);
 
