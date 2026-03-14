@@ -919,8 +919,8 @@ dims_list :
 																					{$$[0] = 0;}
 			| OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET 								{$$[0] = 0; $$[++$$[0]] = -1;}
 			| OPEN_SQUARE_BRACKET integer CLOSE_SQUARE_BRACKET 						{$$[0] = 0; $$[++$$[0]] = $2;}
-			| dims_list OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET 					{$1[++$1[0]] = -1; memcpy($$, $1, sizeof($$));}
-			| dims_list OPEN_SQUARE_BRACKET integer CLOSE_SQUARE_BRACKET 			{$1[++$1[0]] = $3; memcpy($$, $1, sizeof($$));}
+			| dims_list OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET 					{{if($1[0] > (sizeof($1)/sizeof(int64_t))-1){YYABORT;}} $1[++$1[0]] = -1; memcpy($$, $1, sizeof($$));}
+			| dims_list OPEN_SQUARE_BRACKET integer CLOSE_SQUARE_BRACKET 			{{if($1[0] > (sizeof($1)/sizeof(int64_t))-1){YYABORT;}} $1[++$1[0]] = $3; memcpy($$, $1, sizeof($$));}
 
 type_name : 	BOOL 					{$$ = SQL_BOOL;}
 				| BIT 					{$$ = SQL_BIT;}
@@ -943,7 +943,7 @@ type_name : 	BOOL 					{$$ = SQL_BOOL;}
 
 integer_list :
 				integer 						{$$[0] = 0; $$[++$$[0]] = $1;}
-				| integer_list COMMA integer 	{$1[++$1[0]] = $3; memcpy($$, $1, sizeof($$));}
+				| integer_list COMMA integer 	{{if($1[0] > (sizeof($1)/sizeof(int64_t))-1){YYABORT;}} $1[++$1[0]] = $3; memcpy($$, $1, sizeof($$));}
 
 integer : INTEGER  			{unsigned long long int res = 0; get_unsigned_long_long_int_from_dstring(&($1), 10, &res); $$ = res; deinit_dstring(&($1));}
 
