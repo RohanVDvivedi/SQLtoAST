@@ -1,9 +1,5 @@
 PICKED TASKS
 
- * make sql_type a pointer reference and never created by value
-  * implement
-    * new_sql_type()
-    * delete_sql_type()
  * create SQL_TYPE
  * alter SQL_TYPE
 
