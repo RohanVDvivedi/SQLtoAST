@@ -67,7 +67,8 @@ void delete_table_element(sql_table_element* te_p);
 	uint64_t uval;
 	int64_t ival;
 
-	uint64_t uvals[5];
+	uint64_t uvals[8];
+	int64_t ivals[8];
 
 	dstring sval; // for any other lexeme
 }
@@ -302,10 +303,10 @@ void delete_table_element(sql_table_element* te_p);
 
 /* SQL DATA TYPE */
 %type <data_type> type
-%type <data_type> type_name
-%type <data_type> type_specs
-%type <uval> type_spec
-%type <data_type> type_with_or_without_timezone
+%type <uval> type_name
+%type <ivals> integer_list
+%type <ival> integer
+%type <uval> with_or_without_timezone
 
 %token <sval> IDENTIFIER
 %token <sval> INTEGER
@@ -900,39 +901,39 @@ expr_list :
 			expr 								{initialize_expr_list(&($$)); insert_in_expr_list(&($$), $1);}
 			| expr_list COMMA expr 				{insert_in_expr_list(&($1), $3); $$ = $1;}
 
-type : type_name type_specs type_with_or_without_timezone							{$$ = $1; $$.spec_size = $2.spec_size; memcpy($$.spec, $2.spec, sizeof($$.spec)); $$.with_time_zone = $3.with_time_zone;}
+type :
+		type_name with_or_without_timezone												{$$ = new_sql_type($1); $$->with_time_zone = $2;}
+		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone	{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5;}
+		| IDENTIFIER 																	{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1;}
 
-type_name : 	BOOL 					{$$.type_name = SQL_BOOL;}
-				| BIT 					{$$.type_name = SQL_BIT;}
-				| SMALLINT 				{$$.type_name = SQL_SMALLINT;}
-				| INT 					{$$.type_name = SQL_INT;}
-				| BIGINT 				{$$.type_name = SQL_BIGINT;}
-				| REAL 					{$$.type_name = SQL_REAL;}
-				| DOUBLE 				{$$.type_name = SQL_DOUBLE;}
-				| FLOAT 				{$$.type_name = SQL_FLOAT;}
-				| DECIMAL 				{$$.type_name = SQL_DECIMAL;}
-				| NUMERIC 				{$$.type_name = SQL_NUMERIC;}
-				| TEXT 					{$$.type_name = SQL_TEXT;}
-				| CHAR 					{$$.type_name = SQL_CHAR;}
-				| VARCHAR 				{$$.type_name = SQL_VARCHAR;}
-				| CLOB 					{$$.type_name = SQL_CLOB;}
-				| BLOB 					{$$.type_name = SQL_BLOB;}
-				| DATE 					{$$.type_name = SQL_DATE;}
-				| TIME 					{$$.type_name = SQL_TIME;}
-				| TIMESTAMP 			{$$.type_name = SQL_TIMESTAMP;}
+type_name : 	BOOL 					{$$ = SQL_BOOL;}
+				| BIT 					{$$ = SQL_BIT;}
+				| SMALLINT 				{$$ = SQL_SMALLINT;}
+				| INT 					{$$ = SQL_INT;}
+				| BIGINT 				{$$ = SQL_BIGINT;}
+				| REAL 					{$$ = SQL_REAL;}
+				| DOUBLE 				{$$ = SQL_DOUBLE;}
+				| FLOAT 				{$$ = SQL_FLOAT;}
+				| DECIMAL 				{$$ = SQL_DECIMAL;}
+				| NUMERIC 				{$$ = SQL_NUMERIC;}
+				| TEXT 					{$$ = SQL_TEXT;}
+				| CHAR 					{$$ = SQL_CHAR;}
+				| VARCHAR 				{$$ = SQL_VARCHAR;}
+				| CLOB 					{$$ = SQL_CLOB;}
+				| BLOB 					{$$ = SQL_BLOB;}
+				| DATE 					{$$ = SQL_DATE;}
+				| TIME 					{$$ = SQL_TIME;}
+				| TIMESTAMP 			{$$ = SQL_TIMESTAMP;}
 
-type_specs : 																												{$$.spec_size = 0;}
-				| OPEN_BRACKET type_spec CLOSE_BRACKET 																		{$$.spec[0] = $2; $$.spec_size = 1;}
-				| OPEN_BRACKET type_spec COMMA type_spec CLOSE_BRACKET 														{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec_size = 2;}
-				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 										{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec[2] = $6; $$.spec_size = 3;}
-				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 						{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec[2] = $6; $$.spec[3] = $8; $$.spec_size = 4;}
-				| OPEN_BRACKET type_spec COMMA type_spec COMMA type_spec COMMA type_spec COMMA type_spec CLOSE_BRACKET 		{$$.spec[0] = $2; $$.spec[1] = $4; $$.spec[2] = $6; $$.spec[3] = $8; $$.spec[4] = $10; $$.spec_size = 5;}
+integer_list :
+				integer 						{$$[0] = 0; $$[++$$[0]] = $1;}
+				| integer_list COMMA integer 	{$1[++$1[0]] = $3; memcpy($$, $1, sizeof($$));}
 
-type_spec : INTEGER  			{unsigned long long int res = 0; get_unsigned_long_long_int_from_dstring(&($1), 10, &res); $$ = res; deinit_dstring(&($1));}
+integer : INTEGER  			{unsigned long long int res = 0; get_unsigned_long_long_int_from_dstring(&($1), 10, &res); $$ = res; deinit_dstring(&($1));}
 
-type_with_or_without_timezone : 								{$$.with_time_zone = 0;}
-									| WITH TIME ZONE 			{$$.with_time_zone = 1;}
-									| WITHOUT TIME ZONE 		{$$.with_time_zone = 0;}
+with_or_without_timezone : 										{$$ = 0;}
+									| WITH TIME ZONE 			{$$ = 1;}
+									| WITHOUT TIME ZONE 		{$$ = 0;}
 
 %%
 
