@@ -51,7 +51,7 @@ struct sql_column_def
 {
 	dstring column_name;
 
-	sql_type type;
+	sql_type* type;
 
 	int is_not_null:1;
 	int is_primary_key:1;
@@ -118,6 +118,7 @@ struct sql_table_element
 		case SQL_COLUMN :                                                                 \
 		{                                                                                 \
 			init_empty_dstring(&((te_p)->column_def.column_name), 0);                     \
+			(te_p)->column_def.type = NULL;                                               \
 			(te_p)->column_def.is_not_null = 0;                                           \
 			(te_p)->column_def.is_primary_key = 0;                                        \
 			(te_p)->column_def.is_unique = 0;                                             \
@@ -259,7 +260,7 @@ struct sql_alter_table
 	};
 
 	// set a new type for the column
-	sql_type new_column_type;
+	sql_type* new_column_type;
 
 	// set default value for the column
 	sql_expression* new_column_default_value;

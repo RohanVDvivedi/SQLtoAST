@@ -113,7 +113,7 @@ void print_table_element(const sql_table_element* te_p)
 
 			printf_dstring(&(c->column_name));
 			printf(" ");
-			print_sql_type(&(c->type));
+			print_sql_type(c->type);
 			printf(" ");
 			if(c->is_not_null)
 			{
@@ -652,7 +652,7 @@ void print_ddl(const sql_ddl* ddl)
 								if(clauses_printed != 0)
 									printf(" , ");
 								printf("new_type = ");
-								print_sql_type(&(ddl->alter_table_query.new_column_type));
+								print_sql_type(ddl->alter_table_query.new_column_type);
 								clauses_printed++;
 							}
 							break;
@@ -839,6 +839,7 @@ void delete_table_element(sql_table_element* table_element)
 			sql_column_def* c = &(table_element->column_def);
 
 			deinit_dstring(&(c->column_name));
+			delete_sql_type(c->type);
 			deinit_dstring(&(c->foreign_table));
 			deinit_dstring(&(c->foreign_column));
 			if(c->default_value)
@@ -960,6 +961,8 @@ void delete_ddl(sql_ddl* ddl)
 						delete_table_element(ddl->alter_table_query.add_table_element);
 					deinit_dstring(&(ddl->alter_table_query.column_name));
 					deinit_dstring(&(ddl->alter_table_query.new_column_name));
+					if(ddl->alter_table_query.new_column_type != NULL)
+						delete_sql_type(ddl->alter_table_query.new_column_type);
 					if(ddl->alter_table_query.new_column_default_value != NULL)
 						delete_sql_expr(ddl->alter_table_query.new_column_default_value);
 					break;
