@@ -911,9 +911,9 @@ type :
 		type_name with_or_without_timezone																	{$$ = new_sql_type($1); $$->with_time_zone = $2;}
 		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone						{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5;}
 		| IDENTIFIER 																						{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1;}
-		| type_name with_or_without_timezone ARRAY dims_list												{$$ = new_sql_type($1); $$->with_time_zone = $2; $$->for_array = 1; $$->spec_size = $4[0]; memcpy($$->spec, &($4[1]), sizeof(int64_t) * $4[0]);}
-		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone ARRAY dims_list		{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5; $$->for_array = 1; $$->spec_size = $7[0]; memcpy($$->spec, &($7[1]), sizeof(int64_t) * $7[0]);}
-		| IDENTIFIER ARRAY dims_list 																		{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1; $$->for_array = 1; $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]);}
+		| type_name with_or_without_timezone ARRAY dims_list												{$$ = new_sql_type($1); $$->with_time_zone = $2; $$->for_array = 1; $$->array_dins_size = $4[0]; memcpy($$->array_dims, &($4[1]), sizeof(int64_t) * $4[0]);}
+		| type_name OPEN_BRACKET integer_list CLOSE_BRACKET with_or_without_timezone ARRAY dims_list		{$$ = new_sql_type($1); $$->spec_size = $3[0]; memcpy($$->spec, &($3[1]), sizeof(int64_t) * $3[0]); $$->with_time_zone = $5; $$->for_array = 1; $$->array_dims_size = $7[0]; memcpy($$->array_dims, &($7[1]), sizeof(int64_t) * $7[0]);}
+		| IDENTIFIER ARRAY dims_list 																		{$$ = new_sql_type(SQL_CUSTOM_TYPE); $$->custom_type_name = $1; $$->for_array = 1; $$->array_dims_size = $3[0]; memcpy($$->array_dims, &($3[1]), sizeof(int64_t) * $3[0]);}
 
 dims_list :
 																					{$$[0] = 0;}
