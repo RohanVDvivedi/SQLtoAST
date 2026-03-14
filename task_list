@@ -1,5 +1,12 @@
 PICKED TASKS
 
+ * make sql_type a pointer reference and never created by value
+  * implement
+    * new_sql_type()
+    * delete_sql_type()
+ * create SQL_TYPE
+ * alter SQL_TYPE
+
 TO BE PICKED TASKS
 
 *0
@@ -7,12 +14,10 @@ TO BE PICKED TASKS
  * create queries
 	SQL_FUNCTION, // only create and drop for function and procedure
 	SQL_PROCEDURE,
-	SQL_TYPE,
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
  * alter queries
-	SQL_TYPE,
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
