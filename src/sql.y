@@ -62,7 +62,7 @@ void delete_table_element(sql_table_element* te_p);
 
 	relation_input rel_input;
 
-	sql_type data_type;
+	sql_type* data_type;
 
 	uint64_t uval;
 	int64_t ival;
@@ -84,6 +84,7 @@ void delete_table_element(sql_table_element* te_p);
 %destructor { delete_order_by($$); } <order_by>
 %destructor { delete_sql_expr($$); } <expr>
 %destructor { destroy_relation_input(&($$)); } <rel_input>
+%destructor { delete_sql_type($$); } <data_type>
 %destructor { deinit_dstring(&($$)); } <sval>
 
 /* SQL */
