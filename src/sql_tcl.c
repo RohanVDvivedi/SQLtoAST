@@ -28,15 +28,31 @@ static void print_iso_and_mode(const sql_tcl* tcl)
 	{
 		if(clauses_printed != 0)
 			printf(" , ");
-		printf("isolation_level = ");
+
+		printf("ISOLATION LEVEL ");
+
 		switch(tcl->isolation_level)
 		{
-			case ISO_UNSPECIFIED : printf("ISO_UNSPECIFIED"); break;
-			case ISO_READ_UNCOMMITTED : printf("ISO_READ_UNCOMMITTED"); break;
-			case ISO_READ_COMMITTED : printf("ISO_READ_COMMITTED"); break;
-			case ISO_REPEATABLE_READ : printf("ISO_REPEATABLE_READ"); break;
-			case ISO_SERIALIZABLE : printf("ISO_SERIALIZABLE"); break;
+			case ISO_READ_UNCOMMITTED:
+				printf("READ UNCOMMITTED");
+				break;
+
+			case ISO_READ_COMMITTED:
+				printf("READ COMMITTED");
+				break;
+
+			case ISO_REPEATABLE_READ:
+				printf("REPEATABLE READ");
+				break;
+
+			case ISO_SERIALIZABLE:
+				printf("SERIALIZABLE");
+				break;
+
+			default:
+				break;
 		}
+
 		clauses_printed++;
 	}
 
@@ -44,13 +60,21 @@ static void print_iso_and_mode(const sql_tcl* tcl)
 	{
 		if(clauses_printed != 0)
 			printf(" , ");
-		printf("mode = ");
+
 		switch(tcl->mode)
 		{
-			case TX_ACC_RW_UNSPECIFIED : printf("TX_ACC_RW_UNSPECIFIED"); break;
-			case TX_ACC_RW_READ_ONLY : printf("TX_ACC_RW_READ_ONLY"); break;
-			case TX_ACC_RW_READ_WRITE : printf("TX_ACC_RW_READ_WRITE"); break;
+			case TX_ACC_RW_READ_ONLY:
+				printf("READ ONLY");
+				break;
+
+			case TX_ACC_RW_READ_WRITE:
+				printf("READ WRITE");
+				break;
+
+			default:
+				break;
 		}
+
 		clauses_printed++;
 	}
 }
@@ -61,62 +85,51 @@ void print_tcl(const sql_tcl* tcl)
 	{
 		case START_TX_TCL_CMD :
 		{
-			printf("start_tx (");
-
+			printf("START TRANSACTION ");
 			print_iso_and_mode(tcl);
-
-			printf(" )");
 			break;
 		}
 		case COMMIT_TCL_CMD :
 		{
-			printf("commit");
+			printf("COMMIT");
 			break;
 		}
 		case ROLLBACK_TCL_CMD :
 		{
-			printf("rollback");
+			printf("ROLLBACK");
 			break;
 		}
 
 		case SAVEPOINT_TCL_CMD :
 		{
-			printf("savepoint( \"");
+			printf("SAVEPOINT ");
 			printf_dstring(&(tcl->savepoint_name));
-			printf("\" )");
 			break;
 		}
 		case ROLLBACK_TO_SAVEPOINT_TCL_CMD :
 		{
-			printf("rollback_to_savepoint( \"");
+			printf("ROLLBACK TO SAVEPOINT ");
 			printf_dstring(&(tcl->savepoint_name));
-			printf("\" )");
 			break;
 		}
 		case RELEASE_SAVEPOINT_TCL_CMD :
 		{
-			printf("release_savepoint( \"");
+			printf("RELEASE SAVEPOINT ");
 			printf_dstring(&(tcl->savepoint_name));
-			printf("\" )");
 			break;
 		}
 
 		case SET_TX_TCL_CMD :
 		{
-			printf("set_tx( ");
-
+			printf("SET TRANSACTION ");
 			print_iso_and_mode(tcl);
-
-			printf(" )");
+			printf(" ");
 			break;
 		}
 		case SET_TX_CHARACTERISTICS_TCL_CMD :
 		{
-			printf("set_tx_characteristics( ");
-
+			printf("SET TRANSACTION CHARACTERISTICS ");
 			print_iso_and_mode(tcl);
-
-			printf(")");
 			break;
 		}
 	}
