@@ -1,7 +1,5 @@
 PICKED TASKS
 
- * convert printf to concatenate into dstring functions
-
  * implement an interface to get type information and attributes from the schema tables for the tables
 
  * start with converting this parsed query into this exact logical query plan, using building blocks like
