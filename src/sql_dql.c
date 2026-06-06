@@ -168,106 +168,106 @@ void flatten_exprs_dql(sql_dql* dql)
 	}
 }
 
-static void print_relation_input(const relation_input* ri_p)
+static void snprint_relation_input(dstring* str_p, const relation_input* ri_p)
 {
 	switch(ri_p->type)
 	{
 		case RELATION :
 		{
-			printf_dstring(&(ri_p->relation_name));
+			concatenate_dstring(str_p, &(ri_p->relation_name));
 			break;
 		}
 		case SUB_QUERY :
 		{
-			printf("(");
-			print_dql(ri_p->sub_query);
-			printf(")");
+			snprintf_dstring(str_p, "(");
+			snprint_dql(str_p, ri_p->sub_query);
+			snprintf_dstring(str_p, ")");
 			break;
 		}
 		case FUNCTION_CALL :
 		{
-			print_sql_expr(ri_p->function_call);
+			snprint_sql_expr(str_p, ri_p->function_call);
 			break;
 		}
 	}
 	if(!is_empty_dstring(&(ri_p->as)))
 	{
-		printf(" AS ");
-		printf_dstring(&(ri_p->as));
+		snprintf_dstring(str_p, " AS ");
+		concatenate_dstring(str_p, &(ri_p->as));
 		if(get_element_count_arraylist(&(ri_p->columns_as)) > 0)
 		{
-			printf("(");
+			snprintf_dstring(str_p, "(");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(ri_p->columns_as)); i++)
 			{
 				if(i != 0)
-					printf(",");
-				printf_dstring((const dstring*) get_from_front_of_arraylist(&(ri_p->columns_as), i));
+					snprintf_dstring(str_p, ",");
+				concatenate_dstring(str_p, (const dstring*) get_from_front_of_arraylist(&(ri_p->columns_as), i));
 			}
-			printf(")");
+			snprintf_dstring(str_p, ")");
 		}
 	}
 }
 
-void print_dql(const sql_dql* dql)
+void snprint_dql(dstring* str_p, const sql_dql* dql)
 {
 	switch(dql->type)
 	{
 		case SELECT_QUERY :
 		{
-			printf("SELECT");
+			snprintf_dstring(str_p, "SELECT");
 
 			if(dql->select_query.projection_mode == SQL_RESULT_SET_DISTINCT)
-				printf(" DISTINCT");
+				snprintf_dstring(str_p, " DISTINCT");
 
 			if(get_element_count_arraylist(&(dql->select_query.projections)) > 0)
 			{
-				printf(" ");
+				snprintf_dstring(str_p, " ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
 				{
 					if(i != 0)
-						printf(",");
+						snprintf_dstring(str_p, ",");
 					projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
-					printf("(");
-					print_sql_expr(p->projection_expr);
-					printf(")");
+					snprintf_dstring(str_p, "(");
+					snprint_sql_expr(str_p, p->projection_expr);
+					snprintf_dstring(str_p, ")");
 					if(!is_empty_dstring(&(p->as)))
 					{
-						printf(" AS ");
-						printf_dstring(&(p->as));
+						snprintf_dstring(str_p, " AS ");
+						concatenate_dstring(str_p, &(p->as));
 					}
 				}
 			}
 
 			if(dql->select_query.has_base_input)
 			{
-				printf(" FROM ");
-				print_relation_input(&(dql->select_query.base_input));
+				snprintf_dstring(str_p, " FROM ");
+				snprint_relation_input(str_p, &(dql->select_query.base_input));
 			}
 
 			if(get_element_count_arraylist(&(dql->select_query.joins_with)) > 0)
 			{
-				printf(" ");
+				snprintf_dstring(str_p, " ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
 				{
 					const join_with* j = get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
 
 					if(j->condition_type == NATURAL_JOIN_CONDITION)
-						printf("NATURAL ");
+						snprintf_dstring(str_p, "NATURAL ");
 
 					switch(j->type)
 					{
-						case INNER_JOIN: printf("INNER JOIN "); break;
-						case LEFT_JOIN:  printf("LEFT JOIN ");  break;
-						case RIGHT_JOIN: printf("RIGHT JOIN "); break;
-						case FULL_JOIN:  printf("FULL JOIN ");  break;
-						case CROSS_JOIN: printf("CROSS JOIN "); break;
+						case INNER_JOIN: snprintf_dstring(str_p, "INNER JOIN "); break;
+						case LEFT_JOIN:  snprintf_dstring(str_p, "LEFT JOIN ");  break;
+						case RIGHT_JOIN: snprintf_dstring(str_p, "RIGHT JOIN "); break;
+						case FULL_JOIN:  snprintf_dstring(str_p, "FULL JOIN ");  break;
+						case CROSS_JOIN: snprintf_dstring(str_p, "CROSS JOIN "); break;
 					}
 
 					if(j->is_lateral)
-						printf("LATERAL ");
+						snprintf_dstring(str_p, "LATERAL ");
 
-					print_relation_input(&(j->input));
-					printf(" ");
+					snprint_relation_input(str_p, &(j->input));
+					snprintf_dstring(str_p, " ");
 
 					switch(j->condition_type)
 					{
@@ -277,127 +277,127 @@ void print_dql(const sql_dql* dql)
 							break;
 						case ON_EXPR_JOIN_CONDITION:
 						{
-							printf("ON ");
-							print_sql_expr(j->on_expr);
+							snprintf_dstring(str_p, "ON ");
+							snprint_sql_expr(str_p, j->on_expr);
 							break;
 						}
 						case USING_JOIN_CONDITION:
 						{
-							printf("USING (");
+							snprintf_dstring(str_p, "USING (");
 							for(cy_uint k = 0; k < get_element_count_arraylist(&(j->using_cols)); k++)
 							{
 								if(k != 0)
-									printf(",");
-								printf_dstring(get_from_front_of_arraylist(&(j->using_cols), k));
+									snprintf_dstring(str_p, ",");
+								concatenate_dstring(str_p, get_from_front_of_arraylist(&(j->using_cols), k));
 							}
-							printf(")");
+							snprintf_dstring(str_p, ")");
 							break;
 						}
 					}
-					printf(" ");
+					snprintf_dstring(str_p, " ");
 				}
 			}
 
 			if(dql->select_query.where_expr)
 			{
-				printf(" WHERE (");
-				print_sql_expr(dql->select_query.where_expr);
-				printf(")");
+				snprintf_dstring(str_p, " WHERE (");
+				snprint_sql_expr(str_p, dql->select_query.where_expr);
+				snprintf_dstring(str_p, ")");
 			}
 
 			if(get_element_count_arraylist(&(dql->select_query.group_by)) > 0)
 			{
-				printf(" GROUP BY ");
+				snprintf_dstring(str_p, " GROUP BY ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.group_by)); i++)
 				{
 					if(i != 0)
-						printf(",");
+						snprintf_dstring(str_p, ",");
 					sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
-					printf("(");
-					print_sql_expr(g);
-					printf(")");
+					snprintf_dstring(str_p, "(");
+					snprint_sql_expr(str_p, g);
+					snprintf_dstring(str_p, ")");
 				}
 			}
 
 			
 			if(dql->select_query.having_expr)
 			{
-				printf(" HAVING (");
-				print_sql_expr(dql->select_query.having_expr);
-				printf(")");
+				snprintf_dstring(str_p, " HAVING (");
+				snprint_sql_expr(str_p, dql->select_query.having_expr);
+				snprintf_dstring(str_p, ")");
 			}
 
 			if(get_element_count_arraylist(&(dql->select_query.ordered_by)) > 0)
 			{
-				printf(" ORDER BY ");
+				snprintf_dstring(str_p, " ORDER BY ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
 				{
 					if(i != 0)
-						printf(",");
+						snprintf_dstring(str_p, ",");
 					order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
-					printf("(");
-					print_sql_expr(o->ordering_expr);
-					printf(") %s", ((o->dir == ORDER_BY_ASC) ? "ASC" : "DESC"));
+					snprintf_dstring(str_p, "(");
+					snprint_sql_expr(str_p, o->ordering_expr);
+					snprintf_dstring(str_p, ") %s", ((o->dir == ORDER_BY_ASC) ? "ASC" : "DESC"));
 				}
 			}
 
 			if(dql->select_query.offset_expr)
 			{
-				printf(" OFFSET (");
-				print_sql_expr(dql->select_query.offset_expr);
-				printf(")");
+				snprintf_dstring(str_p, " OFFSET (");
+				snprint_sql_expr(str_p, dql->select_query.offset_expr);
+				snprintf_dstring(str_p, ")");
 			}
 
 			if(dql->select_query.limit_expr)
 			{
-				printf(" LIMIT (");
-				print_sql_expr(dql->select_query.limit_expr);
-				printf(")");
+				snprintf_dstring(str_p, " LIMIT (");
+				snprint_sql_expr(str_p, dql->select_query.limit_expr);
+				snprintf_dstring(str_p, ")");
 			}
 
 			break;
 		}
 		case VALUES_QUERY :
 		{
-			printf("VALUES ");
+			snprintf_dstring(str_p, "VALUES ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->values_query.values)); i++)
 			{
 				if(i != 0)
-					printf(",");
+					snprintf_dstring(str_p, ",");
 				const arraylist* row = get_from_front_of_arraylist(&(dql->values_query.values), i);
-				printf("(");
+				snprintf_dstring(str_p, "(");
 				for(cy_uint j = 0; j < get_element_count_arraylist(row); j++)
 				{
 					if(j != 0)
-						printf(",");
+						snprintf_dstring(str_p, ",");
 					const sql_expression* expr = get_from_front_of_arraylist(row, j);
 					if(expr == NULL)
-						printf("DEFAULT");
+						snprintf_dstring(str_p, "DEFAULT");
 					else
-						print_sql_expr(expr);
+						snprint_sql_expr(str_p, expr);
 				}
-				printf(")");
+				snprintf_dstring(str_p, ")");
 			}
 			break;
 		}
 		case SET_OPERATION :
 		{
-			printf("(");print_dql(dql->set_operation.left);printf(")");
+			snprintf_dstring(str_p, "(");snprint_dql(str_p, dql->set_operation.left);snprintf_dstring(str_p, ")");
 			switch(dql->set_operation.op_type)
 			{
 				case SQL_SET_INTERSECT :
 				{
-					printf(" INTERSECT");
+					snprintf_dstring(str_p, " INTERSECT");
 					break;
 				}
 				case SQL_SET_UNION :
 				{
-					printf(" UNION");
+					snprintf_dstring(str_p, " UNION");
 					break;
 				}
 				case SQL_SET_EXCEPT :
 				{
-					printf(" EXCEPT");
+					snprintf_dstring(str_p, " EXCEPT");
 					break;
 				}
 			}
@@ -405,16 +405,16 @@ void print_dql(const sql_dql* dql)
 			{
 				case SQL_RESULT_SET_DISTINCT :
 				{
-					printf(" DISTINCT");
+					snprintf_dstring(str_p, " DISTINCT");
 					break;
 				}
 				case SQL_RESULT_SET_ALL :
 				{
-					printf(" ALL");
+					snprintf_dstring(str_p, " ALL");
 					break;
 				}
 			}
-			printf(" (");print_dql(dql->set_operation.right);printf(")");
+			snprintf_dstring(str_p, " (");snprint_dql(str_p, dql->set_operation.right);snprintf_dstring(str_p, ")");
 			break;
 		}
 	}
