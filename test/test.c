@@ -16,13 +16,16 @@ int main()
 
 	if(sqlast)
 	{
-		/*print_sql(sqlast);
-		printf("\n\n");*/
+		dstring str1;
+		init_empty_dstring(&str1, 0);
+
+		/*snprint_sql(&str1, sqlast);
+		printf(printf_dstring_format "\n\n", printf_dstring_params(&str1));*/
 
 		flatten_exprs_sql(sqlast);
 		
-		print_sql(sqlast);
-		printf("\n\n");
+		snprint_sql(&str1, sqlast);
+		printf(printf_dstring_format "\n\n", printf_dstring_params(&str1));
 		
 		printf("error = %d\n", error);
 		
