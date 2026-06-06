@@ -1,6 +1,6 @@
 PICKED TASKS
 
- * print minified sql statement for any sql statement, not this custom function like form
+ * convert printf to concatenate into dstring functions
 
  * implement an interface to get type information and attributes from the schema tables for the tables
 
