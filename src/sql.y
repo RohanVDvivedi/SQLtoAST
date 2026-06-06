@@ -395,8 +395,11 @@ void delete_table_element(sql_table_element* te_p);
 %token TEXT
 %token CHAR
 %token VARCHAR
+%token STRING_TYPE_NAME
+
 %token CLOB
 %token BLOB
+%token BINARY
 
 %token DATE
 %token TIME
@@ -935,8 +938,10 @@ type_name : 	BOOL 					{$$ = SQL_BOOL;}
 				| TEXT 					{$$ = SQL_TEXT;}
 				| CHAR 					{$$ = SQL_CHAR;}
 				| VARCHAR 				{$$ = SQL_VARCHAR;}
+				| STRING_TYPE_NAME 		{$$ = SQL_STRING;}
 				| CLOB 					{$$ = SQL_CLOB;}
 				| BLOB 					{$$ = SQL_BLOB;}
+				| BINARY 				{$$ = SQL_BINARY;}
 				| DATE 					{$$ = SQL_DATE;}
 				| TIME 					{$$ = SQL_TIME;}
 				| TIMESTAMP 			{$$ = SQL_TIMESTAMP;}

@@ -17,7 +17,9 @@ char const * const type_names[] = {
 
 	[SQL_DECIMAL] = "DECIMAL", [SQL_NUMERIC] = "NUMERIC",
 
-	[SQL_TEXT] = "TEXT", [SQL_CHAR] = "CHAR", [SQL_VARCHAR] = "VARCHAR", [SQL_CLOB] = "CLOB", [SQL_BLOB] = "BLOB",
+	[SQL_TEXT] = "TEXT", [SQL_CHAR] = "CHAR", [SQL_VARCHAR] = "VARCHAR", [SQL_STRING] = "STRING",
+
+	[SQL_CLOB] = "CLOB", [SQL_BLOB] = "BLOB", [SQL_BINARY] = "BINARY",
 
 	[SQL_DATE] = "DATE", [SQL_TIME] = "TIME", [SQL_TIMESTAMP] = "TIMESTAMP",
 

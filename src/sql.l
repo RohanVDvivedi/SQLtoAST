@@ -101,8 +101,10 @@
 (?i:CHAR)				{return CHAR;}
 (?i:CHARACTER)			{return CHAR;}
 (?i:VARCHAR)			{return VARCHAR;}
+(?i:STRING)				{return STRING_TYPE_NAME;}
 (?i:CLOB)				{return CLOB;}
 (?i:BLOB)				{return BLOB;}
+(?i:BINARY)				{return BINARY;}
 (?i:DATE)				{return DATE;}
 (?i:TIME)				{return TIME;}
 (?i:TIMESTAMP)			{return TIMESTAMP;}
