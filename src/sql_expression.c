@@ -901,7 +901,7 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 				snprintf_dstring(str_p, ") ");
 			}
 			else
-				printf("CASE ");
+				snprintf_dstring(str_p, "CASE ");
 			for(cy_uint i = 0; i < min(get_element_count_arraylist(&(expr->when_exprs)), get_element_count_arraylist(&(expr->then_exprs))); i++)
 			{
 				{

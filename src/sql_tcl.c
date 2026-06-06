@@ -27,26 +27,26 @@ static void snprint_iso_and_mode(dstring* str_p, const sql_tcl* tcl)
 	if(tcl->isolation_level != ISO_UNSPECIFIED)
 	{
 		if(clauses_printed != 0)
-			printf(" , ");
+			snprintf_dstring(str_p, ",");
 
-		printf("ISOLATION LEVEL ");
+		snprintf_dstring(str_p, "ISOLATION LEVEL ");
 
 		switch(tcl->isolation_level)
 		{
 			case ISO_READ_UNCOMMITTED:
-				printf("READ UNCOMMITTED");
+				snprintf_dstring(str_p, "READ UNCOMMITTED");
 				break;
 
 			case ISO_READ_COMMITTED:
-				printf("READ COMMITTED");
+				snprintf_dstring(str_p, "READ COMMITTED");
 				break;
 
 			case ISO_REPEATABLE_READ:
-				printf("REPEATABLE READ");
+				snprintf_dstring(str_p, "REPEATABLE READ");
 				break;
 
 			case ISO_SERIALIZABLE:
-				printf("SERIALIZABLE");
+				snprintf_dstring(str_p, "SERIALIZABLE");
 				break;
 
 			default:
@@ -59,16 +59,16 @@ static void snprint_iso_and_mode(dstring* str_p, const sql_tcl* tcl)
 	if(tcl->mode != TX_ACC_RW_UNSPECIFIED)
 	{
 		if(clauses_printed != 0)
-			printf(" , ");
+			snprintf_dstring(str_p, ",");
 
 		switch(tcl->mode)
 		{
 			case TX_ACC_RW_READ_ONLY:
-				printf("READ ONLY");
+				snprintf_dstring(str_p, "READ ONLY");
 				break;
 
 			case TX_ACC_RW_READ_WRITE:
-				printf("READ WRITE");
+				snprintf_dstring(str_p, "READ WRITE");
 				break;
 
 			default:
