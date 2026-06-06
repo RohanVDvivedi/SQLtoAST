@@ -176,7 +176,7 @@ void snprint_table_element(dstring* str_p, const sql_table_element* te_p)
 				if(!is_empty_dstring(name))
 				{
 					snprintf_dstring(str_p, "( ");
-					printf_dstring(name);
+					concatenate_dstring(str_p, name);
 					snprintf_dstring(str_p, " )");
 				}
 				snprintf_dstring(str_p, " CHECK ( ");
