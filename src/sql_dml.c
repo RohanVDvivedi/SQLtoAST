@@ -93,7 +93,7 @@ void print_dml(const sql_dml* dml)
 			printf_dstring(&(dml->update_query.table_name));
 
 			{
-				printf("SET ");
+				printf(" SET ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->update_query.values_to_be_set)); i++)
 				{
 					if(i != 0)
@@ -123,13 +123,13 @@ void print_dml(const sql_dml* dml)
 						else
 							printf("DEFAULT");
 					}
-					printf(" )");
+					printf(")");
 				}
 			}
 
 			if(dml->update_query.where_expr)
 			{
-				printf("WHERE (");
+				printf(" WHERE (");
 				print_sql_expr(dml->update_query.where_expr);
 				printf(")");
 			}
@@ -139,12 +139,11 @@ void print_dml(const sql_dml* dml)
 		case DELETE_QUERY :
 		{
 			printf("DELETE FROM ");
-
 			printf_dstring(&(dml->delete_query.table_name));
 
 			if(dml->delete_query.where_expr)
 			{
-				printf("WHERE (");
+				printf(" WHERE (");
 				print_sql_expr(dml->delete_query.where_expr);
 				printf(")");
 			}

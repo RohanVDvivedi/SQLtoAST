@@ -184,7 +184,8 @@ static void print_relation_input(const relation_input* ri_p)
 			break;
 		}
 		case FUNCTION_CALL :
-		{			print_sql_expr(ri_p->function_call);
+		{
+			print_sql_expr(ri_p->function_call);
 			break;
 		}
 	}
@@ -212,13 +213,14 @@ void print_dql(const sql_dql* dql)
 	{
 		case SELECT_QUERY :
 		{
-			printf("SELECT ");
+			printf("SELECT");
 
 			if(dql->select_query.projection_mode == SQL_RESULT_SET_DISTINCT)
-				printf("DISTINCT ");
+				printf(" DISTINCT");
 
 			if(get_element_count_arraylist(&(dql->select_query.projections)) > 0)
 			{
+				printf(" ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.projections)); i++)
 				{
 					if(i != 0)
@@ -237,13 +239,13 @@ void print_dql(const sql_dql* dql)
 			}
 
 			{
-				printf("FROM ");
+				printf(" FROM ");
 				print_relation_input(&(dql->select_query.base_input));
-				printf(" ");
 			}
 
 			if(get_element_count_arraylist(&(dql->select_query.joins_with)) > 0)
 			{
+				printf(" ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
 				{
 					const join_with* j = get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
@@ -264,6 +266,7 @@ void print_dql(const sql_dql* dql)
 						printf("LATERAL ");
 
 					print_relation_input(&(j->input));
+					printf(" ");
 
 					switch(j->condition_type)
 					{
@@ -296,14 +299,14 @@ void print_dql(const sql_dql* dql)
 
 			if(dql->select_query.where_expr)
 			{
-				printf("WHERE (");
+				printf(" WHERE (");
 				print_sql_expr(dql->select_query.where_expr);
-				printf(") ");
+				printf(")");
 			}
 
 			if(get_element_count_arraylist(&(dql->select_query.group_by)) > 0)
 			{
-				printf("GROUP BY ");
+				printf(" GROUP BY ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.group_by)); i++)
 				{
 					if(i != 0)
@@ -311,21 +314,21 @@ void print_dql(const sql_dql* dql)
 					sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
 					printf("(");
 					print_sql_expr(g);
-					printf(") ");
+					printf(")");
 				}
 			}
 
 			
 			if(dql->select_query.having_expr)
 			{
-				printf("HAVING (");
+				printf(" HAVING (");
 				print_sql_expr(dql->select_query.having_expr);
-				printf(") ");
+				printf(")");
 			}
 
 			if(get_element_count_arraylist(&(dql->select_query.ordered_by)) > 0)
 			{
-				printf("ORDER BY ");
+				printf(" ORDER BY ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->select_query.ordered_by)); i++)
 				{
 					if(i != 0)
@@ -333,22 +336,22 @@ void print_dql(const sql_dql* dql)
 					order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
 					printf("(");
 					print_sql_expr(o->ordering_expr);
-					printf(") %s ", ((o->dir == ORDER_BY_ASC) ? "ASC" : "DESC"));
+					printf(") %s", ((o->dir == ORDER_BY_ASC) ? "ASC" : "DESC"));
 				}
 			}
 
 			if(dql->select_query.offset_expr)
 			{
-				printf("OFFSET (");
+				printf(" OFFSET (");
 				print_sql_expr(dql->select_query.offset_expr);
-				printf(") ");
+				printf(")");
 			}
 
 			if(dql->select_query.limit_expr)
 			{
-				printf("LIMIT (");
+				printf(" LIMIT (");
 				print_sql_expr(dql->select_query.limit_expr);
-				printf(") ");
+				printf(")");
 			}
 
 			break;
@@ -383,17 +386,17 @@ void print_dql(const sql_dql* dql)
 			{
 				case SQL_SET_INTERSECT :
 				{
-					printf(" INTERSECT ");
+					printf(" INTERSECT");
 					break;
 				}
 				case SQL_SET_UNION :
 				{
-					printf(" UNION ");
+					printf(" UNION");
 					break;
 				}
 				case SQL_SET_EXCEPT :
 				{
-					printf(" EXCEPT ");
+					printf(" EXCEPT");
 					break;
 				}
 			}
@@ -401,16 +404,16 @@ void print_dql(const sql_dql* dql)
 			{
 				case SQL_RESULT_SET_DISTINCT :
 				{
-					printf(" DISTINCT ");
+					printf(" DISTINCT");
 					break;
 				}
 				case SQL_RESULT_SET_ALL :
 				{
-					printf(" ALL ");
+					printf(" ALL");
 					break;
 				}
 			}
-			printf("(");print_dql(dql->set_operation.right);printf(")");
+			printf(" (");print_dql(dql->set_operation.right);printf(")");
 			break;
 		}
 	}
