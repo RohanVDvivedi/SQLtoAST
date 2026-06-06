@@ -102,7 +102,7 @@ sql_ddl* new_ddl(sql_ddl_type type, sql_object_type object_type)
 	return ddl;
 }
 
-void print_table_element(const sql_table_element* te_p)
+void snprint_table_element(dstring* str_p, const sql_table_element* te_p)
 {
 	switch(te_p->type)
 	{
@@ -110,78 +110,78 @@ void print_table_element(const sql_table_element* te_p)
 		{
 			const sql_column_def* c = &(te_p->column_def);
 
-			printf(" COLUMN ");
+			snprintf_dstring(str_p, " COLUMN ");
 
-			printf_dstring(&(c->column_name));
-			printf(" ");
-			print_sql_type(c->type);
-			printf(" ");
+			concatenate_dstring(str_p, &(c->column_name));
+			snprintf_dstring(str_p, " ");
+			snprint_sql_type(str_p, c->type);
+			snprintf_dstring(str_p, " ");
 			if(c->is_not_null)
 			{
 				if(!is_empty_dstring(&(c->is_not_null_constraint_name)))
 				{
-					printf("( ");
-					printf_dstring(&(c->is_not_null_constraint_name));
-					printf(" )");
+					snprintf_dstring(str_p, "( ");
+					concatenate_dstring(str_p, &(c->is_not_null_constraint_name));
+					snprintf_dstring(str_p, " )");
 				}
-				printf(" NOT NULL ");
+				snprintf_dstring(str_p, " NOT NULL ");
 			}
 			if(c->is_primary_key)
 			{
 				if(!is_empty_dstring(&(c->is_primary_key_constraint_name)))
 				{
-					printf("( ");
-					printf_dstring(&(c->is_primary_key_constraint_name));
-					printf(" )");
+					snprintf_dstring(str_p, "( ");
+					concatenate_dstring(str_p, &(c->is_primary_key_constraint_name));
+					snprintf_dstring(str_p, " )");
 				}
-				printf(" PRIMARY KEY ");
+				snprintf_dstring(str_p, " PRIMARY KEY ");
 			}
 			if(c->is_unique)
 			{
 				if(!is_empty_dstring(&(c->is_unique_constraint_name)))
 				{
-					printf("( ");
-					printf_dstring(&(c->is_unique_constraint_name));
-					printf(" )");
+					snprintf_dstring(str_p, "( ");
+					concatenate_dstring(str_p, &(c->is_unique_constraint_name));
+					snprintf_dstring(str_p, " )");
 				}
-				printf(" UNIQUE ");
+				snprintf_dstring(str_p, " UNIQUE ");
 			}
 			if(c->is_foreign_key)
 			{
 				if(!is_empty_dstring(&(c->is_foreign_key_constraint_name)))
 				{
-					printf("( ");
-					printf_dstring(&(c->is_foreign_key_constraint_name));
-					printf(" )");
+					snprintf_dstring(str_p, "( ");
+					concatenate_dstring(str_p, &(c->is_foreign_key_constraint_name));
+					snprintf_dstring(str_p, " )");
 				}
-				printf(" FOREIGN_REFERENCE ");
-				printf_dstring(&(c->foreign_table));
+				snprintf_dstring(str_p, " FOREIGN_REFERENCE ");
+				concatenate_dstring(str_p, &(c->foreign_table));
 				if(!is_empty_dstring(&(c->foreign_column)))
 				{
-					printf("(");
-					printf_dstring(&(c->foreign_column));
-					printf(")");
+					snprintf_dstring(str_p, "(");
+					concatenate_dstring(str_p, &(c->foreign_column));
+					snprintf_dstring(str_p, ")");
 				}
-				printf(" ");
+				snprintf_dstring(str_p, " ");
 			}
 			if(c->default_value)
 			{
-				printf(" DEFAULT ");
-				print_sql_expr(c->default_value);
-				printf(" ");
+				snprintf_dstring(str_p, " DEFAULT ");
+				snprint_sql_expr(str_p, c->default_value);
+				snprintf_dstring(str_p, " ");
 			}
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(c->constraint_check_exprs)); i++)
 			{
 				const dstring* name = get_from_front_of_arraylist(&(c->constraint_check_names), i);
 				if(!is_empty_dstring(name))
 				{
-					printf("( ");
+					snprintf_dstring(str_p, "( ");
 					printf_dstring(name);
-					printf(" )");
+					snprintf_dstring(str_p, " )");
 				}
-				printf(" CHECK ( ");
-				print_sql_expr(get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
-				printf(" )");
+				snprintf_dstring(str_p, " CHECK ( ");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(c->constraint_check_exprs), i));
+				snprintf_dstring(str_p, " )");
 			}
 			break;
 		}
@@ -189,70 +189,70 @@ void print_table_element(const sql_table_element* te_p)
 		{
 			const sql_constraint_def* c = &(te_p->constraint_def);
 
-			printf(" CONSTRAINT ");
+			snprintf_dstring(str_p, " CONSTRAINT ");
 
-			printf_dstring(&(c->constraint_name));
+			concatenate_dstring(str_p, &(c->constraint_name));
 
 			switch(c->type)
 			{
 				case SQL_UNIQUE_KEY :
 				{
-					printf(" UNIQUE_KEY_CONSTRAINT ");
-					printf_dstring(&(c->constraint_name));
-					printf(" ( ");
+					snprintf_dstring(str_p, " UNIQUE_KEY_CONSTRAINT ");
+					concatenate_dstring(str_p, &(c->constraint_name));
+					snprintf_dstring(str_p, " ( ");
 					for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
 					{
 						if(i != 0)
-							printf(" , ");
+							snprintf_dstring(str_p, " , ");
 						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 					}
-					printf(" )");
+					snprintf_dstring(str_p, " )");
 					break;
 				}
 				case SQL_PRIMARY_KEY :
 				{
-					printf(" PRIMARY_KEY_CONSTRAINT ");
-					printf_dstring(&(c->constraint_name));
-					printf(" ( ");
+					snprintf_dstring(str_p, " PRIMARY_KEY_CONSTRAINT ");
+					concatenate_dstring(str_p, &(c->constraint_name));
+					snprintf_dstring(str_p, " ( ");
 					for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
 					{
 						if(i != 0)
-							printf(" , ");
+							snprintf_dstring(str_p, " , ");
 						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 					}
-					printf(" )");
+					snprintf_dstring(str_p, " )");
 					break;
 				}
 				case SQL_FOREIGN_KEY :
 				{
-					printf(" FOREIGN_KEY_CONSTRAINT ");
-					printf_dstring(&(c->constraint_name));
-					printf(" ( ");
+					snprintf_dstring(str_p, " FOREIGN_KEY_CONSTRAINT ");
+					concatenate_dstring(str_p, &(c->constraint_name));
+					snprintf_dstring(str_p, " ( ");
 					for(cy_uint i = 0; i < get_element_count_arraylist(&(c->column_list)); i++)
 					{
 						if(i != 0)
-							printf(" , ");
+							snprintf_dstring(str_p, " , ");
 						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 					}
-					printf(" ) REFERENCES ");
-					printf_dstring(&(c->foreign_table));
-					printf(" ( ");
+					snprintf_dstring(str_p, " ) REFERENCES ");
+					concatenate_dstring(str_p, &(c->foreign_table));
+					snprintf_dstring(str_p, " ( ");
 					for(cy_uint i = 0; i < get_element_count_arraylist(&(c->foreign_column_list)); i++)
 					{
 						if(i != 0)
-							printf(" , ");
+							snprintf_dstring(str_p, " , ");
 						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->foreign_column_list), i));
 					}
-					printf(" )");
+					snprintf_dstring(str_p, " )");
 					break;
 				}
 				case SQL_CONSTRAINT_CHECK :
 				{
-					printf(" CHECK_CONSTRAINT ");
-					printf_dstring(&(c->constraint_name));
-					printf(" ( ");
-					print_sql_expr(c->constraint_check_expr);
-					printf(" )");
+					snprintf_dstring(str_p, " CHECK_CONSTRAINT ");
+					concatenate_dstring(str_p, &(c->constraint_name));
+					snprintf_dstring(str_p, " ( ");
+					snprint_sql_expr(str_p, c->constraint_check_expr);
+					snprintf_dstring(str_p, " )");
 					break;
 				}
 			}
@@ -262,103 +262,103 @@ void print_table_element(const sql_table_element* te_p)
 	}
 }
 
-void print_ddl(const sql_ddl* ddl)
+void snprint_ddl(dstring* str_p, const sql_ddl* ddl)
 {
 	switch(ddl->type)
 	{
 		case CREATE_QUERY :
 		{
-			printf("CREATE");
+			snprintf_dstring(str_p, "CREATE");
 			break;
 		}
 		case ALTER_QUERY :
 		{
-			printf("ALTER");
+			snprintf_dstring(str_p, "ALTER");
 			break;
 		}
 		case DROP_QUERY :
 		{
-			printf("DROP");
+			snprintf_dstring(str_p, "DROP");
 			break;
 		}
 		case TRUNCATE_QUERY :
 		{
-			printf("TRUNCATE");
+			snprintf_dstring(str_p, "TRUNCATE");
 			break;
 		}
 	}
 
-	printf(" ");
+	snprintf_dstring(str_p, " ");
 
 	switch(ddl->object_type)
 	{
 		//case SQL_CATALOG :
 		case SQL_DATABASE :
 		{
-			printf("DATABASE/CATALOG");
+			snprintf_dstring(str_p, "DATABASE/CATALOG");
 			break;
 		}
 		case SQL_SCHEMA :
 		{
-			printf("SCHEMA");
+			snprintf_dstring(str_p, "SCHEMA");
 			break;
 		}
 		case SQL_TABLE :
 		{
-			printf("TABLE");
+			snprintf_dstring(str_p, "TABLE");
 			break;
 		}
 		case SQL_VIEW :
 		{
-			printf("VIEW");
+			snprintf_dstring(str_p, "VIEW");
 			break;
 		}
 		case SQL_INDEX :
 		{
-			printf("INDEX");
+			snprintf_dstring(str_p, "INDEX");
 			break;
 		}
 		case SQL_FUNCTION :
 		{
-			printf("FUNCTION");
+			snprintf_dstring(str_p, "FUNCTION");
 			break;
 		}
 		case SQL_PROCEDURE :
 		{
-			printf("PROCEDURE");
+			snprintf_dstring(str_p, "PROCEDURE");
 			break;
 		}
 		case SQL_TYPE :
 		{
-			printf("TYPE");
+			snprintf_dstring(str_p, "TYPE");
 			break;
 		}
 		case SQL_DOMAIN :
 		{
-			printf("DOMAIN");
+			snprintf_dstring(str_p, "DOMAIN");
 			break;
 		}
 		case SQL_SEQUENCE :
 		{
-			printf("SEQUENCE");
+			snprintf_dstring(str_p, "SEQUENCE");
 			break;
 		}
 		case SQL_TRIGGER :
 		{
-			printf("TRIGGER");
+			snprintf_dstring(str_p, "TRIGGER");
 			break;
 		}
 	}
 
-	printf("( ");
+	snprintf_dstring(str_p, "( ");
 
 	int clauses_printed = 0;
 
 	{
 		if(clauses_printed != 0)
-			printf(" , ");
-		printf("name = ");
-		printf_dstring(&(ddl->object_name));
+			snprintf_dstring(str_p, " , ");
+		snprintf_dstring(str_p, "name = ");
+		concatenate_dstring(str_p, &(ddl->object_name));
 		clauses_printed++;
 	}
 
@@ -373,9 +373,9 @@ void print_ddl(const sql_ddl* ddl)
 					if(!is_empty_dstring(&(ddl->create_schema_query.authorization)))
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("authorization = ");
-						printf_dstring(&(ddl->create_schema_query.authorization));
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "authorization = ");
+						concatenate_dstring(str_p, &(ddl->create_schema_query.authorization));
 						clauses_printed++;
 					}
 					break;
@@ -384,16 +384,16 @@ void print_ddl(const sql_ddl* ddl)
 				{
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("table_elements = ( ");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "table_elements = ( ");
 						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_table_query.table_elements)); i++)
 						{
 							if(i != 0)
-								printf(" , ");
+								snprintf_dstring(str_p, " , ");
 							const sql_table_element* te_p = get_from_front_of_arraylist(&(ddl->create_table_query.table_elements), i);
-							print_table_element(te_p);
+							snprint_table_element(str_p, te_p);
 						}
-						printf(" )");
+						snprintf_dstring(str_p, " )");
 						clauses_printed++;
 					}
 					break;
@@ -403,45 +403,45 @@ void print_ddl(const sql_ddl* ddl)
 					if(get_element_count_arraylist(&(ddl->create_view_query.column_list)) > 0)
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("column_list = ( ");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "column_list = ( ");
 						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_view_query.column_list)); i++)
 						{
 							if(i != 0)
-								printf(" , ");
+								snprintf_dstring(str_p, " , ");
 							printf_dstring((const dstring*)get_from_front_of_arraylist(&(ddl->create_view_query.column_list), i));
 						}
-						printf(" )");
+						snprintf_dstring(str_p, " )");
 						clauses_printed++;
 					}
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("view_query = ( ");
-						print_dql(ddl->create_view_query.view_query);
-						printf(" )");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "view_query = ( ");
+						snprint_dql(str_p, ddl->create_view_query.view_query);
+						snprintf_dstring(str_p, " )");
 						clauses_printed++;
 					}
 					if(ddl->create_view_query.check_option != CHECK_OPTION_NONE)
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("check_option = ");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "check_option = ");
 						switch(ddl->create_view_query.check_option)
 						{
 							case CHECK_OPTION_NONE :
 							{
-								printf("NONE");
+								snprintf_dstring(str_p, "NONE");
 								break;
 							}
 							case CHECK_OPTION_LOCAL :
 							{
-								printf("LOCAL");
+								snprintf_dstring(str_p, "LOCAL");
 								break;
 							}
 							case CHECK_OPTION_CASCADED :
 							{
-								printf("CASCADED");
+								snprintf_dstring(str_p, "CASCADED");
 								break;
 							}
 						}
@@ -453,65 +453,65 @@ void print_ddl(const sql_ddl* ddl)
 				{
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("is_unique = %d", !!(ddl->create_index_query.is_unique));
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "is_unique = %d", !!(ddl->create_index_query.is_unique));
 						clauses_printed++;
 					}
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("on_table = ");
-						printf_dstring(&(ddl->create_index_query.table_name));
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "on_table = ");
+						concatenate_dstring(str_p, &(ddl->create_index_query.table_name));
 						clauses_printed++;
 					}
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("keys = ( ");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "keys = ( ");
 						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_index_query.key_exprs)); i++)
 						{
 							if(i != 0)
-								printf(" , ");
+								snprintf_dstring(str_p, " , ");
 							index_key_expr* k = (index_key_expr*) get_from_front_of_arraylist(&(ddl->create_index_query.key_exprs), i);
-							printf("( ( ");
-							print_sql_expr(k->ordering_expr);
-							printf(" ) in %s order )", ((k->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
+							snprintf_dstring(str_p, "( ( ");
+							snprint_sql_expr(str_p, k->ordering_expr);
+							snprintf_dstring(str_p, " ) in %s order )", ((k->dir == ORDER_BY_ASC) ? "ascending" : "descending"));
 						}
-						printf(" )");
+						snprintf_dstring(str_p, " )");
 						clauses_printed++;
 					}
 					if(get_element_count_arraylist(&(ddl->create_index_query.include_exprs)) > 0)
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("include = ( ");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "include = ( ");
 						for(cy_uint i = 0; i < get_element_count_arraylist(&(ddl->create_index_query.include_exprs)); i++)
 						{
 							if(i != 0)
-								printf(" , ");
+								snprintf_dstring(str_p, " , ");
 							sql_expression* x = (sql_expression*) get_from_front_of_arraylist(&(ddl->create_index_query.include_exprs), i);
-							printf("( ");
-							print_sql_expr(x);
-							printf(" )");
+							snprintf_dstring(str_p, "( ");
+							snprint_sql_expr(str_p, x);
+							snprintf_dstring(str_p, " )");
 						}
-						printf(" )");
+						snprintf_dstring(str_p, " )");
 						clauses_printed++;
 					}
 					if(ddl->create_index_query.where_expr != NULL)
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("where = ( ");
-						print_sql_expr(ddl->create_index_query.where_expr);
-						printf(" )");
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "where = ( ");
+						snprint_sql_expr(str_p, ddl->create_index_query.where_expr);
+						snprintf_dstring(str_p, " )");
 						clauses_printed++;
 					}
 					if(!is_empty_dstring(&(ddl->create_index_query.using_index_type)))
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("using_index_type = ");
-						printf_dstring(&(ddl->create_index_query.using_index_type));
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "using_index_type = ");
+						concatenate_dstring(str_p, &(ddl->create_index_query.using_index_type));
 						clauses_printed++;
 					}
 					break;
@@ -533,9 +533,9 @@ void print_ddl(const sql_ddl* ddl)
 				{
 					{
 						if(clauses_printed != 0)
-							printf(" , ");
-						printf("rename = ");
-						printf_dstring(&(ddl->alter_rename_only.new_name));
+							snprintf_dstring(str_p, " , ");
+						snprintf_dstring(str_p, "rename = ");
+						concatenate_dstring(str_p, &(ddl->alter_rename_only.new_name));
 						clauses_printed++;
 					}
 					break;
@@ -548,9 +548,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("rename = ");
-								printf_dstring(&(ddl->alter_table_query.new_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "rename = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.new_name));
 								clauses_printed++;
 							}
 							break;
@@ -559,9 +559,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("set_schema = ");
-								printf_dstring(&(ddl->alter_table_query.new_schema));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "set_schema = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.new_schema));
 								clauses_printed++;
 							}
 							break;
@@ -570,9 +570,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("add_column = ");
-								print_table_element(ddl->alter_table_query.add_table_element);
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "add_column = ");
+								snprint_table_element(str_p, ddl->alter_table_query.add_table_element);
 								clauses_printed++;
 							}
 							break;
@@ -581,9 +581,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("add_constraint = ");
-								print_table_element(ddl->alter_table_query.add_table_element);
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "add_constraint = ");
+								snprint_table_element(str_p, ddl->alter_table_query.add_table_element);
 								clauses_printed++;
 							}
 							break;
@@ -592,17 +592,17 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("for_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "for_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("new_default_value = ( ");
-								print_sql_expr(ddl->alter_table_query.new_column_default_value);
-								printf(" )");
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "new_default_value = ( ");
+								snprint_sql_expr(str_p, ddl->alter_table_query.new_column_default_value);
+								snprintf_dstring(str_p, " )");
 								clauses_printed++;
 							}
 							break;
@@ -611,9 +611,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("drop_default for_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "drop_default for_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							break;
@@ -622,9 +622,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("set_not_null for_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "set_not_null for_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							break;
@@ -633,9 +633,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("drop_not_null for_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "drop_not_null for_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							break;
@@ -644,16 +644,16 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("for_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "for_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("new_type = ");
-								print_sql_type(ddl->alter_table_query.new_column_type);
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "new_type = ");
+								snprint_sql_type(str_p, ddl->alter_table_query.new_column_type);
 								clauses_printed++;
 							}
 							break;
@@ -662,16 +662,16 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("rename_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "rename_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("new_name = ");
-								printf_dstring(&(ddl->alter_table_query.new_column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "new_name = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.new_column_name));
 								clauses_printed++;
 							}
 							break;
@@ -680,16 +680,16 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("rename_constraint = ");
-								printf_dstring(&(ddl->alter_table_query.constraint_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "rename_constraint = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.constraint_name));
 								clauses_printed++;
 							}
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("new_name = ");
-								printf_dstring(&(ddl->alter_table_query.new_constraint_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "new_name = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.new_constraint_name));
 								clauses_printed++;
 							}
 							break;
@@ -698,24 +698,24 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("drop_column = ");
-								printf_dstring(&(ddl->alter_table_query.column_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "drop_column = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.column_name));
 								clauses_printed++;
 							}
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
+									snprintf_dstring(str_p, " , ");
 								switch(ddl->drop_behavior)
 								{
 									case DROP_RESTRICT :
 									{
-										printf("RESTRICT");
+										snprintf_dstring(str_p, "RESTRICT");
 										break;
 									}
 									case DROP_CASCADE :
 									{
-										printf("CASCADE");
+										snprintf_dstring(str_p, "CASCADE");
 										break;
 									}
 								}
@@ -727,24 +727,24 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("drop_constraint = ");
-								printf_dstring(&(ddl->alter_table_query.constraint_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "drop_constraint = ");
+								concatenate_dstring(str_p, &(ddl->alter_table_query.constraint_name));
 								clauses_printed++;
 							}
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
+									snprintf_dstring(str_p, " , ");
 								switch(ddl->drop_behavior)
 								{
 									case DROP_RESTRICT :
 									{
-										printf("RESTRICT");
+										snprintf_dstring(str_p, "RESTRICT");
 										break;
 									}
 									case DROP_CASCADE :
 									{
-										printf("CASCADE");
+										snprintf_dstring(str_p, "CASCADE");
 										break;
 									}
 								}
@@ -766,9 +766,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("rename = ");
-								printf_dstring(&(ddl->alter_rename_and_set_schema_query.new_name));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "rename = ");
+								concatenate_dstring(str_p, &(ddl->alter_rename_and_set_schema_query.new_name));
 								clauses_printed++;
 							}
 							break;
@@ -777,9 +777,9 @@ void print_ddl(const sql_ddl* ddl)
 						{
 							{
 								if(clauses_printed != 0)
-									printf(" , ");
-								printf("set_schema = ");
-								printf_dstring(&(ddl->alter_rename_and_set_schema_query.new_schema));
+									snprintf_dstring(str_p, " , ");
+								snprintf_dstring(str_p, "set_schema = ");
+								concatenate_dstring(str_p, &(ddl->alter_rename_and_set_schema_query.new_schema));
 								clauses_printed++;
 							}
 							break;
@@ -802,17 +802,17 @@ void print_ddl(const sql_ddl* ddl)
 		{
 			{
 				if(clauses_printed != 0)
-					printf(" , ");
+					snprintf_dstring(str_p, " , ");
 				switch(ddl->drop_behavior)
 				{
 					case DROP_RESTRICT :
 					{
-						printf("RESTRICT");
+						snprintf_dstring(str_p, "RESTRICT");
 						break;
 					}
 					case DROP_CASCADE :
 					{
-						printf("CASCADE");
+						snprintf_dstring(str_p, "CASCADE");
 						break;
 					}
 				}
@@ -826,7 +826,7 @@ void print_ddl(const sql_ddl* ddl)
 		}
 	}
 
-	printf(" )");
+	snprintf_dstring(str_p, " )");
 }
 
 void delete_dstring(dstring* d);
