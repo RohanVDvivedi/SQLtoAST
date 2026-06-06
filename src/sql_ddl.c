@@ -204,7 +204,7 @@ void snprint_table_element(dstring* str_p, const sql_table_element* te_p)
 					{
 						if(i != 0)
 							snprintf_dstring(str_p, " , ");
-						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
+						concatenate_dstring(str_p, (const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 					}
 					snprintf_dstring(str_p, " )");
 					break;
@@ -218,7 +218,7 @@ void snprint_table_element(dstring* str_p, const sql_table_element* te_p)
 					{
 						if(i != 0)
 							snprintf_dstring(str_p, " , ");
-						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
+						concatenate_dstring(str_p, (const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 					}
 					snprintf_dstring(str_p, " )");
 					break;
@@ -232,7 +232,7 @@ void snprint_table_element(dstring* str_p, const sql_table_element* te_p)
 					{
 						if(i != 0)
 							snprintf_dstring(str_p, " , ");
-						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
+						concatenate_dstring(str_p, (const dstring*)get_from_front_of_arraylist(&(c->column_list), i));
 					}
 					snprintf_dstring(str_p, " ) REFERENCES ");
 					concatenate_dstring(str_p, &(c->foreign_table));
@@ -241,7 +241,7 @@ void snprint_table_element(dstring* str_p, const sql_table_element* te_p)
 					{
 						if(i != 0)
 							snprintf_dstring(str_p, " , ");
-						printf_dstring((const dstring*)get_from_front_of_arraylist(&(c->foreign_column_list), i));
+						concatenate_dstring(str_p, (const dstring*)get_from_front_of_arraylist(&(c->foreign_column_list), i));
 					}
 					snprintf_dstring(str_p, " )");
 					break;
