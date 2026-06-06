@@ -27,6 +27,7 @@ int main()
 
 		flatten_exprs_sql(sqlast1);
 		
+		make_dstring_empty(&str1);
 		snprint_sql(&str1, sqlast1);
 		printf("flattened " printf_dstring_format "\n\n", printf_dstring_params(&str1));
 
@@ -61,11 +62,15 @@ int main()
 					printf("REPARSING SERIALIZED QUERY PRODUCES SAME SERIALIZED STRING\n");
 				}
 
+				deinit_dstring(&str2);
+
 				delete_sql(sqlast2);
 			}
 			else
 				printf("error2 = %d\n", error2);
 		}
+
+		deinit_dstring(&str1);
 
 		delete_sql(sqlast1);
 	}
