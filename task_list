@@ -2,8 +2,6 @@ PICKED TASKS
 
  * print minified sql statement for any sql statement, not this custom function like form
 
- * sql query with only projection list
-
  * write function to evaluate sql_expression
 
  * start with converting this parsed query into this exact logical query plan, using building blocks like
