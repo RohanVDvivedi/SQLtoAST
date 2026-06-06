@@ -50,6 +50,8 @@ int main()
 				dstring str2;
 				init_empty_dstring(&str2, 0);
 
+				flatten_exprs_sql(sqlast2);
+
 				snprint_sql(&str2, sqlast2);
 				printf("reparsed of serialized copy " printf_dstring_format "\n\n", printf_dstring_params(&str2));
 
