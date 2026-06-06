@@ -2,8 +2,6 @@ PICKED TASKS
 
  * print minified sql statement for any sql statement, not this custom function like form
 
- * write function to evaluate sql_expression
-
  * start with converting this parsed query into this exact logical query plan, using building blocks like
    * join left/right/inner/outer
    * aggregation with/without group_by_expressions, with/without aggregate_expressions
@@ -13,6 +11,10 @@ PICKED TASKS
    * union
    * sort (may be eliminated if the input row is already sorted from previous sorting or in index scan)
    * limit/offset operator
+
+ * write function to evaluate sql_expression, for a solvable one that that does not have sub queries
+  * for sub queries add a variable nae or key to rename the attribute if possible that pouints to something in the logical query plan
+  * add void* for this for every sub-query in sql_expression
 
  * create SQL_TYPE
  * alter SQL_TYPE
