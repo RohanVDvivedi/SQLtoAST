@@ -125,6 +125,7 @@ struct sql_select
 	arraylist projections;
 
 	// from clause
+	int has_base_input;
 	relation_input base_input;
 
 	// join tables (each strcut is join_with)

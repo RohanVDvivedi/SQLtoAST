@@ -17,6 +17,7 @@ sql_dql* new_dql(sql_dql_type type)
 		{
 			initialize_arraylist(&(dql->select_query.projections), 0);
 
+			dql->select_query.has_base_input = 0;
 			init_relation_input(&(dql->select_query.base_input), new_copy_dstring(&get_dstring_pointing_to_cstring("")), new_copy_dstring(&get_dstring_pointing_to_cstring("")));
 
 			initialize_arraylist(&(dql->select_query.joins_with), 0);
@@ -238,6 +239,7 @@ void print_dql(const sql_dql* dql)
 				}
 			}
 
+			if(dql->select_query.has_base_input)
 			{
 				printf(" FROM ");
 				print_relation_input(&(dql->select_query.base_input));

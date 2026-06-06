@@ -695,6 +695,7 @@ select_query :
 				$$ = new_dql(SELECT_QUERY);
 				$$->select_query.projection_mode = $2;
 				$$->select_query.projections = $3;
+				$$->select_query.has_base_input = 1;
 				$$->select_query.base_input = $5;
 				$$->select_query.joins_with = $6;
 				$$->select_query.where_expr = $7;
@@ -703,6 +704,11 @@ select_query :
 				$$->select_query.ordered_by = $10;
 				$$->select_query.offset_expr = $11;
 				$$->select_query.limit_expr = $12;
+			}
+			| SELECT projection_all_or_distinct projection_list {
+				$$ = new_dql(SELECT_QUERY);
+				$$->select_query.projection_mode = $2;
+				$$->select_query.projections = $3;
 			}
 
 projection_all_or_distinct :
