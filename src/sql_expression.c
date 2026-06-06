@@ -451,369 +451,351 @@ void print_sql_expr(const sql_expression* expr)
 	{
 		case SQL_MUL_INV :
 		{
-			printf("( 1/( ");
+			printf("1/(");
 			print_sql_expr(expr->unary_of);
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 		case SQL_NEG :
 		{
-			printf("( -( ");
+			printf("-(");
 			print_sql_expr(expr->unary_of);
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 		case SQL_BITNOT :
 		{
-			printf("( ~( ");
+			printf("~(");
 			print_sql_expr(expr->unary_of);
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 		case SQL_LOGNOT :
 		{
-			printf("( !( ");
+			printf("NOT(");
 			print_sql_expr(expr->unary_of);
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 
 		case SQL_ADD :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" + ");
+			printf(")+(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_SUB :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" - ");
+			printf(")-(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_MUL :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" * ");
+			printf(")*(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_DIV :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" / ");
+			printf(")/(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_MOD :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" %% ");
+			printf(")%%(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_GT :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" > ");
+			printf(")>");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			printf("(");
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
-			{
-				printf("( ");
 				print_dql(expr->right_sub_query);
-				printf(" )");
-			}
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_GTE :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" >= ");
+			printf(")>=");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			printf("(");
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
-			{
-				printf("( ");
 				print_dql(expr->right_sub_query);
-				printf(" )");
-			}
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LT :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" < ");
+			printf(")<");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			printf("(");
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
-			{
-				printf("( ");
 				print_dql(expr->right_sub_query);
-				printf(" )");
-			}
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LTE :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" <= ");
+			printf(")<=");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			printf("(");
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
-			{
-				printf("( ");
 				print_dql(expr->right_sub_query);
-				printf(" )");
-			}
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_EQ :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" = ");
+			printf(")=");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			printf("(");
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
-			{
-				printf("( ");
 				print_dql(expr->right_sub_query);
-				printf(" )");
-			}
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_NEQ :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" <> ");
+			printf(")<>");
 			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) printf("%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			printf("(");
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 				print_sql_expr(expr->right);
 			else
-			{
-				printf("( ");
 				print_dql(expr->right_sub_query);
-				printf(" )");
-			}
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_BITAND :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" & ");
+			printf(")&(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_BITOR :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" | ");
+			printf(")|(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_BITXOR :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" ^ ");
+			printf(")^(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LOGAND :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" AND ");
+			printf(")AND(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LOGOR :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" OR ");
+			printf(")OR(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LOGXOR :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" XOR ");
+			printf(")XOR(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LSHIFT :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" << ");
+			printf(")<<(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_RSHIFT :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" >> ");
+			printf(")>>(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_CONCAT :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" || ");
+			printf(")||(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_LIKE :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" LIKE ");
+			printf(")LIKE(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 		case SQL_IS :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->left);
-			printf(" IS ");
+			printf(")IS(");
 			print_sql_expr(expr->right);
-			printf(" )");
+			printf(")");
 			break;
 		}
 
 		case SQL_BTWN :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->btwn_input);
-			printf(" BETWEEN [ ");
+			printf(")BETWEEN(");
 			print_sql_expr(expr->bounds[0]);
-			printf(" , ");
+			printf(")AND(");
 			print_sql_expr(expr->bounds[1]);
-			printf(" ] )");
+			printf(")");
 			break;
 		}
 
 		case SQL_ADD_FLAT :
 		{
-			printf("( ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" + ");
+					printf("+");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				printf(")");
 			}
-			printf(" )");
 			break;
 		}
 		case SQL_MUL_FLAT :
 		{
-			printf("( ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" * ");
+					printf("*");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				printf(")");
 			}
-			printf(" )");
 			break;
 		}
 		case SQL_LOGAND_FLAT :
 		{
-			printf("( ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" AND ");
+					printf("AND");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				printf(")");
 			}
-			printf(" )");
 			break;
 		}
 		case SQL_LOGOR_FLAT :
 		{
-			printf("( ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" OR ");
+					printf("OR");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				printf(")");
 			}
-			printf(" )");
 			break;
 		}
 		case SQL_LOGXOR_FLAT :
 		{
-			printf("( ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" XOR ");
+					printf("XOR");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				printf(")");
 			}
-			printf(" )");
 			break;
 		}
 		case SQL_CONCAT_FLAT :
 		{
-			printf("( ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" || ");
+					printf("||");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i));
+				printf(")");
 			}
-			printf(" )");
 			break;
 		}
 		case SQL_IN :
 		{
-			printf("( ");
+			printf("(");
 			print_sql_expr(expr->in_input);
-			printf(" IN ( ");
+			printf(")IN(");
 			if(expr->in_sub_query)
 				print_dql(expr->in_sub_query);
 			else
@@ -821,11 +803,13 @@ void print_sql_expr(const sql_expression* expr)
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
 				{
 					if(i != 0)
-						printf(" , ");
+						printf(",");
+					printf("(");
 					print_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i));
+					printf(")");
 				}
 			}
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 
@@ -843,9 +827,7 @@ void print_sql_expr(const sql_expression* expr)
 		}
 		case SQL_VAR :
 		{
-			printf("\"");
 			printf_dstring(&(expr->value));
-			printf("\"");
 			break;
 		}
 
@@ -872,56 +854,59 @@ void print_sql_expr(const sql_expression* expr)
 
 		case SQL_FUNCTION_CALL :
 		{
-			printf("( ");
 			printf_dstring(&(expr->func_name));
-			printf("( ");
+			printf("(");
 			if(expr->aggregate_mode == SQL_RESULT_SET_DISTINCT)
 				printf("DISTINCT ");
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 			{
 				if(i != 0)
-					printf(" , ");
+					printf(",");
+				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i));
+				printf(")");
 			}
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 
 		case SQL_CAST :
 		{
-			printf("( CAST ( ");
+			printf("CAST(");
 			print_sql_expr(expr->cast_expr);
-			printf(" ) AS ( ");
+			printf(")AS ");
 			print_sql_type(expr->cast_type);
-			printf(" ) )");
+			printf(" )");
 			break;
 		}
 
 		case SQL_SUB_QUERY :
 		{
-			printf("( ");
+			printf("(");
 			print_dql(expr->sub_query);
-			printf(" )");
+			printf(")");
 			break;
 		}
 
 		case SQL_EXISTS :
 		{
-			printf("( EXISTS( ");
+			printf("EXISTS(");
 			print_dql(expr->sub_query);
-			printf(" ) )");
+			printf(")");
 			break;
 		}
 
 		case SQL_CASE :
 		{
 			int clauses_printed = 0;
-			printf("( CASE( ");
+			printf("CASE");
 			if(expr->case_expr)
 			{
 				if(clauses_printed != 0)
 					printf(" , ");
+				printf("(");
 				print_sql_expr(expr->case_expr);
+				printf(")");
 				clauses_printed++;
 			}
 			for(cy_uint i = 0; i < min(get_element_count_arraylist(&(expr->when_exprs)), get_element_count_arraylist(&(expr->then_exprs))); i++)
@@ -930,9 +915,9 @@ void print_sql_expr(const sql_expression* expr)
 					const sql_expression* when = get_from_front_of_arraylist(&(expr->when_exprs), i);
 					if(clauses_printed != 0)
 						printf(" , ");
-					printf("WHEN( ");
+					printf("WHEN(");
 					print_sql_expr(when);
-					printf(" )");
+					printf(")");
 					clauses_printed++;
 				}
 
@@ -940,9 +925,9 @@ void print_sql_expr(const sql_expression* expr)
 					const sql_expression* then = get_from_front_of_arraylist(&(expr->then_exprs), i);
 					if(clauses_printed != 0)
 						printf(" , ");
-					printf("THEN( ");
+					printf("THEN(");
 					print_sql_expr(then);
-					printf(" )");
+					printf(")");
 					clauses_printed++;
 				}
 			}
@@ -950,12 +935,12 @@ void print_sql_expr(const sql_expression* expr)
 			{
 				if(clauses_printed != 0)
 					printf(" , ");
-				printf("ELSE( ");
+				printf("ELSE(");
 				print_sql_expr(expr->else_expr);
-				printf(" )");
+				printf(")");
 				clauses_printed++;
 			}
-			printf(" ) )");
+			printf("END");
 			break;
 		}
 	}
