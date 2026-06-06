@@ -868,11 +868,11 @@ void print_sql_expr(const sql_expression* expr)
 
 		case SQL_CAST :
 		{
-			printf("CAST(");
+			printf("CAST((");
 			print_sql_expr(expr->cast_expr);
-			printf(")AS ");
+			printf(") AS ");
 			print_sql_type(expr->cast_type);
-			printf(" )");
+			printf(")");
 			break;
 		}
 
