@@ -701,9 +701,8 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 		{
 			snprintf_dstring(str_p, "(");
 			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")IS(");
+			snprintf_dstring(str_p, ")IS ");
 			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
 			break;
 		}
 
@@ -831,22 +830,22 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 
 		case SQL_TRUE :
 		{
-			snprintf_dstring(str_p, "true");
+			snprintf_dstring(str_p, "TRUE");
 			break;
 		}
 		case SQL_FALSE :
 		{
-			snprintf_dstring(str_p, "false");
+			snprintf_dstring(str_p, "FALSE");
 			break;
 		}
 		case SQL_UNKNOWN :
 		{
-			snprintf_dstring(str_p, "unknown");
+			snprintf_dstring(str_p, "UNKNOWN");
 			break;
 		}
 		case SQL_NULL :
 		{
-			snprintf_dstring(str_p, "null");
+			snprintf_dstring(str_p, "NULL");
 			break;
 		}
 
