@@ -27,7 +27,7 @@ static void snprint_iso_and_mode(dstring* str_p, const sql_tcl* tcl)
 	if(tcl->isolation_level != ISO_UNSPECIFIED)
 	{
 		if(clauses_printed != 0)
-			snprintf_dstring(str_p, ",");
+			snprintf_dstring(str_p, " , ");
 
 		snprintf_dstring(str_p, "ISOLATION LEVEL ");
 
@@ -59,7 +59,7 @@ static void snprint_iso_and_mode(dstring* str_p, const sql_tcl* tcl)
 	if(tcl->mode != TX_ACC_RW_UNSPECIFIED)
 	{
 		if(clauses_printed != 0)
-			snprintf_dstring(str_p, ",");
+			snprintf_dstring(str_p, " , ");
 
 		switch(tcl->mode)
 		{
