@@ -35,7 +35,7 @@ sql* parse_sql(stream* strm, int* error);
 
 void flatten_exprs_sql(sql* sqlast);
 
-void print_sql(const sql* sqlast);
+void snprint_sql(dstring* str_p, const sql* sqlast);
 
 void delete_sql(sql* sqlast);
 

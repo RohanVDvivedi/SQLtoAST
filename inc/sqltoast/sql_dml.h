@@ -77,7 +77,7 @@ sql_dml* new_dml(sql_dml_type type);
 
 void flatten_exprs_dml(sql_dml* dml);
 
-void print_dml(const sql_dml* dml);
+void snprint_dml(dstring* str_p, const sql_dml* dml);
 
 void delete_dml(sql_dml* dml);
 

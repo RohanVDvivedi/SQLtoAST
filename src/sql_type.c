@@ -46,42 +46,42 @@ sql_type* new_sql_type(sql_type_name type_name)
 	return t;
 }
 
-void print_sql_type(const sql_type* t)
+void snprint_sql_type(dstring* str_p, const sql_type* t)
 {
 	if(t->type_name != SQL_CUSTOM_TYPE)
 	{
-		printf("%s", type_names[t->type_name]);
+		snprintf_dstring(str_p, "%s", type_names[t->type_name]);
 		if(t->spec_size > 0)
 		{
-			printf("(");
+			snprintf_dstring(str_p, "(");
 			for(int i = 0; i < t->spec_size; i++)
 			{
 				if(i > 0)
-					printf(",");
-				printf("%"PRId64, t->spec[i]);
+					snprintf_dstring(str_p, ",");
+				snprintf_dstring(str_p, "%"PRId64, t->spec[i]);
 			}
-			printf(")");
+			snprintf_dstring(str_p, ")");
 		}
 		if(t->type_name == SQL_TIME || t->type_name == SQL_TIMESTAMP)
 		{
 			if(t->with_time_zone)
-				printf(" WITH TIME ZONE");
+				snprintf_dstring(str_p, " WITH TIME ZONE");
 			else
-				printf(" WITHOUT TIME ZONE");
+				snprintf_dstring(str_p, " WITHOUT TIME ZONE");
 		}
 	}
 	else
-		printf_dstring(&(t->custom_type_name));
+		concatenate_dstring(str_p, &(t->custom_type_name));
 
 	if(t->for_array)
 	{
-		printf(" ARRAY");
+		snprintf_dstring(str_p, " ARRAY");
 		for(int i = 0; i < t->array_dims_size; i++)
 		{
 			if(t->array_dims[i] == -1)
-				printf("[]");
+				snprintf_dstring(str_p, "[]");
 			else
-				printf("[%"PRId64"]", t->array_dims[i]);
+				snprintf_dstring(str_p, "[%"PRId64"]", t->array_dims[i]);
 		}
 	}
 }

@@ -195,7 +195,7 @@ sql_dql* new_dql(sql_dql_type type);
 
 void flatten_exprs_dql(sql_dql* dql);
 
-void print_dql(const sql_dql* dql);
+void snprint_dql(dstring* str_p, const sql_dql* dql);
 
 void delete_dql(sql_dql* dql);
 

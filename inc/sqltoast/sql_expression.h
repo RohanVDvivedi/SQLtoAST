@@ -220,7 +220,7 @@ sql_expression* new_case_sql_expr(sql_expression* case_expr, arraylist when_expr
 // the below function destroys the old tree and returns a new one
 sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expression* expr);
 
-void print_sql_expr(const sql_expression* expr);
+void snprint_sql_expr(dstring* str_p, const sql_expression* expr);
 
 void delete_sql_expr(sql_expression* expr);
 

@@ -57,7 +57,7 @@ struct sql_tcl
 
 sql_tcl* new_tcl(sql_tcl_type type);
 
-void print_tcl(const sql_tcl* tcl);
+void snprint_tcl(dstring* str_p, const sql_tcl* tcl);
 
 void delete_tcl(sql_tcl* tcl);
 

@@ -52,28 +52,28 @@ void flatten_exprs_sql(sql* sqlast)
 	}
 }
 
-void print_sql(const sql* sqlast)
+void snprint_sql(dstring* str_p, const sql* sqlast)
 {
 	switch(sqlast->type)
 	{
 		case DQL :
 		{
-			print_dql(sqlast->dql_query);
+			snprint_dql(str_p, sqlast->dql_query);
 			break;
 		}
 		case DML :
 		{
-			print_dml(sqlast->dml_query);
+			snprint_dml(str_p, sqlast->dml_query);
 			break;
 		}
 		case DDL :
 		{
-			print_ddl(sqlast->ddl_query);
+			snprint_ddl(str_p, sqlast->ddl_query);
 			break;
 		}
 		case TCL :
 		{
-			print_tcl(sqlast->tcl_cmd);
+			snprint_tcl(str_p, sqlast->tcl_cmd);
 			break;
 		}
 	}

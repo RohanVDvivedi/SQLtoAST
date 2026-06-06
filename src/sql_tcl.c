@@ -20,7 +20,7 @@ sql_tcl* new_tcl(sql_tcl_type type)
 	return tcl;
 }
 
-static void print_iso_and_mode(const sql_tcl* tcl)
+static void snprint_iso_and_mode(dstring* str_p, const sql_tcl* tcl)
 {
 	int clauses_printed = 0;
 
@@ -79,57 +79,56 @@ static void print_iso_and_mode(const sql_tcl* tcl)
 	}
 }
 
-void print_tcl(const sql_tcl* tcl)
+void snprint_tcl(dstring* str_p, const sql_tcl* tcl)
 {
 	switch(tcl->type)
 	{
 		case START_TX_TCL_CMD :
 		{
-			printf("START TRANSACTION ");
-			print_iso_and_mode(tcl);
+			snprintf_dstring(str_p, "START TRANSACTION ");
+			snprint_iso_and_mode(str_p, tcl);
 			break;
 		}
 		case COMMIT_TCL_CMD :
 		{
-			printf("COMMIT");
+			snprintf_dstring(str_p, "COMMIT");
 			break;
 		}
 		case ROLLBACK_TCL_CMD :
 		{
-			printf("ROLLBACK");
+			snprintf_dstring(str_p, "ROLLBACK");
 			break;
 		}
 
 		case SAVEPOINT_TCL_CMD :
 		{
-			printf("SAVEPOINT ");
-			printf_dstring(&(tcl->savepoint_name));
+			snprintf_dstring(str_p, "SAVEPOINT ");
+			concatenate_dstring(str_p, &(tcl->savepoint_name));
 			break;
 		}
 		case ROLLBACK_TO_SAVEPOINT_TCL_CMD :
 		{
-			printf("ROLLBACK TO SAVEPOINT ");
-			printf_dstring(&(tcl->savepoint_name));
+			snprintf_dstring(str_p, "ROLLBACK TO SAVEPOINT ");
+			concatenate_dstring(str_p, &(tcl->savepoint_name));
 			break;
 		}
 		case RELEASE_SAVEPOINT_TCL_CMD :
 		{
-			printf("RELEASE SAVEPOINT ");
-			printf_dstring(&(tcl->savepoint_name));
+			snprintf_dstring(str_p, "RELEASE SAVEPOINT ");
+			concatenate_dstring(str_p, &(tcl->savepoint_name));
 			break;
 		}
 
 		case SET_TX_TCL_CMD :
 		{
-			printf("SET TRANSACTION ");
-			print_iso_and_mode(tcl);
-			printf(" ");
+			snprintf_dstring(str_p, "SET TRANSACTION ");
+			snprint_iso_and_mode(str_p, tcl);
 			break;
 		}
 		case SET_TX_CHARACTERISTICS_TCL_CMD :
 		{
-			printf("SET TRANSACTION CHARACTERISTICS ");
-			print_iso_and_mode(tcl);
+			snprintf_dstring(str_p, "SET TRANSACTION CHARACTERISTICS ");
+			snprint_iso_and_mode(str_p, tcl);
 			break;
 		}
 	}
