@@ -54,98 +54,98 @@ sql_dml* new_dml(sql_dml_type type)
 	return dml;
 }
 
-void print_dml(const sql_dml* dml)
+void snprint_dml(dstring* str_p, const sql_dml* dml)
 {
 	switch(dml->type)
 	{
 		case INSERT_QUERY :
 		{
-			printf("INSERT INTO ");
-			printf_dstring(&(dml->insert_query.table_name));
+			snprintf_dstring(str_p, "INSERT INTO ");
+			concatenate_dstring(str_p, &(dml->insert_query.table_name));
 
 			if(get_element_count_arraylist(&(dml->insert_query.column_name_list)) > 0)
 			{
-				printf("(");
+				snprintf_dstring(str_p, "(");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->insert_query.column_name_list)); i++)
 				{
 					if(i != 0)
-						printf(",");
-					printf_dstring((dstring*) get_from_front_of_arraylist(&(dml->insert_query.column_name_list), i));
+						snprintf_dstring(str_p, ",");
+					concatenate_dstring(str_p, (dstring*) get_from_front_of_arraylist(&(dml->insert_query.column_name_list), i));
 				}
-				printf(")");
+				snprintf_dstring(str_p, ")");
 			}
 
 			if(dml->insert_query.input_data_query)
 			{
-				printf(" ");
-				print_dql(dml->insert_query.input_data_query);
+				snprintf_dstring(str_p, " ");
+				snprint_dql(str_p, dml->insert_query.input_data_query);
 			}
 			else
 			{
-				printf(" DEFAULT VALUES");
+				snprintf_dstring(str_p, " DEFAULT VALUES");
 			}
 
 			break;
 		}
 		case UPDATE_QUERY :
 		{
-			printf("UPDATE ");
-			printf_dstring(&(dml->update_query.table_name));
+			snprintf_dstring(str_p, "UPDATE ");
+			concatenate_dstring(str_p, &(dml->update_query.table_name));
 
 			{
-				printf(" SET ");
+				snprintf_dstring(str_p, " SET ");
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->update_query.values_to_be_set)); i++)
 				{
 					if(i != 0)
-						printf(", ");
+						snprintf_dstring(str_p, ", ");
 
 					columns_to_be_set* c = (columns_to_be_set*) get_from_front_of_arraylist(&(dml->update_query.values_to_be_set), i);
 
-					printf("(");
+					snprintf_dstring(str_p, "(");
 					for(cy_uint j = 0; j < get_element_count_arraylist(&(c->column_names)); j++)
 					{
 						if(j != 0)
-							printf(",");
-						printf_dstring((const dstring*) get_from_front_of_arraylist(&(c->column_names), j));
+							snprintf_dstring(str_p, ",");
+						concatenate_dstring(str_p, (const dstring*) get_from_front_of_arraylist(&(c->column_names), j));
 					}
-					printf(") = (");
+					snprintf_dstring(str_p, ") = (");
 					for(cy_uint j = 0; j < get_element_count_arraylist(&(c->value_exprs)); j++)
 					{
 						if(j != 0)
-							printf(",");
+							snprintf_dstring(str_p, ",");
 						const sql_expression* value_expr = get_from_front_of_arraylist(&(c->value_exprs), j);
 						if(value_expr)
 						{
-							printf("(");
-							print_sql_expr(value_expr);
-							printf(")");
+							snprintf_dstring(str_p, "(");
+							snprint_sql_expr(str_p, value_expr);
+							snprintf_dstring(str_p, ")");
 						}
 						else
-							printf("DEFAULT");
+							snprintf_dstring(str_p, "DEFAULT");
 					}
-					printf(")");
+					snprintf_dstring(str_p, ")");
 				}
 			}
 
 			if(dml->update_query.where_expr)
 			{
-				printf(" WHERE (");
-				print_sql_expr(dml->update_query.where_expr);
-				printf(")");
+				snprintf_dstring(str_p, " WHERE (");
+				snprint_sql_expr(str_p, dml->update_query.where_expr);
+				snprintf_dstring(str_p, ")");
 			}
 
 			break;
 		}
 		case DELETE_QUERY :
 		{
-			printf("DELETE FROM ");
-			printf_dstring(&(dml->delete_query.table_name));
+			snprintf_dstring(str_p, "DELETE FROM ");
+			concatenate_dstring(str_p, &(dml->delete_query.table_name));
 
 			if(dml->delete_query.where_expr)
 			{
-				printf(" WHERE (");
-				print_sql_expr(dml->delete_query.where_expr);
-				printf(")");
+				snprintf_dstring(str_p, " WHERE (");
+				snprint_sql_expr(str_p, dml->delete_query.where_expr);
+				snprintf_dstring(str_p, ")");
 			}
 
 			break;
