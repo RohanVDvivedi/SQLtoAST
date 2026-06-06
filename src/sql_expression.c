@@ -804,9 +804,7 @@ void print_sql_expr(const sql_expression* expr)
 				{
 					if(i != 0)
 						printf(",");
-					printf("(");
 					print_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i));
-					printf(")");
 				}
 			}
 			printf(")");
@@ -862,9 +860,7 @@ void print_sql_expr(const sql_expression* expr)
 			{
 				if(i != 0)
 					printf(",");
-				printf("(");
 				print_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i));
-				printf(")");
 			}
 			printf(")");
 			break;
@@ -898,47 +894,35 @@ void print_sql_expr(const sql_expression* expr)
 
 		case SQL_CASE :
 		{
-			int clauses_printed = 0;
-			printf("CASE");
 			if(expr->case_expr)
 			{
-				if(clauses_printed != 0)
-					printf(" , ");
-				printf("(");
+				printf("CASE(");
 				print_sql_expr(expr->case_expr);
-				printf(")");
-				clauses_printed++;
+				printf(") ");
 			}
+			else
+				printf("CASE ");
 			for(cy_uint i = 0; i < min(get_element_count_arraylist(&(expr->when_exprs)), get_element_count_arraylist(&(expr->then_exprs))); i++)
 			{
 				{
 					const sql_expression* when = get_from_front_of_arraylist(&(expr->when_exprs), i);
-					if(clauses_printed != 0)
-						printf(" , ");
 					printf("WHEN(");
 					print_sql_expr(when);
-					printf(")");
-					clauses_printed++;
+					printf(") ");
 				}
 
 				{
 					const sql_expression* then = get_from_front_of_arraylist(&(expr->then_exprs), i);
-					if(clauses_printed != 0)
-						printf(" , ");
 					printf("THEN(");
 					print_sql_expr(then);
-					printf(")");
-					clauses_printed++;
+					printf(") ");
 				}
 			}
 			if(expr->else_expr)
 			{
-				if(clauses_printed != 0)
-					printf(" , ");
 				printf("ELSE(");
 				print_sql_expr(expr->else_expr);
-				printf(")");
-				clauses_printed++;
+				printf(") ");
 			}
 			printf("END");
 			break;
