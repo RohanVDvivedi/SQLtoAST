@@ -409,7 +409,7 @@ void snprint_ddl(dstring* str_p, const sql_ddl* ddl)
 						{
 							if(i != 0)
 								snprintf_dstring(str_p, " , ");
-							printf_dstring((const dstring*)get_from_front_of_arraylist(&(ddl->create_view_query.column_list), i));
+							concatenate_dstring(str_p, (const dstring*)get_from_front_of_arraylist(&(ddl->create_view_query.column_list), i));
 						}
 						snprintf_dstring(str_p, " )");
 						clauses_printed++;
