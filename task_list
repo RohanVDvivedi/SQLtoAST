@@ -2,8 +2,13 @@ PICKED TASKS
 
  * print minified sql statement for any sql statement, not this custom function like form
 
+ * implement an interface to get type information and attributes from the schema tables for the tables
+
  * start with converting this parsed query into this exact logical query plan, using building blocks like
+     * give index to every operator and plug them like building blocks
+     * every sub query gets an independent sequence of operator blocks in the same list
    * join left/right/inner/outer
+   * non_join semi and anti joins
    * aggregation with/without group_by_expressions, with/without aggregate_expressions
    * projection (add drop column attribute based projection if there is no need of it in later stages of the pipeline) (computed column can be computed at last most time)
    * selection (and can be broken into several stages alloing operator push down)
