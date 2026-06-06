@@ -235,7 +235,6 @@ void print_dql(const sql_dql* dql)
 						printf(" AS ");
 						printf_dstring(&(p->as));
 					}
-					printf(" ");
 				}
 			}
 
