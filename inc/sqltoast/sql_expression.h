@@ -8,6 +8,9 @@
 
 #include<sqltoast/sql_dql.h>
 
+// uncommenting this makes serialized parse tree non identical to the one reparsed
+//#define FLATTEN_SQL_DIV_INTO_SQL_MUL_INV
+
 typedef struct sql_dql sql_dql;
 
 typedef enum sql_expression_type sql_expression_type;
