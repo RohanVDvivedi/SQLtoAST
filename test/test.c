@@ -56,13 +56,9 @@ int main()
 				printf("reparsed of serialized copy " printf_dstring_format "\n\n", printf_dstring_params(&str2));
 
 				if(compare_dstring(&str1, &str2) != 0)
-				{
-					printf("REPARSING SERIALIZED QUERY STILL NOT SAME\n");
-				}
+					printf("REPARSING FAILED\n");
 				else
-				{
-					printf("REPARSING SERIALIZED QUERY PRODUCES SAME SERIALIZED STRING\n");
-				}
+					printf("REPARSING SUCCESS\n");
 
 				deinit_dstring(&str2);
 
