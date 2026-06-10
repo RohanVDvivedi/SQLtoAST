@@ -1,5 +1,8 @@
 PICKED TASKS
 
+ * implement
+ * int has_sub_query_in_sql_exp(const sql_expression* expr);
+
  * implement an interface to get type information and attributes from the schema tables for the tables
 
  * start with converting this parsed query into this exact logical query plan, using building blocks like
