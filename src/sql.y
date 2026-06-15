@@ -116,7 +116,7 @@ void delete_table_element(sql_table_element* te_p);
 
 %type <dql_query> values_query
 %type <ptr_list> values_rows_list
-%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_sql_expr); } values_rows_list
+%destructor { delete_all_and_deinitialize_arraylist_2d(&($$), (void(*)(void*))delete_sql_expr); } values_rows_list
 
 %type <uval> set_op_mod
 
