@@ -136,6 +136,9 @@ void snprint_tcl(dstring* str_p, const sql_tcl* tcl)
 
 void delete_tcl(sql_tcl* tcl)
 {
+	if(tcl == NULL)
+		return;
+
 	if(tcl->type == SAVEPOINT_TCL_CMD || tcl->type == ROLLBACK_TO_SAVEPOINT_TCL_CMD || tcl->type == RELEASE_SAVEPOINT_TCL_CMD)
 		deinit_dstring(&(tcl->savepoint_name));
 

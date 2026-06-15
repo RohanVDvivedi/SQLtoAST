@@ -936,6 +936,9 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 
 void delete_sql_expr(sql_expression* expr)
 {
+	if(expr == NULL)
+		return;
+
 	switch(expr->type)
 	{
 		case SQL_MUL_INV :

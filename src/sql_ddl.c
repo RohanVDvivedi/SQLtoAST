@@ -894,6 +894,9 @@ void delete_order_by(order_by* o);
 
 void delete_ddl(sql_ddl* ddl)
 {
+	if(ddl == NULL)
+		return;
+
 	switch(ddl->type)
 	{
 		case CREATE_QUERY :

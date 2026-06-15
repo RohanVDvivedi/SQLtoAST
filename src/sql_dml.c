@@ -222,6 +222,9 @@ void delete_dstring(dstring* d)
 
 void delete_dml(sql_dml* dml)
 {
+	if(dml == NULL)
+		return;
+
 	switch(dml->type)
 	{
 		case INSERT_QUERY :

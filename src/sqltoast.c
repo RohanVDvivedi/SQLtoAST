@@ -81,6 +81,9 @@ void snprint_sql(dstring* str_p, const sql* sqlast)
 
 void delete_sql(sql* sqlast)
 {
+	if(sqlast == NULL)
+		return;
+
 	switch(sqlast->type)
 	{
 		case DQL :

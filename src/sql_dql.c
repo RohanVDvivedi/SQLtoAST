@@ -492,6 +492,9 @@ void delete_order_by(order_by* o)
 
 void delete_dql(sql_dql* dql)
 {
+	if(dql == NULL)
+		return;
+
 	switch(dql->type)
 	{
 		case SELECT_QUERY :

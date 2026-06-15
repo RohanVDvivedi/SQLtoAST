@@ -88,6 +88,9 @@ void snprint_sql_type(dstring* str_p, const sql_type* t)
 
 void delete_sql_type(sql_type* t)
 {
+	if(t == NULL)
+		return;
+
 	if(t->type_name == SQL_CUSTOM_TYPE)
 		deinit_dstring(&(t->custom_type_name));
 	free(t);
