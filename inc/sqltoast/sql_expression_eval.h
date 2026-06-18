@@ -5,13 +5,17 @@
 
 int has_sub_query_in_sql_exp(const sql_expression* expr);
 
-typedef void* (*sql_user_function)();
-
 typedef struct sql_expr_eval_context sql_expr_eval_context;
+
+typedef void* (*sql_user_function)(void** data_params, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
+
 struct sql_expr_eval_context
 {
+	// to be used only by the user, not internally used
+	void* context_p;
+
 	// true is 1 and 0 is false
-	int (*bool)(void* data, int* error_code); // used for all logical operators
+	int (*bool)(void* data, const sql_expr_eval_context* ec_p, int* error_code); // used for all logical operators
 
 	// constants, static
 	union
@@ -29,40 +33,45 @@ struct sql_expr_eval_context
 	// NULL is just NULL
 
 	// basic arithmetic
-	void* (*add)(void* data1, void* data2, int* error_code);
-	void* (*sub)(void* data1, void* data2, int* error_code);
-	void* (*mul)(void* data1, void* data2, int* error_code);
-	void* (*div)(void* data1, void* data2, int* error_code);
-	void* (*mod)(void* data1, void* data2, int* error_code);
+	void* (*add)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*sub)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*mul)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*div)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*mod)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
 
-	int (*compare)(void* data1, void* data2, int* error_code); // returns sign of data1 - data2
+	int (*compare)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code); // returns sign of data1 - data2
 
 	// left shift/right shift
-	void* (*left_shift)(void* data, void* shift_amt, int* error);
-	void* (*right_shift)(void* data, void* shift_amt, int* error);
+	void* (*left_shift)(void* data, void* shift_amt, const sql_expr_eval_context* ec_p, int* error);
+	void* (*right_shift)(void* data, void* shift_amt, const sql_expr_eval_context* ec_p, int* error);
 
 	// bit-wise ops
-	void* (*bit_and)(void* data1, void* data2, int* error_code);
-	void* (*bit_or)(void* data1, void* data2, int* error_code);
-	void* (*bit_xor)(void* data1, void* data2, int* error_code);
-	void* (*bit_not)(void* data, int* error_code);
+	void* (*bit_and)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*bit_or)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*bit_xor)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*bit_not)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
 
-	void* (*cast)(void* data, const sql_type* to_type, int* error_code);
+	void* (*cast)(void* data, const sql_type* to_type, const sql_expr_eval_context* ec_p, int* error_code);
 
-	void* (*create_number)(const char* bytes, int* error_code);
-	void* (*create_string)(const char* bytes, int* error_code);
+	void* (*create_number)(const char* bytes, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*create_string)(const char* bytes, const sql_expr_eval_context* ec_p, int* error_code);
 
 	// concat
-	void (*concat)(void** data1_p, void* data2, int* error_code);
+	void (*concat)(void** data1_p, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
 
 	// destroys any 1 data
-	void (*destroy)(void* data);
+	void (*delete_data)(void* data, const sql_expr_eval_context* ec_p);
 
-	void* (*create_sub_query)(const char* bytes, int* error_code);
-	void* (*next_data_from_sub_query)(void* sub_query);
-	void* (*destroy_sub_query)(void* sub_query);
+	void* (*get_sub_query)(const sql_dql* dql, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*next_data_from_sub_query)(void* sub_query, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*delete_sub_query)(void* sub_query, const sql_expr_eval_context* ec_p);
 
-	sql_user_function (*create_function)(const char* function_name, uint32_t params_count, int* error_code);
+	sql_user_function (*get_function)(const char* function_name, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
+
+	// get value for the variable
+	void* (*get_variable)(const char* bytes, const sql_expr_eval_context* ec_p, int* error_code);
 };
+
+void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error);
 
 #endif
