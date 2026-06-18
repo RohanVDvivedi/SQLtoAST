@@ -133,6 +133,7 @@
 (?i:INNER) 				{return INNER;}
 (?i:OUTER)				{return OUTER;}
 (?i:LEFT)				{return LEFT;}
+(?i:RIGHT)				{return RIGHT;}
 (?i:FULL)				{return FULL;}
 (?i:CROSS)				{return CROSS;}
 (?i:LATERAL)			{return LATERAL;}
