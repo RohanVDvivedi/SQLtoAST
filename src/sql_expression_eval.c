@@ -660,7 +660,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_UNKNOWN :
 		{
-			return ec_p->unknown_bool
+			return ec_p->unknown_bool;
 		}
 		case SQL_NULL :
 		{
@@ -685,12 +685,16 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_CAST :
 		{
-			snprintf_dstring(str_p, "CAST((");
-			snprint_sql_expr(str_p, expr->cast_expr);
-			snprintf_dstring(str_p, ") AS ");
-			snprint_sql_type(str_p, expr->cast_type);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->cast_expr, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* res = ec_p->cast(a, expr->cast_type, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 
 		case SQL_SUB_QUERY :
