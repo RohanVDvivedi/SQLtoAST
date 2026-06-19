@@ -658,27 +658,65 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LOGAND_FLAT :
 		{
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			// default value
+			void* res = ec_p->true_bool;
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)) && res != ec_p->false_bool; i++)
 			{
-				if(i != 0)
-					snprintf_dstring(str_p, "AND");
-				snprintf_dstring(str_p, "(");
-				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
-				snprintf_dstring(str_p, ")");
+				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				if(*error_code)
+					return NULL;
+
+				void* log_a = ec_p->get_bool(a, ec_p, error_code);
+				ec_p->delete_data(a, ec_p);
+				if(*error_code)
+					return NULL;
+
+				if(res == ec_p->false_bool || log_a == ec_p->false_bool)
+				{
+					res = ec_p->false_bool;
+					continue;
+				}
+
+				if(res == ec_p->unknown_bool || log_a == ec_p->unknown_bool)
+				{
+					res = ec_p->unknown_bool;
+					continue;
+				}
 			}
-			break;
+
+			return res;
 		}
 		case SQL_LOGOR_FLAT :
 		{
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			// default value
+			void* res = ec_p->false_bool;
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)) && res != ec_p->true_bool; i++)
 			{
-				if(i != 0)
-					snprintf_dstring(str_p, "OR");
-				snprintf_dstring(str_p, "(");
-				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
-				snprintf_dstring(str_p, ")");
+				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				if(*error_code)
+					return NULL;
+
+				void* log_a = ec_p->get_bool(a, ec_p, error_code);
+				ec_p->delete_data(a, ec_p);
+				if(*error_code)
+					return NULL;
+
+				if(res == ec_p->true_bool || log_a == ec_p->true_bool)
+				{
+					res = ec_p->true_bool;
+					continue;
+				}
+
+				if(res == ec_p->unknown_bool || log_a == ec_p->unknown_bool)
+				{
+					res = ec_p->unknown_bool;
+					continue;
+				}
 			}
-			break;
+
+			return res;
 		}
 		case SQL_LOGXOR_FLAT :
 		{
