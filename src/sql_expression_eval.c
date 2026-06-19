@@ -639,20 +639,15 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_STR :
 		{
-			snprintf_dstring(str_p, "'");
-			concatenate_dstring(str_p, &(expr->value));
-			snprintf_dstring(str_p, "'");
-			break;
+			return ec_p->create_string(&(expr->value), ec_p, error_code);
 		}
 		case SQL_NUM :
 		{
-			concatenate_dstring(str_p, &(expr->value));
-			break;
+			return ec_p->create_number(&(expr->value), ec_p, error_code);
 		}
 		case SQL_VAR :
 		{
-			concatenate_dstring(str_p, &(expr->value));
-			break;
+			return ec_p->get_variable(&(expr->value), ec_p, error_code);
 		}
 
 		case SQL_TRUE :
