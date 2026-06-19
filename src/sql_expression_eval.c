@@ -466,21 +466,45 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LSHIFT :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")<<(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->left_shift(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_RSHIFT :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")>>(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->right_shift(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_CONCAT :
 		{
@@ -633,23 +657,19 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_TRUE :
 		{
-			snprintf_dstring(str_p, "TRUE");
-			break;
+			return ec_p->true_bool;
 		}
 		case SQL_FALSE :
 		{
-			snprintf_dstring(str_p, "FALSE");
-			break;
+			return ec_p->false_bool;
 		}
 		case SQL_UNKNOWN :
 		{
-			snprintf_dstring(str_p, "UNKNOWN");
-			break;
+			return ec_p->unknown_bool
 		}
 		case SQL_NULL :
 		{
-			snprintf_dstring(str_p, "NULL");
-			break;
+			return NULL;
 		}
 
 		case SQL_FUNCTION_CALL :
