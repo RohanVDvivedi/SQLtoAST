@@ -547,27 +547,51 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_ADD_FLAT :
 		{
+			void* res = ec_p->zero_number;
+
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				if(i != 0)
-					snprintf_dstring(str_p, "+");
-				snprintf_dstring(str_p, "(");
-				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
-				snprintf_dstring(str_p, ")");
+				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				if(*error_code)
+				{
+					ec_p->delete_data(res, ec_p);
+					return NULL;
+				}
+
+				void* temp = ec_p->add(res, a, ec_p, error_code);
+				ec_p->delete_data(a, ec_p);
+				ec_p->delete_data(res, ec_p);
+				if(*error_code)
+					return NULL;
+
+				res = temp;
 			}
-			break;
+
+			return res;
 		}
 		case SQL_MUL_FLAT :
 		{
+			void* res = ec_p->one_number;
+
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				if(i != 0)
-					snprintf_dstring(str_p, "*");
-				snprintf_dstring(str_p, "(");
-				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
-				snprintf_dstring(str_p, ")");
+				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				if(*error_code)
+				{
+					ec_p->delete_data(res, ec_p);
+					return NULL;
+				}
+
+				void* temp = ec_p->mul(res, a, ec_p, error_code);
+				ec_p->delete_data(a, ec_p);
+				ec_p->delete_data(res, ec_p);
+				if(*error_code)
+					return NULL;
+
+				res = temp;
 			}
-			break;
+
+			return res;
 		}
 		case SQL_LOGAND_FLAT :
 		{

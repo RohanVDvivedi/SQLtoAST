@@ -9,6 +9,8 @@ typedef struct sql_expr_eval_context sql_expr_eval_context;
 
 typedef void* (*sql_user_function)(void** data_params, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
 
+// any of the functions below inside sql_expr_eval_context OR evaluate_sql_expr, must return NULL on setting or receiving error_code
+
 struct sql_expr_eval_context
 {
 	// to be used only by the user, not internally used
@@ -54,7 +56,7 @@ struct sql_expr_eval_context
 	// concat
 	void (*concat)(void** data1_p, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
 
-	// destroys any 1 data
+	// destroys any data, NO-OP if the void* constansts, static provided in this struct are passed
 	void (*delete_data)(void* data, const sql_expr_eval_context* ec_p);
 
 	void* (*get_sub_query)(const sql_dql* dql, const sql_expr_eval_context* ec_p, int* error_code);
