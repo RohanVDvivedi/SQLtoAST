@@ -463,6 +463,8 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(log_a == ec_p->unknown_bool || log_b == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
+			// default return true when neither is false or unknown
+			// this is the result when everything is true
 			return ec_p->true_bool;
 		}
 		case SQL_LOGOR :
@@ -491,6 +493,8 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(log_a == ec_p->unknown_bool || log_b == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
+			// default return false when neither is true or unknown
+			// this is the result when everything is false
 			return ec_p->false_bool;
 		}
 		case SQL_LOGXOR :
