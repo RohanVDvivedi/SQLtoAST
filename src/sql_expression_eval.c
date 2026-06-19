@@ -439,30 +439,89 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LOGAND :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")AND(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* log_a = ec_p->get_bool(a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* log_b = ec_p->get_bool(b, ec_p, error_code);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			if(log_a == ec_p->false_bool || log_b == ec_p->false_bool)
+				return ec_p->false_bool;
+
+			if(log_a == ec_p->unknown_bool || log_b == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			return ec_p->true_bool;
 		}
 		case SQL_LOGOR :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")OR(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* log_a = ec_p->get_bool(a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* log_b = ec_p->get_bool(b, ec_p, error_code);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			if(log_a == ec_p->true_bool || log_b == ec_p->true_bool)
+				return ec_p->true_bool;
+
+			if(log_a == ec_p->unknown_bool || log_b == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			return ec_p->false_bool;
 		}
 		case SQL_LOGXOR :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")XOR(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* log_a = ec_p->get_bool(a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* log_b = ec_p->get_bool(b, ec_p, error_code);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			if(log_a == ec_p->unknown_bool || log_b == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			if(log_a == ec_p->false_bool)
+				return log_b;
+			else if(log_b == ec_p->false_bool)
+				return log_a;
+			else
+				return ec_p->false_bool;
 		}
 		case SQL_LSHIFT :
 		{
