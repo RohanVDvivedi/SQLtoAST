@@ -16,15 +16,15 @@ struct sql_expr_eval_context
 
 	// used for all logical operators only returns true_bool, false_bool and unknown_bool
 	// output of this function must never be freed
-	const void* (*get_bool)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*get_bool)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
 
 	// constants, static, and needs special handling
-	const void* true_bool;
-	const void* false_bool;
-	const void* unknown_bool;
-	const void* one_number;
-	const void* zero_number;
-	const void* minus_one_number;
+	void* true_bool;
+	void* false_bool;
+	void* unknown_bool;
+	void* one_number;
+	void* zero_number;
+	void* minus_one_number;
 	// NULL is just NULL
 
 	// basic arithmetic

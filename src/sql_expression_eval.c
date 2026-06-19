@@ -118,3 +118,524 @@ int has_sub_query_in_sql_exp(const sql_expression* expr)
 
 	return 0;
 }
+
+void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code)
+{
+	dstring str;
+	dstring* str_p = &str;
+	init_empty_dstring(str_p, 0);
+
+	switch(expr->type)
+	{
+		case SQL_MUL_INV :
+		{
+			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* res = ec_p->div(ec_p->one_number, a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
+		}
+		case SQL_NEG :
+		{
+			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* res = ec_p->sub(ec_p->zero_number, a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
+		}
+		case SQL_BITNOT :
+		{
+			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* res = ec_p->bit_not(a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
+		}
+		case SQL_LOGNOT :
+		{
+			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* res = ec_p->get_bool(a, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			if(*error_code)
+				return NULL;
+
+			if(res == ec_p->true_bool)
+				return ec_p->false_bool;
+			else if(res == ec_p->false_bool)
+				return ec_p->true_bool;
+			else
+				return ec_p->unknown_bool;
+		}
+
+		case SQL_ADD :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")+(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_SUB :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")-(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_MUL :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")*(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_DIV :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")/(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_MOD :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")%%(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_GT :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")>");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			snprintf_dstring(str_p, "(");
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				snprint_sql_expr(str_p, expr->right);
+			else
+				snprint_dql(str_p, expr->right_sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_GTE :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")>=");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			snprintf_dstring(str_p, "(");
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				snprint_sql_expr(str_p, expr->right);
+			else
+				snprint_dql(str_p, expr->right_sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LT :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")<");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			snprintf_dstring(str_p, "(");
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				snprint_sql_expr(str_p, expr->right);
+			else
+				snprint_dql(str_p, expr->right_sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LTE :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")<=");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			snprintf_dstring(str_p, "(");
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				snprint_sql_expr(str_p, expr->right);
+			else
+				snprint_dql(str_p, expr->right_sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_EQ :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")=");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			snprintf_dstring(str_p, "(");
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				snprint_sql_expr(str_p, expr->right);
+			else
+				snprint_dql(str_p, expr->right_sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_NEQ :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")<>");
+			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
+			snprintf_dstring(str_p, "(");
+			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
+				snprint_sql_expr(str_p, expr->right);
+			else
+				snprint_dql(str_p, expr->right_sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_BITAND :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")&(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_BITOR :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")|(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_BITXOR :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")^(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LOGAND :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")AND(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LOGOR :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")OR(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LOGXOR :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")XOR(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LSHIFT :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")<<(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_RSHIFT :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")>>(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_CONCAT :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")||(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_LIKE :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")LIKE(");
+			snprint_sql_expr(str_p, expr->right);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+		case SQL_IS :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->left);
+			snprintf_dstring(str_p, ")IS ");
+			snprint_sql_expr(str_p, expr->right);
+			break;
+		}
+
+		case SQL_BTWN :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->btwn_input);
+			snprintf_dstring(str_p, ")BETWEEN(");
+			snprint_sql_expr(str_p, expr->bounds[0]);
+			snprintf_dstring(str_p, ")AND(");
+			snprint_sql_expr(str_p, expr->bounds[1]);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+
+		case SQL_ADD_FLAT :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, "+");
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+		case SQL_MUL_FLAT :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, "*");
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+		case SQL_LOGAND_FLAT :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, "AND");
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+		case SQL_LOGOR_FLAT :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, "OR");
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+		case SQL_LOGXOR_FLAT :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, "XOR");
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+		case SQL_CONCAT_FLAT :
+		{
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, "||");
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+		case SQL_IN :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, expr->in_input);
+			snprintf_dstring(str_p, ")IN(");
+			if(expr->in_sub_query)
+				snprint_dql(str_p, expr->in_sub_query);
+			else
+			{
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
+				{
+					if(i != 0)
+						snprintf_dstring(str_p, ",");
+					snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->in_expr_list), i));
+				}
+			}
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+
+		case SQL_STR :
+		{
+			snprintf_dstring(str_p, "'");
+			concatenate_dstring(str_p, &(expr->value));
+			snprintf_dstring(str_p, "'");
+			break;
+		}
+		case SQL_NUM :
+		{
+			concatenate_dstring(str_p, &(expr->value));
+			break;
+		}
+		case SQL_VAR :
+		{
+			concatenate_dstring(str_p, &(expr->value));
+			break;
+		}
+
+		case SQL_TRUE :
+		{
+			snprintf_dstring(str_p, "TRUE");
+			break;
+		}
+		case SQL_FALSE :
+		{
+			snprintf_dstring(str_p, "FALSE");
+			break;
+		}
+		case SQL_UNKNOWN :
+		{
+			snprintf_dstring(str_p, "UNKNOWN");
+			break;
+		}
+		case SQL_NULL :
+		{
+			snprintf_dstring(str_p, "NULL");
+			break;
+		}
+
+		case SQL_FUNCTION_CALL :
+		{
+			concatenate_dstring(str_p, &(expr->func_name));
+			snprintf_dstring(str_p, "(");
+			if(expr->aggregate_mode == SQL_RESULT_SET_DISTINCT)
+				snprintf_dstring(str_p, "DISTINCT ");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
+			{
+				if(i != 0)
+					snprintf_dstring(str_p, ",");
+				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->param_expr_list), i));
+			}
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+
+		case SQL_CAST :
+		{
+			snprintf_dstring(str_p, "CAST((");
+			snprint_sql_expr(str_p, expr->cast_expr);
+			snprintf_dstring(str_p, ") AS ");
+			snprint_sql_type(str_p, expr->cast_type);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+
+		case SQL_SUB_QUERY :
+		{
+			snprintf_dstring(str_p, "(");
+			snprint_dql(str_p, expr->sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+
+		case SQL_EXISTS :
+		{
+			snprintf_dstring(str_p, "EXISTS(");
+			snprint_dql(str_p, expr->sub_query);
+			snprintf_dstring(str_p, ")");
+			break;
+		}
+
+		case SQL_CASE :
+		{
+			if(expr->case_expr)
+			{
+				snprintf_dstring(str_p, "CASE(");
+				snprint_sql_expr(str_p, expr->case_expr);
+				snprintf_dstring(str_p, ") ");
+			}
+			else
+				snprintf_dstring(str_p, "CASE ");
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
+			{
+				{
+					const sql_expression* when = get_from_front_of_arraylist(&(expr->when_exprs), i);
+					snprintf_dstring(str_p, "WHEN(");
+					snprint_sql_expr(str_p, when);
+					snprintf_dstring(str_p, ") ");
+				}
+
+				{
+					const sql_expression* then = get_from_front_of_arraylist(&(expr->then_exprs), i);
+					snprintf_dstring(str_p, "THEN(");
+					snprint_sql_expr(str_p, then);
+					snprintf_dstring(str_p, ") ");
+				}
+			}
+			if(expr->else_expr)
+			{
+				snprintf_dstring(str_p, "ELSE(");
+				snprint_sql_expr(str_p, expr->else_expr);
+				snprintf_dstring(str_p, ") ");
+			}
+			snprintf_dstring(str_p, "END");
+			break;
+		}
+	}
+
+	deinit_dstring(str_p);
+
+	return NULL;
+}
