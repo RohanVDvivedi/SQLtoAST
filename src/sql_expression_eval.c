@@ -187,48 +187,108 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_ADD :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")+(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->add(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_SUB :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")-(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->sub(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_MUL :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")*(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->mul(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_DIV :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")/(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->div(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_MOD :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")%%(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				ec_p->delete_data(a, ec_p);
+				return NULL;
+			}
+
+			void* res = ec_p->mod(a, b, ec_p, error_code);
+			ec_p->delete_data(a, ec_p);
+			ec_p->delete_data(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_GT :
 		{
