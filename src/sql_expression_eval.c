@@ -489,6 +489,8 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 					return res;
 				}
 			}
+
+			return NULL;
 		}
 		case SQL_GTE :
 		{
