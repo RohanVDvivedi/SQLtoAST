@@ -773,7 +773,9 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(*error_code)
 					return NULL;
 
-				void* log_a = ec_p->get_bool(a, ec_p, error_code);
+				void* log_a = ec_p->unknown_bool;
+				if(a != NULL && a != ec_p->unknown_bool)
+					log_a = ec_p->get_bool(a, ec_p, error_code);
 				ec_p->delete_data(a, ec_p);
 				if(*error_code)
 					return NULL;
@@ -804,7 +806,9 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(*error_code)
 					return NULL;
 
-				void* log_a = ec_p->get_bool(a, ec_p, error_code);
+				void* log_a = ec_p->unknown_bool;
+				if(a != NULL && a != ec_p->unknown_bool)
+					log_a = ec_p->get_bool(a, ec_p, error_code);
 				ec_p->delete_data(a, ec_p);
 				if(*error_code)
 					return NULL;
@@ -835,7 +839,9 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(*error_code)
 					return NULL;
 
-				void* log_a = ec_p->get_bool(a, ec_p, error_code);
+				void* log_a = ec_p->unknown_bool;
+				if(a != NULL && a != ec_p->unknown_bool)
+					log_a = ec_p->get_bool(a, ec_p, error_code);
 				ec_p->delete_data(a, ec_p);
 				if(*error_code)
 					return NULL;
