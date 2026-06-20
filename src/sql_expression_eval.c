@@ -1497,11 +1497,45 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_IS :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")IS ");
-			snprint_sql_expr(str_p, expr->right);
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				delete_data_internal(b, ec_p);
+				return NULL;
+			}
+
+			if(b == a)
+				return ec_p->true_bool;
+
+			if(a == NULL || b == NULL || a == ec_p->unknown_bool || b == ec_p->unknown_bool)
+			{
+				delete_data_internal(a, ec_p);
+				delete_data_internal(b, ec_p);
+				return ec_p->false_bool;
+			}
+
+			void* log_a = ec_p->get_bool(a, ec_p, error_code);
+			delete_data_internal(a, ec_p);
+			if(*error_code)
+			{
+				delete_data_internal(b, ec_p);
+				return NULL;
+			}
+
+			if(b == log_a)
+			{
+				delete_data_internal(b, ec_p);
+				return ec_p->true_bool;
+			}
+			else
+			{
+				delete_data_internal(b, ec_p);
+				return ec_p->false_bool;
+			}
 		}
 
 		case SQL_BTWN :
