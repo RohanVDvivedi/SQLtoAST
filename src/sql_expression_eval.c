@@ -976,7 +976,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return NULL;
 
 			int end_of_results = 0;
-			void* some_result = next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
+			void* some_result = ec_p->next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
 			ec_p->delete_sub_query(sub_query, ec_p);
 			if(*error_code)
 				return NULL;
@@ -994,7 +994,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return NULL;
 
 			int end_of_results = 0;
-			void* some_result = next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
+			void* some_result = ec_p->next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
 			ec_p->delete_sub_query(sub_query, ec_p);
 			if(*error_code)
 				return NULL;
