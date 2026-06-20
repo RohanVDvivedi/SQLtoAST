@@ -119,6 +119,17 @@ int has_sub_query_in_sql_exp(const sql_expression* expr)
 	return 0;
 }
 
+static void delete_data_internal(void* a, const sql_expr_eval_context* ec_p)
+{
+	if(a == NULL)
+		return;
+	if(a == ec_p->true_bool || a == ec_p->false_bool || a == ec_p->unknown_bool)
+		return;
+	if(a == ec_p->minus_one_number || a == ec_p->zero_number || a == ec_p->one_number)
+		return;
+	ec_p->delete_data(a, ec_p);
+}
+
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code)
 {
 	dstring str;
@@ -136,7 +147,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return ec_p->unknown_bool;
 
 			void* res = ec_p->div(ec_p->one_number, a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -151,7 +162,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return ec_p->unknown_bool;
 
 			void* res = ec_p->sub(ec_p->zero_number, a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -166,7 +177,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return ec_p->unknown_bool;
 
 			void* res = ec_p->bit_not(a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -181,7 +192,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return ec_p->unknown_bool;
 
 			void* res = ec_p->get_bool(a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -204,18 +215,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->add(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -232,18 +243,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->sub(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -260,18 +271,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->mul(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -288,18 +299,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->div(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -316,18 +327,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->mod(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -428,18 +439,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->bit_and(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -456,18 +467,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->bit_or(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -484,18 +495,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->bit_xor(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -510,7 +521,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* log_a = ec_p->unknown_bool;
 			if(a != NULL && a != ec_p->unknown_bool)
 				log_a = ec_p->get_bool(a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -524,7 +535,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* log_b = ec_p->unknown_bool;
 			if(b != NULL && b != ec_p->unknown_bool)
 				log_b = ec_p->get_bool(b, ec_p, error_code);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -547,7 +558,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* log_a = ec_p->unknown_bool;
 			if(a != NULL && a != ec_p->unknown_bool)
 				log_a = ec_p->get_bool(a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -561,7 +572,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* log_b = ec_p->unknown_bool;
 			if(b != NULL && b != ec_p->unknown_bool)
 				log_b = ec_p->get_bool(b, ec_p, error_code);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -584,7 +595,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* log_a = ec_p->unknown_bool;
 			if(a != NULL && a != ec_p->unknown_bool)
 				log_a = ec_p->get_bool(a, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -595,7 +606,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* log_b = ec_p->unknown_bool;
 			if(b != NULL && b != ec_p->unknown_bool)
 				log_b = ec_p->get_bool(b, ec_p, error_code);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -620,18 +631,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->left_shift(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -648,18 +659,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return NULL;
 			}
 			if(b == NULL || b == ec_p->unknown_bool)
 			{
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				return ec_p->unknown_bool;
 			}
 
 			void* res = ec_p->right_shift(a, b, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
-			ec_p->delete_data(b, ec_p);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -713,18 +724,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
 				if(*error_code)
 				{
-					ec_p->delete_data(res, ec_p);
+					delete_data_internal(res, ec_p);
 					return NULL;
 				}
 				if(a == NULL || a == ec_p->unknown_bool)
 				{
-					ec_p->delete_data(res, ec_p);
+					delete_data_internal(res, ec_p);
 					return ec_p->unknown_bool;
 				}
 
 				void* temp = ec_p->add(res, a, ec_p, error_code);
-				ec_p->delete_data(a, ec_p);
-				ec_p->delete_data(res, ec_p);
+				delete_data_internal(a, ec_p);
+				delete_data_internal(res, ec_p);
 				if(*error_code)
 					return NULL;
 
@@ -742,18 +753,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
 				if(*error_code)
 				{
-					ec_p->delete_data(res, ec_p);
+					delete_data_internal(res, ec_p);
 					return NULL;
 				}
 				if(a == NULL || a == ec_p->unknown_bool)
 				{
-					ec_p->delete_data(res, ec_p);
+					delete_data_internal(res, ec_p);
 					return ec_p->unknown_bool;
 				}
 
 				void* temp = ec_p->mul(res, a, ec_p, error_code);
-				ec_p->delete_data(a, ec_p);
-				ec_p->delete_data(res, ec_p);
+				delete_data_internal(a, ec_p);
+				delete_data_internal(res, ec_p);
 				if(*error_code)
 					return NULL;
 
@@ -776,7 +787,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				void* log_a = ec_p->unknown_bool;
 				if(a != NULL && a != ec_p->unknown_bool)
 					log_a = ec_p->get_bool(a, ec_p, error_code);
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
 
@@ -809,7 +820,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				void* log_a = ec_p->unknown_bool;
 				if(a != NULL && a != ec_p->unknown_bool)
 					log_a = ec_p->get_bool(a, ec_p, error_code);
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
 
@@ -842,7 +853,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				void* log_a = ec_p->unknown_bool;
 				if(a != NULL && a != ec_p->unknown_bool)
 					log_a = ec_p->get_bool(a, ec_p, error_code);
-				ec_p->delete_data(a, ec_p);
+				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
 
@@ -948,7 +959,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return a;
 
 			void* res = ec_p->cast(a, expr->cast_type, ec_p, error_code);
-			ec_p->delete_data(a, ec_p);
+			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
 
