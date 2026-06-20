@@ -346,17 +346,149 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_GT :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")>");
-			if(expr->cmp_rhs_quantfier != SQL_CMP_NONE) snprintf_dstring(str_p, "%s", ((expr->cmp_rhs_quantfier == SQL_CMP_ANY) ? "ANY" : "ALL"));
-			snprintf_dstring(str_p, "(");
-			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
-				snprint_sql_expr(str_p, expr->right);
-			else
-				snprint_dql(str_p, expr->right_sub_query);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+			if(a == NULL || a == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			switch(expr->cmp_rhs_quantfier)
+			{
+				case SQL_CMP_NONE :
+				{
+					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					if(*error_code)
+					{
+						delete_data_internal(a, ec_p);
+						return NULL;
+					}
+					if(b == NULL || b == ec_p->unknown_bool)
+					{
+						delete_data_internal(a, ec_p);
+						return ec_p->unknown_bool;
+					}
+
+					int a_minus_b = ec_p->compare(a, b, ec_p, error_code);
+					delete_data_internal(a, ec_p);
+					delete_data_internal(b, ec_p);
+					if(*error_code)
+						return NULL;
+
+					if(a_minus_b > 0)
+						return ec_p->true_bool;
+					return ec_p->false_bool;
+				}
+				case SQL_CMP_ANY :
+				{
+					void* sub_query = ec_p->get_sub_query(expr->right_sub_query, ec_p, error_code);
+					if(*error_code)
+					{
+						delete_data_internal(a, ec_p);
+						return NULL;
+					}
+
+					void* res = ec_p->false_bool;
+					int end_of_results = 0;
+					while(res != ec_p->true_bool)
+					{
+						void* b = ec_p->next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
+						if(*error_code)
+						{
+							ec_p->delete_sub_query(sub_query, ec_p);
+							delete_data_internal(a, ec_p);
+							return NULL;
+						}
+						if(end_of_results)
+							break;
+
+						void* curr_res = ec_p->unknown_bool;
+						if(b != NULL && b != ec_p->unknown_bool)
+						{
+							int a_minus_b = ec_p->compare(a, b, ec_p, error_code);
+							delete_data_internal(b, ec_p);
+							if(*error_code)
+							{
+								ec_p->delete_sub_query(sub_query, ec_p);
+								delete_data_internal(a, ec_p);
+								return NULL;
+							}
+							curr_res = (a_minus_b > 0) ? ec_p->true_bool : ec_p->false_bool;
+						}
+
+						if(res == ec_p->true_bool || curr_res == ec_p->true_bool)
+						{
+							res = ec_p->true_bool;
+							continue;
+						}
+
+						if(res == ec_p->unknown_bool || curr_res == ec_p->unknown_bool)
+						{
+							res = ec_p->unknown_bool;
+							continue;
+						}
+					}
+
+					ec_p->delete_sub_query(sub_query, ec_p);
+					delete_data_internal(a, ec_p);
+
+					return res;
+				}
+				case SQL_CMP_ALL :
+				{
+					void* sub_query = ec_p->get_sub_query(expr->right_sub_query, ec_p, error_code);
+					if(*error_code)
+					{
+						delete_data_internal(a, ec_p);
+						return NULL;
+					}
+
+					void* res = ec_p->true_bool;
+					int end_of_results = 0;
+					while(res != ec_p->false_bool)
+					{
+						void* b = ec_p->next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
+						if(*error_code)
+						{
+							ec_p->delete_sub_query(sub_query, ec_p);
+							delete_data_internal(a, ec_p);
+							return NULL;
+						}
+						if(end_of_results)
+							break;
+
+						void* curr_res = ec_p->unknown_bool;
+						if(b != NULL && b != ec_p->unknown_bool)
+						{
+							int a_minus_b = ec_p->compare(a, b, ec_p, error_code);
+							delete_data_internal(b, ec_p);
+							if(*error_code)
+							{
+								ec_p->delete_sub_query(sub_query, ec_p);
+								delete_data_internal(a, ec_p);
+								return NULL;
+							}
+							curr_res = (a_minus_b > 0) ? ec_p->true_bool : ec_p->false_bool;
+						}
+
+						if(res == ec_p->false_bool || curr_res == ec_p->false_bool)
+						{
+							res = ec_p->false_bool;
+							continue;
+						}
+
+						if(res == ec_p->unknown_bool || curr_res == ec_p->unknown_bool)
+						{
+							res = ec_p->unknown_bool;
+							continue;
+						}
+					}
+
+					ec_p->delete_sub_query(sub_query, ec_p);
+					delete_data_internal(a, ec_p);
+
+					return res;
+				}
+			}
 		}
 		case SQL_GTE :
 		{
