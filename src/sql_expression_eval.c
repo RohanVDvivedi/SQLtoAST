@@ -944,6 +944,8 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* a = evaluate_sql_expr(expr->cast_expr, ec_p, error_code);
 			if(*error_code)
 				return NULL;
+			if(a == NULL || a == ec_p->unknown_bool)
+				return a;
 
 			void* res = ec_p->cast(a, expr->cast_type, ec_p, error_code);
 			ec_p->delete_data(a, ec_p);
