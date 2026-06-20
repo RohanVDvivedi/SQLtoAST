@@ -319,19 +319,6 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_MUL_INV :
 		case SQL_NEG :
 		case SQL_BITNOT :
-		{
-			expr->unary_of = flatten_similar_associative_operators_in_sql_expression(expr->unary_of);
-			if(expr->unary_of->type == expr->type)
-			{
-				sql_expression* flat_expr = expr->unary_of->unary_of;
-				free(expr->unary_of);
-				free(expr);
-				return flat_expr;
-			}
-			else
-				return expr;
-		}
-
 		case SQL_LOGNOT :
 		{
 			expr->unary_of = flatten_similar_associative_operators_in_sql_expression(expr->unary_of);
