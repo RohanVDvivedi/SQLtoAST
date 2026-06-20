@@ -599,6 +599,9 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(*error_code)
 				return NULL;
 
+			if(log_a == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
 			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
 			if(*error_code)
 				return NULL;
