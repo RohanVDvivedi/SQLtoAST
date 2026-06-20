@@ -1506,14 +1506,64 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_BTWN :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->btwn_input);
-			snprintf_dstring(str_p, ")BETWEEN(");
-			snprint_sql_expr(str_p, expr->bounds[0]);
-			snprintf_dstring(str_p, ")AND(");
-			snprint_sql_expr(str_p, expr->bounds[1]);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* input = evaluate_sql_expr(expr->btwn_input, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+			if(input == NULL || input == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			void* low = evaluate_sql_expr(expr->bounds[0], ec_p, error_code);
+			if(*error_code)
+			{
+				delete_data_internal(input, ec_p);
+				return NULL;
+			}
+
+			void* high = evaluate_sql_expr(expr->bounds[1], ec_p, error_code);
+			if(*error_code)
+			{
+				delete_data_internal(input, ec_p);
+				delete_data_internal(low, ec_p);
+				return NULL;
+			}
+
+			void* lower_bound_satisfied = ec_p->unknown_bool;
+			if(low != NULL && low != ec_p->unknown_bool)
+			{
+				int input_minus_low = ec_p->compare(input, low, ec_p, error_code);
+				if(*error_code)
+				{
+					delete_data_internal(input, ec_p);
+					delete_data_internal(low, ec_p);
+					delete_data_internal(high, ec_p);
+					return NULL;
+				}
+				lower_bound_satisfied = (input_minus_low >= 0) ? ec_p->true_bool : ec_p->false_bool;
+			}
+
+			void* upper_bound_satisfied = ec_p->unknown_bool;
+			if(high != NULL && high != ec_p->unknown_bool)
+			{
+				int input_minus_high = ec_p->compare(input, high, ec_p, error_code);
+				if(*error_code)
+				{
+					delete_data_internal(input, ec_p);
+					delete_data_internal(low, ec_p);
+					delete_data_internal(high, ec_p);
+					return NULL;
+				}
+				upper_bound_satisfied = (input_minus_high <= 0) ? ec_p->true_bool : ec_p->false_bool;
+			}
+
+			delete_data_internal(input, ec_p);
+			delete_data_internal(low, ec_p);
+			delete_data_internal(high, ec_p);
+
+			if(lower_bound_satisfied == ec_p->false_bool || upper_bound_satisfied == ec_p->false_bool)
+				return ec_p->false_bool;
+			if(lower_bound_satisfied == ec_p->unknown_bool || upper_bound_satisfied == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+			return ec_p->true_bool;
 		}
 
 		case SQL_ADD_FLAT :
