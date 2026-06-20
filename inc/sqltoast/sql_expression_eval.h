@@ -60,7 +60,7 @@ struct sql_expr_eval_context
 	void (*delete_data)(void* data, const sql_expr_eval_context* ec_p);
 
 	void* (*get_sub_query)(const sql_dql* dql, const sql_expr_eval_context* ec_p, int* error_code);
-	void* (*next_data_from_sub_query)(void* sub_query, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*next_data_from_sub_query)(void* sub_query, int* end_of_results, const sql_expr_eval_context* ec_p, int* error_code);
 	void* (*delete_sub_query)(void* sub_query, const sql_expr_eval_context* ec_p);
 
 	sql_user_function (*get_function)(const dstring* identifier_bytes, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
