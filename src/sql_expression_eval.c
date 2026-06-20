@@ -979,10 +979,18 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_EXISTS :
 		{
-			snprintf_dstring(str_p, "EXISTS(");
-			snprint_dql(str_p, expr->sub_query);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* sub_query = ec_p->get_sub_query(expr->sub_query, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			int end_of_results = 0;
+			void* some_result = next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
+			ec_p->delete_sub_query(sub_query, ec_p);
+			if(*error_code)
+				return NULL;
+			delete_data_internal(some_result, ec_p);
+
+			return (end_of_results) ? ec_p->false_bool : ec_p->true_bool;
 		}
 
 		case SQL_CASE :
