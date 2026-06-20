@@ -716,6 +716,11 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 					ec_p->delete_data(res, ec_p);
 					return NULL;
 				}
+				if(a == NULL || a == ec_p->unknown_bool)
+				{
+					ec_p->delete_data(res, ec_p);
+					return ec_p->unknown_bool;
+				}
 
 				void* temp = ec_p->add(res, a, ec_p, error_code);
 				ec_p->delete_data(a, ec_p);
@@ -739,6 +744,11 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				{
 					ec_p->delete_data(res, ec_p);
 					return NULL;
+				}
+				if(a == NULL || a == ec_p->unknown_bool)
+				{
+					ec_p->delete_data(res, ec_p);
+					return ec_p->unknown_bool;
 				}
 
 				void* temp = ec_p->mul(res, a, ec_p, error_code);
