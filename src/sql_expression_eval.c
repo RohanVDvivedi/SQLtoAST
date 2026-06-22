@@ -1976,15 +1976,17 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_CASE :
 		{
+			int has_a = 0;
 			void* a = NULL;
 			if(expr->case_expr != NULL)
 			{
 				a = evaluate_sql_expr(expr->case_expr, ec_p, error_code);
 				if(*error_code)
 					return NULL;
+				has_a = 1;
 			}
 
-			if(a != NULL && a != ec_p->unknown_bool)
+			if((has_a && a != NULL && a != ec_p->unknown_bool) || (!has_a))
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
 				{
@@ -1999,7 +2001,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 					int produce_output = 0;
 
-					if(a == NULL)
+					if(!has_a)
 					{
 						void* log_when = ec_p->get_bool(when, ec_p, error_code);
 						delete_data_internal(when, ec_p);
