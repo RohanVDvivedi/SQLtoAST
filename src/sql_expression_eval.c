@@ -1982,56 +1982,54 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				a = evaluate_sql_expr(expr->case_expr, ec_p, error_code);
 				if(*error_code)
 					return NULL;
-				if(a == NULL || a == ec_p->unknown_bool)
-					return ec_p->unknown_bool;
 			}
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
+			if(a != NULL && a != ec_p->unknown_bool)
 			{
-				void* when = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->when_exprs), i), ec_p, error_code);
-				if(*error_code)
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
 				{
-					delete_data_internal(a, ec_p);
-					return NULL;
-				}
-				if(when == NULL || when == ec_p->unknown_bool)
-				{
-					delete_data_internal(a, ec_p);
-					return ec_p->unknown_bool;
-				}
-
-				int produce_output = 0;
-
-				if(a == NULL)
-				{
-					void* log_when = ec_p->get_bool(when, ec_p, error_code);
-					delete_data_internal(when, ec_p);
+					void* when = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->when_exprs), i), ec_p, error_code);
 					if(*error_code)
 					{
 						delete_data_internal(a, ec_p);
 						return NULL;
 					}
-					produce_output = (log_when == ec_p->true_bool);
-				}
-				else
-				{
-					int a_minus_when = ec_p->compare(a, when, ec_p, error_code);
-					delete_data_internal(when, ec_p);
-					if(*error_code)
+					if(when == NULL || when == ec_p->unknown_bool)
+						continue;
+
+					int produce_output = 0;
+
+					if(a == NULL)
+					{
+						void* log_when = ec_p->get_bool(when, ec_p, error_code);
+						delete_data_internal(when, ec_p);
+						if(*error_code)
+						{
+							delete_data_internal(a, ec_p);
+							return NULL;
+						}
+						produce_output = (log_when == ec_p->true_bool);
+					}
+					else
+					{
+						int a_minus_when = ec_p->compare(a, when, ec_p, error_code);
+						delete_data_internal(when, ec_p);
+						if(*error_code)
+						{
+							delete_data_internal(a, ec_p);
+							return NULL;
+						}
+						produce_output = (a_minus_when == 0);
+					}
+
+					if(produce_output)
 					{
 						delete_data_internal(a, ec_p);
-						return NULL;
+						void* result = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->then_exprs), i), ec_p, error_code);
+						if(*error_code)
+							return NULL;
+						return result;
 					}
-					produce_output = (a_minus_when == 0);
-				}
-
-				if(produce_output)
-				{
-					delete_data_internal(a, ec_p);
-					void* result = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->then_exprs), i), ec_p, error_code);
-					if(*error_code)
-						return NULL;
-					return result;
 				}
 			}
 
