@@ -1509,7 +1509,10 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			}
 
 			if(b == a)
+			{
+				delete_data_internal(a, ec_p); // b too gets deleted, it points to a
 				return ec_p->true_bool;
+			}
 
 			if(a == NULL || b == NULL || a == ec_p->unknown_bool || b == ec_p->unknown_bool)
 			{
