@@ -1774,22 +1774,108 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_IN :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->in_input);
-			snprintf_dstring(str_p, ")IN(");
+			void* a = evaluate_sql_expr(expr->in_input, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+			if(a == NULL || a == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
 			if(expr->in_sub_query)
-				snprint_dql(str_p, expr->in_sub_query);
+			{
+				void* sub_query = ec_p->get_sub_query(expr->in_sub_query, ec_p, error_code);
+				if(*error_code)
+				{
+					delete_data_internal(a, ec_p);
+					return NULL;
+				}
+
+				void* res = ec_p->false_bool;
+				int end_of_results = 0;
+				while(res != ec_p->true_bool)
+				{
+					void* b = ec_p->next_data_from_sub_query(sub_query, &end_of_results, ec_p, error_code);
+					if(*error_code)
+					{
+						ec_p->delete_sub_query(sub_query, ec_p);
+						delete_data_internal(a, ec_p);
+						return NULL;
+					}
+					if(end_of_results)
+						break;
+
+					void* curr_res = ec_p->unknown_bool;
+					if(b != NULL && b != ec_p->unknown_bool)
+					{
+						int a_minus_b = ec_p->compare(a, b, ec_p, error_code);
+						delete_data_internal(b, ec_p);
+						if(*error_code)
+						{
+							ec_p->delete_sub_query(sub_query, ec_p);
+							delete_data_internal(a, ec_p);
+							return NULL;
+						}
+						curr_res = (a_minus_b == 0) ? ec_p->true_bool : ec_p->false_bool;
+					}
+
+					if(res == ec_p->true_bool || curr_res == ec_p->true_bool)
+					{
+						res = ec_p->true_bool;
+						continue;
+					}
+
+					if(res == ec_p->unknown_bool || curr_res == ec_p->unknown_bool)
+					{
+						res = ec_p->unknown_bool;
+						continue;
+					}
+				}
+
+				ec_p->delete_sub_query(sub_query, ec_p);
+				delete_data_internal(a, ec_p);
+
+				return res;
+			}
 			else
 			{
-				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
+				void* res = ec_p->false_bool;
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)) && res != ec_p->true_bool; i++)
 				{
-					if(i != 0)
-						snprintf_dstring(str_p, ",");
-					snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->in_expr_list), i));
+					void* b = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i), ec_p, error_code);
+					if(*error_code)
+					{
+						delete_data_internal(a, ec_p);
+						return NULL;
+					}
+
+					void* curr_res = ec_p->unknown_bool;
+					if(b != NULL && b != ec_p->unknown_bool)
+					{
+						int a_minus_b = ec_p->compare(a, b, ec_p, error_code);
+						delete_data_internal(b, ec_p);
+						if(*error_code)
+						{
+							delete_data_internal(a, ec_p);
+							return NULL;
+						}
+						curr_res = (a_minus_b == 0) ? ec_p->true_bool : ec_p->false_bool;
+					}
+
+					if(res == ec_p->true_bool || curr_res == ec_p->true_bool)
+					{
+						res = ec_p->true_bool;
+						continue;
+					}
+
+					if(res == ec_p->unknown_bool || curr_res == ec_p->unknown_bool)
+					{
+						res = ec_p->unknown_bool;
+						continue;
+					}
 				}
+
+				delete_data_internal(a, ec_p);
+				return res;
 			}
-			snprintf_dstring(str_p, ")");
-			break;
 		}
 
 		case SQL_STR :
