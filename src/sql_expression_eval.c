@@ -1,5 +1,7 @@
 #include<sqltoast/sql_expression_eval.h>
 
+#include<stdlib.h> // for alloca
+
 int has_sub_query_in_sql_exp(const sql_expression* expr)
 {
 	switch(expr->type)
@@ -1951,18 +1953,26 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_FUNCTION_CALL :
 		{
-			concatenate_dstring(str_p, &(expr->func_name));
-			snprintf_dstring(str_p, "(");
-			if(expr->aggregate_mode == SQL_RESULT_SET_DISTINCT)
-				snprintf_dstring(str_p, "DISTINCT ");
+			sql_user_function func = ec_p->get_function(&(expr->func_name), get_element_count_arraylist(&(expr->param_expr_list)), ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
+			void** param_values = alloca(sizeof(void*) * get_element_count_arraylist(&(expr->param_expr_list)));
+
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 			{
-				if(i != 0)
-					snprintf_dstring(str_p, ",");
-				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->param_expr_list), i));
+				param_values[i] = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i), ec_p, error_code);
+				if(param_values[i] == NULL || param_values[i] == ec_p->unknown_bool)
+					param_values[i] = NULL;
 			}
-			snprintf_dstring(str_p, ")");
-			break;
+
+			void* res = func(param_values, get_element_count_arraylist(&(expr->param_expr_list)), ec_p, error_code);
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
+				delete_data_internal(param_values[i], ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 
 		case SQL_CAST :
