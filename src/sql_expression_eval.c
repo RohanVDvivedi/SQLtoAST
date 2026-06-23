@@ -1511,12 +1511,31 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LIKE :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")LIKE(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+			if(a == NULL || a == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				delete_data_internal(a, ec_p);
+				return NULL;
+			}
+			if(b == NULL || b == ec_p->unknown_bool)
+			{
+				delete_data_internal(a, ec_p);
+				return ec_p->unknown_bool;
+			}
+
+			void* res = ec_p->like(a, b, ec_p, error_code);
+			delete_data_internal(a, ec_p);
+			delete_data_internal(b, ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 		case SQL_IS :
 		{

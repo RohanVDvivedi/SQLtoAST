@@ -56,6 +56,9 @@ struct sql_expr_eval_context
 	// concat
 	void (*concat)(void** data1_p, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
 
+	// like
+	void* (*like)(void** str_p, void* pattern_, const sql_expr_eval_context* ec_p, int* error_code);
+
 	// destroys any data, NO-OP if the void* constansts, static provided in this struct are passed
 	void (*delete_data)(void* data, const sql_expr_eval_context* ec_p);
 
