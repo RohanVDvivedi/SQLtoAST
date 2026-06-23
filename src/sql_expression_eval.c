@@ -1962,6 +1962,12 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 			{
 				param_values[i] = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i), ec_p, error_code);
+				if(*error_code)
+				{
+					for(cy_uint j = 0; j < i; j++)
+						delete_data_internal(param_values[j], ec_p);
+					return NULL;
+				}
 				if(param_values[i] == NULL || param_values[i] == ec_p->unknown_bool)
 					param_values[i] = NULL;
 			}
