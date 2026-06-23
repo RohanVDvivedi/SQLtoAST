@@ -134,10 +134,6 @@ static void delete_data_internal(void* a, const sql_expr_eval_context* ec_p)
 
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code)
 {
-	dstring str;
-	dstring* str_p = &str;
-	init_empty_dstring(str_p, 0);
-
 	switch(expr->type)
 	{
 		case SQL_MUL_INV :
@@ -2124,8 +2120,6 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			return NULL;
 		}
 	}
-
-	deinit_dstring(str_p);
 
 	return NULL;
 }
