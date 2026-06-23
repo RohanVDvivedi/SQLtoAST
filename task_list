@@ -1,6 +1,7 @@
 PICKED TASKS
 
- * implement an interface to get type information and attributes from the schema tables for the tables
+ * write a simple sql_expr_eval_context, and simple uint256, int256, double, and dstring, to run and test parsed sql_expression
+ * expose a function to parse a sql_expression separately from the query
 
  * start with converting this parsed query into this exact logical query plan, using building blocks like
      * give index to every operator and plug them like building blocks
@@ -14,10 +15,6 @@ PICKED TASKS
    * union
    * sort (may be eliminated if the input row is already sorted from previous sorting or in index scan)
    * limit/offset operator
-
- * write function to evaluate sql_expression, for a solvable one that that does not have sub queries
-  * for sub queries add a variable nae or key to rename the attribute if possible that pouints to something in the logical query plan
-  * add void* for this for every sub-query in sql_expression
 
  * create SQL_TYPE
  * alter SQL_TYPE
