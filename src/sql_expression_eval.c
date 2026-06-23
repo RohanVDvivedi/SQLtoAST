@@ -1479,12 +1479,33 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_CONCAT :
 		{
-			snprintf_dstring(str_p, "(");
-			snprint_sql_expr(str_p, expr->left);
-			snprintf_dstring(str_p, ")||(");
-			snprint_sql_expr(str_p, expr->right);
-			snprintf_dstring(str_p, ")");
-			break;
+			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+			if(a == NULL || a == ec_p->unknown_bool)
+				return ec_p->unknown_bool;
+
+			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			if(*error_code)
+			{
+				delete_data_internal(a, ec_p);
+				return NULL;
+			}
+			if(b == NULL || b == ec_p->unknown_bool)
+			{
+				delete_data_internal(a, ec_p);
+				return ec_p->unknown_bool;
+			}
+
+			ec_p->concat(&a, b, ec_p, error_code);
+			delete_data_internal(b, ec_p);
+			if(*error_code)
+			{
+				delete_data_internal(a, ec_p);
+				return NULL;
+			}
+
+			return a;
 		}
 		case SQL_LIKE :
 		{
@@ -1762,15 +1783,35 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_CONCAT_FLAT :
 		{
+			void* res = ec_p->create_string(&get_dstring_pointing_to_literal_cstring(""), ec_p, error_code);
+			if(*error_code)
+				return NULL;
+
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				if(i != 0)
-					snprintf_dstring(str_p, "||");
-				snprintf_dstring(str_p, "(");
-				snprint_sql_expr(str_p, get_from_front_of_arraylist(&(expr->expr_list), i));
-				snprintf_dstring(str_p, ")");
+				void* s = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				if(*error_code)
+				{
+					delete_data_internal(res, ec_p);
+					return NULL;
+				}
+
+				if(s == NULL || s == ec_p->unknown_bool)
+				{
+					delete_data_internal(res, ec_p);
+					return ec_p->unknown_bool;
+				}
+
+				ec_p->concat(&res, s, ec_p, error_code);
+				delete_data_internal(s, ec_p);
+				if(*error_code)
+				{
+					delete_data_internal(res, ec_p);
+					return NULL;
+				}
 			}
-			break;
+
+			return res;
 		}
 		case SQL_IN :
 		{
