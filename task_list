@@ -1,7 +1,6 @@
 PICKED TASKS
 
  * write a simple sql_expr_eval_context, and simple uint256, int256, double, and dstring, to run and test parsed sql_expression
- * expose a function to parse a sql_expression separately from the query
 
  * start with converting this parsed query into this exact logical query plan, using building blocks like
      * give index to every operator and plug them like building blocks
