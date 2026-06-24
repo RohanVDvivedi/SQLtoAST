@@ -276,12 +276,6 @@ static sql_user_function get_function(const dstring* id, uint32_t params_count, 
 	*e = 1; return NULL;        /* unknown function -> error (never return NULL without setting *e) */
 }
 
-/* variable lookup — stub: returns 1 for any identifier. Plug in your bindings here. */
-static void* get_variable(const dstring* id, const sql_expr_eval_context* ec, int* e)
-{
-	(void)id; (void)ec; (void)e; return mk_int(1);
-}
-
 static sql_expr_eval_context make_context(void)
 {
 	sql_expr_eval_context ec = (sql_expr_eval_context){0};
@@ -298,7 +292,7 @@ static sql_expr_eval_context make_context(void)
 	ec.delete_data = delete_data;
 	ec.get_sub_query = NULL; ec.next_data_from_sub_query = NULL; ec.delete_sub_query = NULL;
 	ec.get_function = get_function;
-	ec.get_variable = get_variable;
+	ec.get_variable = NULL;
 	return ec;
 }
 
