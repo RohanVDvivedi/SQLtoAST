@@ -29,6 +29,11 @@ void flatten_exprs_sql(sql* sqlast)
 {
 	switch(sqlast->type)
 	{
+		case EXPR :
+		{
+			sqlast->expr = flatten_similar_associative_operators_in_sql_expression(sqlast->expr);
+			break;
+		}
 		case DQL :
 		{
 			flatten_exprs_dql(sqlast->dql_query);
@@ -56,6 +61,11 @@ void snprint_sql(dstring* str_p, const sql* sqlast)
 {
 	switch(sqlast->type)
 	{
+		case EXPR :
+		{
+			snprint_sql_expr(str_p, sqlast->expr);
+			break;
+		}
 		case DQL :
 		{
 			snprint_dql(str_p, sqlast->dql_query);
@@ -86,6 +96,11 @@ void delete_sql(sql* sqlast)
 
 	switch(sqlast->type)
 	{
+		case EXPR :
+		{
+			delete_sql_expr(sqlast->expr);
+			break;
+		}
 		case DQL :
 		{
 			delete_dql(sqlast->dql_query);

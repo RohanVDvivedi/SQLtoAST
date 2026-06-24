@@ -3,6 +3,7 @@
 
 #include<cutlery/stream.h>
 
+#include<sqltoast/sql_expression.h>
 #include<sqltoast/sql_dql.h>
 #include<sqltoast/sql_dml.h>
 #include<sqltoast/sql_ddl.h>
@@ -11,6 +12,7 @@
 typedef enum sql_query_type sql_query_type;
 enum sql_query_type
 {
+	EXPR,
 	DQL,
 	DML,
 	DDL,
@@ -24,6 +26,7 @@ struct sql
 
 	union
 	{
+		sql_expression* expr;
 		sql_dql* dql_query;
 		sql_dml* dml_query;
 		sql_ddl* ddl_query;

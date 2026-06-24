@@ -456,7 +456,8 @@ sql_root :
 			sql_query 							{(*sql_ast) = $1;}
 
 sql_query :
-			dql_query 							{$$ = malloc(sizeof(sql)); $$->type = DQL; $$->dql_query = $1;}
+			expr								{$$ = malloc(sizeof(sql)); $$->type = EXPR; $$->expr = $1;}
+			| dql_query 						{$$ = malloc(sizeof(sql)); $$->type = DQL; $$->dql_query = $1;}
 			| dml_query 						{$$ = malloc(sizeof(sql)); $$->type = DML; $$->dml_query = $1;}
 			| ddl_query 						{$$ = malloc(sizeof(sql)); $$->type = DDL; $$->ddl_query = $1;}
 			| tcl_cmd 							{$$ = malloc(sizeof(sql)); $$->type = TCL; $$->tcl_cmd = $1;}
