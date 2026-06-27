@@ -53,10 +53,10 @@ struct sql_column_def
 
 	sql_type* type;
 
-	int is_not_null:1;
-	int is_primary_key:1;
-	int is_unique:1;
-	int is_foreign_key:1;
+	unsigned int is_not_null:1;
+	unsigned int is_primary_key:1;
+	unsigned int is_unique:1;
+	unsigned int is_foreign_key:1;
 	dstring foreign_table;
 	dstring foreign_column; // if absent, you are bound to reference the primary key of the foreign_table
 	// TODO: add on delete/update clauses
@@ -181,7 +181,7 @@ typedef order_by index_key_expr;
 typedef struct sql_create_index sql_create_index;
 struct sql_create_index
 {
-	int is_unique; // if it is a unique for the key_exprs
+	unsigned int is_unique:1; // if it is a unique for the key_exprs
 
 	dstring table_name; // on clause
 

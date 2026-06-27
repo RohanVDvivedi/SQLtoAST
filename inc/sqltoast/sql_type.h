@@ -44,14 +44,14 @@ struct sql_type
 			uint8_t spec_size;
 
 			// valid only for time and timestamp
-			int with_time_zone:1;
+			unsigned int with_time_zone:1;
 		};
 
 		// only valid for custom_type
 		dstring custom_type_name;
 	};
 
-	int for_array:1;
+	unsigned int for_array:1;
 
 	int64_t array_dims[8];
 	uint8_t array_dims_size;
