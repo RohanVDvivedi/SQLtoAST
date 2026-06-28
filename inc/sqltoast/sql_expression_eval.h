@@ -5,12 +5,9 @@
 
 int has_sub_query_in_sql_exp(const sql_expression* expr);
 
-typedef struct sql_expr_eval_context sql_expr_eval_context;
-
-typedef void* (*sql_user_function)(void** data_params, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
-
 // any of the functions below inside sql_expr_eval_context OR evaluate_sql_expr, must return NULL on setting or receiving error_code
 
+typedef struct sql_expr_eval_context sql_expr_eval_context;
 struct sql_expr_eval_context
 {
 	// to be used only by the user, not internally used
@@ -66,7 +63,7 @@ struct sql_expr_eval_context
 	void* (*next_data_from_sub_query)(void* sub_query, int* end_of_results, const sql_expr_eval_context* ec_p, int* error_code);
 	void* (*delete_sub_query)(void* sub_query, const sql_expr_eval_context* ec_p);
 
-	sql_user_function (*get_function)(const dstring* identifier_bytes, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*call_function)(const dstring* identifier_bytes, void** params, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
 
 	// get value for the variable
 	void* (*get_variable)(const dstring* identifier_bytes, const sql_expr_eval_context* ec_p, int* error_code);

@@ -1968,10 +1968,6 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_FUNCTION_CALL :
 		{
-			sql_user_function func = ec_p->get_function(&(expr->func_name), get_element_count_arraylist(&(expr->param_expr_list)), ec_p, error_code);
-			if(*error_code)
-				return NULL;
-
 			void** param_values = alloca(sizeof(void*) * get_element_count_arraylist(&(expr->param_expr_list)));
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
@@ -1987,7 +1983,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 					param_values[i] = NULL;
 			}
 
-			void* res = func(param_values, get_element_count_arraylist(&(expr->param_expr_list)), ec_p, error_code);
+			void* res = ec_p->call_function(&(expr->func_name), param_values, get_element_count_arraylist(&(expr->param_expr_list)), ec_p, error_code);
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 				delete_data_internal(param_values[i], ec_p);
 			if(*error_code)
