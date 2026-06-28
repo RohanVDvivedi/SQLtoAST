@@ -260,7 +260,7 @@ static void* fn_lower(void** p, uint32_t n, const sql_expr_eval_context* ec, int
 	(void)ec; if(n != 1) { *e = 1; return NULL; } if(!p[0]) return NULL;
 	char* t = to_text(p[0]); for(char* c = t; *c; c++) *c = (char)tolower((unsigned char)*c); return mk_str_take(t, strlen(t));
 }
-static sql_user_function get_function(const dstring* id, uint32_t params_count, const sql_expr_eval_context* ec, int* e)
+static void* call_function(const dstring* id, void** params, uint32_t params_count, const sql_expr_eval_context* ec, int* e)
 {
 	(void)params_count; (void)ec;
 	char nm[64]; cy_uint L = get_char_count_dstring(id);
@@ -268,11 +268,11 @@ static sql_user_function get_function(const dstring* id, uint32_t params_count, 
 	memcpy(nm, get_byte_array_dstring(id), L);
 	nm[L] = 0;
 	for(char* c = nm; *c; c++) *c = (char)tolower((unsigned char)*c);
-	if(!strcmp(nm, "abs"))      return fn_abs;
-	if(!strcmp(nm, "length"))   return fn_length;
-	if(!strcmp(nm, "coalesce")) return fn_coalesce;
-	if(!strcmp(nm, "upper"))    return fn_upper;
-	if(!strcmp(nm, "lower"))    return fn_lower;
+	if(!strcmp(nm, "abs"))      return fn_abs(params, params_count, ec, e);
+	if(!strcmp(nm, "length"))   return fn_length(params, params_count, ec, e);
+	if(!strcmp(nm, "coalesce")) return fn_coalesce(params, params_count, ec, e);
+	if(!strcmp(nm, "upper"))    return fn_upper(params, params_count, ec, e);
+	if(!strcmp(nm, "lower"))    return fn_lower(params, params_count, ec, e);
 	*e = 1; return NULL;        /* unknown function -> error (never return NULL without setting *e) */
 }
 
@@ -291,7 +291,7 @@ static sql_expr_eval_context make_context(void)
 	ec.concat = concat; ec.like = like;
 	ec.delete_data = delete_data;
 	ec.get_sub_query = NULL; ec.next_data_from_sub_query = NULL; ec.delete_sub_query = NULL;
-	ec.get_function = get_function;
+	ec.call_function = call_function;
 	ec.get_variable = NULL;
 	return ec;
 }
