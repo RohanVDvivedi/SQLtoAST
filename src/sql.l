@@ -225,4 +225,6 @@
 
 [a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*(\.\*)?		{yylval->sval = new_dstring(sqlget_text(yyscanner), sqlget_leng(yyscanner)); return IDENTIFIER;}
 
+.						{return ILLEGAL_CHARACTER;}
+
 %%

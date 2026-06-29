@@ -88,6 +88,9 @@ void delete_table_element(sql_table_element* te_p);
 %destructor { delete_sql_type($$); } <data_type>
 %destructor { deinit_dstring(&($$)); } <sval>
 
+/* catch illegal characters and fail */
+%token ILLEGAL_CHARACTER
+
 /* SQL */
 %type <sql_query> sql_query
 
