@@ -387,7 +387,7 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_IN :
 		{
 			if(expr->in_sub_query != NULL)
-				;//flatten_similar_associative_operators_in_sql_dql_query(expr->in_sub_query);
+				flatten_exprs_dql(expr->in_sub_query);
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
 				set_from_front_in_arraylist(&(expr->in_expr_list), (sql_expression*) flatten_similar_associative_operators_in_sql_expression((sql_expression*)get_from_front_of_arraylist(&(expr->in_expr_list), i)), i);
 			expr->in_input = flatten_similar_associative_operators_in_sql_expression(expr->in_input);
