@@ -1743,7 +1743,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(i == 0)
 				{
 					delete_data_internal(res, ec_p);
-					res = a;
+					res = log_a;
 					continue;
 				}
 
@@ -1783,7 +1783,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(i == 0)
 				{
 					delete_data_internal(res, ec_p);
-					res = a;
+					res = log_a;
 					continue;
 				}
 
@@ -1823,7 +1823,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(i == 0)
 				{
 					delete_data_internal(res, ec_p);
-					res = a;
+					res = log_a;
 					continue;
 				}
 
