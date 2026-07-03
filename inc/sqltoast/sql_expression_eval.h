@@ -16,6 +16,9 @@ struct sql_expr_eval_context
 	// used for all logical operators only returns true_bool, false_bool and unknown_bool
 	// output of this function must never be freed
 	void* (*get_bool)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
+	// anything should be convertible into true_bool, false_bool and unknown_bool (often for NULL and unknown)
+	// whether empty string is true_bool or false_bool is up to you
+	// non-zero in all number types must be true_bool and exact-zero in all number types must be false_bool, (ideally, for non-ideal cases, only god knows what you want)
 
 	// constants, static, and needs special handling
 	void* true_bool;
