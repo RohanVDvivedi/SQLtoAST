@@ -1668,6 +1668,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 					return ec_p->unknown_bool;
 				}
 
+				if(i == 0)
+				{
+					delete_data_internal(res, ec_p);
+					res = a;
+					continue;
+				}
+
 				void* temp = ec_p->add(res, a, ec_p, error_code);
 				delete_data_internal(a, ec_p);
 				delete_data_internal(res, ec_p);
@@ -1695,6 +1702,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				{
 					delete_data_internal(res, ec_p);
 					return ec_p->unknown_bool;
+				}
+
+				if(i == 0)
+				{
+					delete_data_internal(res, ec_p);
+					res = a;
+					continue;
 				}
 
 				void* temp = ec_p->mul(res, a, ec_p, error_code);
@@ -1725,6 +1739,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
+
+				if(i == 0)
+				{
+					delete_data_internal(res, ec_p);
+					res = a;
+					continue;
+				}
 
 				if(res == ec_p->false_bool || log_a == ec_p->false_bool)
 				{
@@ -1759,6 +1780,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				if(*error_code)
 					return NULL;
 
+				if(i == 0)
+				{
+					delete_data_internal(res, ec_p);
+					res = a;
+					continue;
+				}
+
 				if(res == ec_p->true_bool || log_a == ec_p->true_bool)
 				{
 					res = ec_p->true_bool;
@@ -1791,6 +1819,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
+
+				if(i == 0)
+				{
+					delete_data_internal(res, ec_p);
+					res = a;
+					continue;
+				}
 
 				if(res == ec_p->unknown_bool || log_a == ec_p->unknown_bool)
 				{
@@ -1826,6 +1861,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				{
 					delete_data_internal(res, ec_p);
 					return ec_p->unknown_bool;
+				}
+
+				if(i == 0)
+				{
+					delete_data_internal(res, ec_p);
+					res = s;
+					continue;
 				}
 
 				ec_p->concat(&res, s, ec_p, error_code);
