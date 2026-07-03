@@ -132,6 +132,15 @@ static void delete_data_internal(void* a, const sql_expr_eval_context* ec_p)
 	ec_p->delete_data(a, ec_p);
 }
 
+static void* get_bool_internal(void* a, const sql_expr_eval_context* ec_p, int* error_code)
+{
+	if(a == NULL)
+		return ec_p->unknown_bool;
+	if(a == ec_p->true_bool || a == ec_p->false_bool || a == ec_p->unknown_bool)
+		return a;
+	return ec_p->get_bool(a, ec_p, error_code);
+}
+
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code)
 {
 	switch(expr->type)
@@ -189,7 +198,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* res = ec_p->get_bool(a, ec_p, error_code);
+			void* res = get_bool_internal(a, ec_p, error_code);
 			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1316,7 +1325,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			void* log_a = ec_p->unknown_bool;
 			if(a != NULL && a != ec_p->unknown_bool)
-				log_a = ec_p->get_bool(a, ec_p, error_code);
+				log_a = get_bool_internal(a, ec_p, error_code);
 			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1330,7 +1339,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			void* log_b = ec_p->unknown_bool;
 			if(b != NULL && b != ec_p->unknown_bool)
-				log_b = ec_p->get_bool(b, ec_p, error_code);
+				log_b = get_bool_internal(b, ec_p, error_code);
 			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1353,7 +1362,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			void* log_a = ec_p->unknown_bool;
 			if(a != NULL && a != ec_p->unknown_bool)
-				log_a = ec_p->get_bool(a, ec_p, error_code);
+				log_a = get_bool_internal(a, ec_p, error_code);
 			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1367,7 +1376,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			void* log_b = ec_p->unknown_bool;
 			if(b != NULL && b != ec_p->unknown_bool)
-				log_b = ec_p->get_bool(b, ec_p, error_code);
+				log_b = get_bool_internal(b, ec_p, error_code);
 			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1390,7 +1399,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			void* log_a = ec_p->unknown_bool;
 			if(a != NULL && a != ec_p->unknown_bool)
-				log_a = ec_p->get_bool(a, ec_p, error_code);
+				log_a = get_bool_internal(a, ec_p, error_code);
 			delete_data_internal(a, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1404,7 +1413,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			void* log_b = ec_p->unknown_bool;
 			if(b != NULL && b != ec_p->unknown_bool)
-				log_b = ec_p->get_bool(b, ec_p, error_code);
+				log_b = get_bool_internal(b, ec_p, error_code);
 			delete_data_internal(b, ec_p);
 			if(*error_code)
 				return NULL;
@@ -1559,7 +1568,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				return ec_p->false_bool;
 			}
 
-			void* log_a = ec_p->get_bool(a, ec_p, error_code);
+			void* log_a = get_bool_internal(a, ec_p, error_code);
 			delete_data_internal(a, ec_p);
 			if(*error_code)
 			{
@@ -1712,7 +1721,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 				void* log_a = ec_p->unknown_bool;
 				if(a != NULL && a != ec_p->unknown_bool)
-					log_a = ec_p->get_bool(a, ec_p, error_code);
+					log_a = get_bool_internal(a, ec_p, error_code);
 				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
@@ -1745,7 +1754,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 				void* log_a = ec_p->unknown_bool;
 				if(a != NULL && a != ec_p->unknown_bool)
-					log_a = ec_p->get_bool(a, ec_p, error_code);
+					log_a = get_bool_internal(a, ec_p, error_code);
 				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
@@ -1778,7 +1787,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 				void* log_a = ec_p->unknown_bool;
 				if(a != NULL && a != ec_p->unknown_bool)
-					log_a = ec_p->get_bool(a, ec_p, error_code);
+					log_a = get_bool_internal(a, ec_p, error_code);
 				delete_data_internal(a, ec_p);
 				if(*error_code)
 					return NULL;
@@ -2071,7 +2080,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 					if(!has_a)
 					{
-						void* log_when = ec_p->get_bool(when, ec_p, error_code);
+						void* log_when = get_bool_internal(when, ec_p, error_code);
 						delete_data_internal(when, ec_p);
 						if(*error_code)
 						{
