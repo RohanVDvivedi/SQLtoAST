@@ -95,11 +95,18 @@ struct sql_expr_eval_context
 	void* (*get_type_for_data)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
 	// prelimnarily used for constant expressions to get their type
 
+	// gives a superset type, for the given 2 types, like for a decimal and integer, it should be decimal, and for string and varchar(30), it could be string etc
+	// used for case statement return values
+	void* (*unify_types)(void* typ1, void* typ2, const sql_expr_eval_context* ec_p, int* error_code);
+
 	void* (*get_type_for_sub_query)(const sql_dql* dql, const sql_expr_eval_context* ec_p, int* error_code);
 	
 	void* (*get_return_type_for_function)(const dstring* identifier_bytes, void** param_typs, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
 
 	void* (*get_type_for_variable)(const dstring* identifier_bytes, const sql_expr_eval_context* ec_p, int* error_code);
+
+	// must not delete bool_type given above
+	void (*delete_type)(void* typ, const sql_expr_eval_context* ec_p);
 };
 
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code);
