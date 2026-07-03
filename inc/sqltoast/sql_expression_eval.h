@@ -70,8 +70,40 @@ struct sql_expr_eval_context
 
 	// get value for the variable
 	void* (*get_variable)(const dstring* identifier_bytes, const sql_expr_eval_context* ec_p, int* error_code);
+
+	//
+	//
+	// below callbacks work with only type (may not be sql_type) dictated by the implementer of ec_p
+	// the below functions may be left unimplemented if you prefer dynamic typing and may never expect to call infer_type_sql_expr() function given below
+	// this (the whole interface) allows users to implement the basic functions and let these functions in this library handle the complex error-prone operator boilerplate
+	//
+	//
+
+	void* bool_type; // exact static constant type for the unknown_bool, true_bool and false_bool above
+	// returned by all the logical and comparison operators
+
+	// returns non-zero if the types are comparable
+	int (*can_compare_types)(void* typ1, void* typ2, const sql_expr_eval_context* ec_p, int* error_code);
+
+	// for cast operations
+	void* (*get_type_for_sql_type)(const sql_type* type, const sql_expr_eval_context* ec_p, int* error_code);
+	int (*can_cast_types)(void* typ_to, void* typ_from, const sql_expr_eval_context* ec_p, int* error_code);
+
+	void* (*get_return_type_for_op_exec_callback)(void* op_exec_func, void* typ1, void* typ2, const sql_expr_eval_context* ec_p, int* error_code);
+	// op_exec_func, here is bit_and, add, sub, left_shift, concat, like etc
+
+	void* (*get_type_for_data)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
+	// prelimnarily used for constant expressions to get their type
+
+	void* (*get_type_for_sub_query)(const sql_dql* dql, const sql_expr_eval_context* ec_p, int* error_code);
+	
+	void* (*get_return_type_for_function)(const dstring* identifier_bytes, void** param_typs, uint32_t params_count, const sql_expr_eval_context* ec_p, int* error_code);
+
+	void* (*get_type_for_variable)(const dstring* identifier_bytes, const sql_expr_eval_context* ec_p, int* error_code);
 };
 
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code);
+
+void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code);
 
 #endif
