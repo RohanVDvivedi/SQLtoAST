@@ -2634,26 +2634,96 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		case SQL_EXISTS :
 			return ec_p->bool_type;
 
-		case SQL_CASE : // TODO
+		case SQL_CASE :
 		{
 			if(expr->case_expr)
-				if(has_sub_query_in_sql_exp(expr->case_expr))
-					return 1;
-
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
 			{
-				if(has_sub_query_in_sql_exp((const sql_expression*) get_from_front_of_arraylist(&(expr->when_exprs), i)))
-					return 1;
+				void* t1 = infer_type_sql_expr(expr->cast_expr, ec_p, error_code);
+				if(*error_code)
+					return NULL;
+
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
+				{
+					void* t2 = infer_type_sql_expr((const sql_expression*) get_from_front_of_arraylist(&(expr->when_exprs), i), ec_p, error_code);
+					if(*error_code)
+					{
+						delete_type_internal(t1, ec_p);
+						return NULL;
+					}
+
+					int cc = ec_p->can_compare_types(t1, t2, ec_p, error_code);
+					delete_type_internal(t2, ec_p);
+					if(*error_code)
+					{
+						delete_type_internal(t1, ec_p);
+						return NULL;
+					}
+
+					if(!cc)
+					{
+						delete_type_internal(t1, ec_p);
+						(*error_code) = 1;
+						return NULL;
+					}
+				}
+
+				delete_type_internal(t1, ec_p);
 			}
+
+			void* res = NULL;
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->then_exprs)); i++)
 			{
-				if(has_sub_query_in_sql_exp((const sql_expression*) get_from_front_of_arraylist(&(expr->then_exprs), i)))
-					return 1;
+				void* t = infer_type_sql_expr((const sql_expression*) get_from_front_of_arraylist(&(expr->then_exprs), i), ec_p, error_code);
+				if(*error_code)
+				{
+					delete_type_internal(res, ec_p);
+					return NULL;
+				}
+
+				if(res == NULL)
+				{
+					res = t;
+					continue;
+				}
+
+				void* new_res = ec_p->unify_types(res, t, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+				{
+					delete_type_internal(res, ec_p);
+					return NULL;
+				}
+
+				res = new_res;
 			}
+
 			if(expr->else_expr)
-				if(has_sub_query_in_sql_exp(expr->else_expr))
-					return 1;
-			return 0;
+			{
+				void* t = infer_type_sql_expr(expr->else_expr, ec_p, error_code);
+				if(*error_code)
+				{
+					delete_type_internal(res, ec_p);
+					return NULL;
+				}
+
+				if(res == NULL)
+				{
+					res = t;
+					continue;
+				}
+
+				void* new_res = ec_p->unify_types(res, t, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+				{
+					delete_type_internal(res, ec_p);
+					return NULL;
+				}
+
+				res = new_res;
+			}
+
+			return res;
 		}
 	}
 
