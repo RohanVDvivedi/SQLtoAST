@@ -2353,7 +2353,26 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		}
 
 		case SQL_IS :
+		{
+			// only for validation
+			{
+				void* t = infer_type_sql_expr(expr->left, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+					return NULL;
+			}
+
+			// only for validation
+			// skipping checks that it must only be NULL, unknown, true or false constants
+			{
+				void* t = infer_type_sql_expr(expr->right, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+					return NULL;
+			}
+
 			return ec_p->bool_type;
+		}
 
 		case SQL_GT :
 		case SQL_GTE :
