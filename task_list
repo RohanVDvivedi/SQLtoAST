@@ -1,9 +1,5 @@
 PICKED TASKS
 
-* implement
- * sql_type* infer_type_for_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code);
-  * this function visits every branch mandatrorily and never does short circuit, and evaluates which type will it return for this variables and functions must be loaded with data and dummy type information, all logical and or case branches are iterated
-
  * start with converting this parsed query into this exact logical query plan, using building blocks like
      * give index to every operator and plug them like building blocks
      * every sub query gets an independent sequence of operator blocks in the same list
