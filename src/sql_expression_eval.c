@@ -2241,7 +2241,17 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		}
 
 		case SQL_LOGNOT :
+		{
+			// only for validation
+			{
+				void* t = infer_type_sql_expr(expr->unary_of, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+					return NULL;
+			}
+
 			return ec_p->bool_type;
+		}
 
 		case SQL_ADD :
 		case SQL_SUB :
@@ -2322,6 +2332,26 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		case SQL_LOGAND :
 		case SQL_LOGOR :
 		case SQL_LOGXOR :
+		{
+			// only for validation
+			{
+				void* t = infer_type_sql_expr(expr->left, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+					return NULL;
+			}
+
+			// only for validation
+			{
+				void* t = infer_type_sql_expr(expr->right, ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+					return NULL;
+			}
+
+			return ec_p->bool_type;
+		}
+
 		case SQL_IS :
 			return ec_p->bool_type;
 
@@ -2471,7 +2501,18 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		case SQL_LOGAND_FLAT :
 		case SQL_LOGOR_FLAT :
 		case SQL_LOGXOR_FLAT :
+		{
+			// only for validation
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
+			{
+				void* t = infer_type_sql_expr((const sql_expression*)get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				delete_type_internal(t, ec_p);
+				if(*error_code)
+					return NULL;
+			}
+
 			return ec_p->bool_type;
+		}
 
 		case SQL_IN :
 		{
@@ -2668,6 +2709,17 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 				}
 
 				delete_type_internal(t1, ec_p);
+			}
+			else
+			{
+				// only for validation
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
+				{
+					void* t = infer_type_sql_expr((const sql_expression*) get_from_front_of_arraylist(&(expr->when_exprs), i), ec_p, error_code);
+					delete_type_internal(t, ec_p);
+					if(*error_code)
+						return NULL;
+				}
 			}
 
 			void* res = NULL;
