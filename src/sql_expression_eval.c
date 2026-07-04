@@ -2638,7 +2638,7 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		{
 			if(expr->case_expr)
 			{
-				void* t1 = infer_type_sql_expr(expr->cast_expr, ec_p, error_code);
+				void* t1 = infer_type_sql_expr(expr->case_expr, ec_p, error_code);
 				if(*error_code)
 					return NULL;
 
@@ -2687,12 +2687,10 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 				}
 
 				void* new_res = ec_p->unify_types(res, t, ec_p, error_code);
+				delete_type_internal(res, ec_p);
 				delete_type_internal(t, ec_p);
 				if(*error_code)
-				{
-					delete_type_internal(res, ec_p);
 					return NULL;
-				}
 
 				res = new_res;
 			}
@@ -2713,12 +2711,10 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 				}
 
 				void* new_res = ec_p->unify_types(res, t, ec_p, error_code);
+				delete_type_internal(res, ec_p);
 				delete_type_internal(t, ec_p);
 				if(*error_code)
-				{
-					delete_type_internal(res, ec_p);
 					return NULL;
-				}
 
 				res = new_res;
 			}
