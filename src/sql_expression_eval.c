@@ -2483,7 +2483,10 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 			{
 				void* t2 = ec_p->get_type_for_sub_query(expr->in_sub_query, ec_p, error_code);
 				if(*error_code)
+				{
 					delete_type_internal(t1, ec_p);
+					return NULL;
+				}
 
 				int cc = ec_p->can_compare_types(t1, t2, ec_p, error_code);
 				delete_type_internal(t1, ec_p);
