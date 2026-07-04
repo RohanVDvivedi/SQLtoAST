@@ -111,6 +111,15 @@ struct sql_expr_eval_context
 
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code);
 
+// delete evaluated data from the function above
+void delete_data(void* a, const sql_expr_eval_context* ec_p);
+
+// required to check if the selection/filter/having clause is true or not
+void* get_bool(void* a, const sql_expr_eval_context* ec_p, int* error_code);
+
 void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code);
+
+// delete the inferred type from the function above
+void delete_type(void* t, const sql_expr_eval_context* ec_p);
 
 #endif
