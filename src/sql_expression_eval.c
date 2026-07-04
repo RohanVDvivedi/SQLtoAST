@@ -2573,12 +2573,30 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 		case SQL_NULL :
 			return NULL;
 
-		case SQL_FUNCTION_CALL : // TODO
+		case SQL_FUNCTION_CALL :
 		{
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
-				if(has_sub_query_in_sql_exp((const sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i)))
-					return 1;
-			return 0;
+			cy_uint param_count = get_element_count_arraylist(&(expr->param_expr_list));
+
+			void** param_typs = alloca(sizeof(void*) * param_count);
+
+			for(cy_uint i = 0; i < param_count; i++)
+			{
+				param_typs[i] = infer_type_sql_expr((const sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i), ec_p, error_code);
+				if(*error_code)
+				{
+					for(cy_uint j = 0; j < i; j++)
+						delete_type_internal(param_typs[j], ec_p);
+					return NULL;
+				}
+			}
+
+			void* res = ec_p->get_return_type_for_function(&(expr->func_name), param_typs, param_count, ec_p, error_code);
+			for(cy_uint i = 0; i < param_count; i++)
+				delete_type_internal(param_typs[i], ec_p);
+			if(*error_code)
+				return NULL;
+
+			return res;
 		}
 
 		case SQL_CAST :
