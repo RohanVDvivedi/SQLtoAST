@@ -2709,7 +2709,7 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 				if(res == NULL)
 				{
 					res = t;
-					continue;
+					goto EXIT_FROM_ELSE;
 				}
 
 				void* new_res = ec_p->unify_types(res, t, ec_p, error_code);
@@ -2722,6 +2722,7 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 
 				res = new_res;
 			}
+			EXIT_FROM_ELSE:;
 
 			return res;
 		}
