@@ -22,7 +22,7 @@
  *  datum* (or C NULL for SQL NULL, or one of the static constants).
  * ------------------------------------------------------------------ */
 typedef enum data_type data_type;
-enum data_type { INTEGER, FLOATING, STRING };
+enum data_type { INTEGER, FLOATING, STRING, BOOLEAN };
 
 typedef struct datum datum;
 struct datum
@@ -39,9 +39,9 @@ struct datum
 /* The constants the evaluator needs. They are distinguished by *address*,
  * so they must be distinct static objects (UNKNOWN and FALSE share a value
  * but must NOT share an address). delete_data() is a no-op on all of them. */
-static datum TRUE_D      = { .type = INTEGER, .integer =  1 };
-static datum FALSE_D     = { .type = INTEGER, .integer =  0 };
-static datum UNKNOWN_D   = { .type = INTEGER, .integer =  0 };
+static datum TRUE_D      = { .type = BOOLEAN, .integer =  1 };
+static datum FALSE_D     = { .type = BOOLEAN, .integer =  0 };
+static datum UNKNOWN_D   = { .type = BOOLEAN, .integer =  0 };
 static datum ONE_D       = { .type = INTEGER, .integer =  1 };
 static datum ZERO_D      = { .type = INTEGER, .integer =  0 };
 static datum MINUS_ONE_D = { .type = INTEGER, .integer = -1 };
@@ -61,19 +61,21 @@ static datum* mk_str_take(char* s, uint64_t n) { datum* d = malloc(sizeof *d); d
 static char* to_text(const datum* d)
 {
 	char buf[64];
-	if(d->type == INTEGER)  { snprintf(buf, sizeof buf, "%lld", (long long)d->integer); return strdup(buf); }
+	if(d->type == INTEGER || d->type == BOOLEAN) { snprintf(buf, sizeof buf, "%lld", (long long)d->integer); return strdup(buf); }
 	if(d->type == FLOATING) { double f = d->floating; if(f == 0.0) f = 0.0; snprintf(buf, sizeof buf, "%g", f); return strdup(buf); }
 	char* s = malloc(d->string_size + 1); memcpy(s, d->string, d->string_size); s[d->string_size] = 0; return s;
 }
 
-static int    is_num(const datum* d) { return d->type == INTEGER || d->type == FLOATING; }
-static double  as_dbl(const datum* d) { return d->type == INTEGER ? (double)d->integer : d->floating; }
+static int    is_int_like(const datum* d) { return d->type == INTEGER || d->type == BOOLEAN; }   /* TRUE/FALSE act as 1/0 */
+static int    is_num(const datum* d) { return is_int_like(d) || d->type == FLOATING; }
+static double  as_dbl(const datum* d) { return d->type == FLOATING ? d->floating : (double)d->integer; }
 
 /* deep copy — functions must return a *fresh* value because evaluate_sql_expr
  * frees every argument it passed in after the call returns. */
 static void* datum_dup(const datum* d)
 {
 	if(d == NULL) return NULL;
+	if(d->type == BOOLEAN) return (void*)d;                 /* the true/false/unknown constants */
 	if(d->type == STRING) { char* s = malloc(d->string_size + 1); memcpy(s, d->string, d->string_size); s[d->string_size] = 0; return mk_str_take(s, d->string_size); }
 	return d->type == INTEGER ? (void*)mk_int(d->integer) : (void*)mk_float(d->floating);
 }
@@ -106,7 +108,7 @@ typedef enum { OP_ADD, OP_SUB, OP_MUL, OP_DIV } arith_op;
 static void* arith(const datum* a, const datum* b, arith_op op, int* ec)
 {
 	if(!is_num(a) || !is_num(b)) { *ec = 1; return NULL; }
-	if(a->type == INTEGER && b->type == INTEGER)
+	if(is_int_like(a) && is_int_like(b))
 	{
 		int64_t x = a->integer, y = b->integer;
 		switch(op)
@@ -135,7 +137,7 @@ static void* mod(void* a, void* b, const sql_expr_eval_context* ec, int* e)
 {
 	(void)ec; const datum* x = a; const datum* y = b;
 	if(!is_num(x) || !is_num(y)) { *e = 1; return NULL; }
-	if(x->type == INTEGER && y->type == INTEGER) { if(y->integer == 0 || (y->integer == -1 && x->integer == INT64_MIN)) { *e = 1; return NULL; } return mk_int(x->integer % y->integer); }
+	if(is_int_like(x) && is_int_like(y)) { if(y->integer == 0 || (y->integer == -1 && x->integer == INT64_MIN)) { *e = 1; return NULL; } return mk_int(x->integer % y->integer); }
 	double bb = as_dbl(y); if(bb == 0) { *e = 1; return NULL; } return mk_float(fmod(as_dbl(x), bb));
 }
 
@@ -153,7 +155,7 @@ static int compare(void* a, void* b, const sql_expr_eval_context* ec, int* error
 	return x->type == STRING ? 1 : -1;     /* numbers sort before strings */
 }
 
-static int64_t to_i64(const datum* d, int* e) { if(d->type == INTEGER) return d->integer; if(d->type == FLOATING) return (int64_t)d->floating; *e = 1; return 0; }
+static int64_t to_i64(const datum* d, int* e) { if(is_int_like(d)) return d->integer; if(d->type == FLOATING) return (int64_t)d->floating; *e = 1; return 0; }
 static void* left_shift (void* a, void* b, const sql_expr_eval_context* ec, int* e){ (void)ec; int er=0; int64_t x=to_i64(a,&er), y=to_i64(b,&er); if(er){*e=1;return NULL;} return mk_int((int64_t)((uint64_t)x << (y & 63))); }
 static void* right_shift(void* a, void* b, const sql_expr_eval_context* ec, int* e){ (void)ec; int er=0; int64_t x=to_i64(a,&er), y=to_i64(b,&er); if(er){*e=1;return NULL;} return mk_int(x >> (y & 63)); }
 static void* bit_and(void* a, void* b, const sql_expr_eval_context* ec, int* e){ (void)ec; int er=0; int64_t x=to_i64(a,&er), y=to_i64(b,&er); if(er){*e=1;return NULL;} return mk_int(x & y); }
@@ -163,15 +165,23 @@ static void* bit_not(void* a,           const sql_expr_eval_context* ec, int* e)
 
 static void* cast(void* data, const sql_type* to_type, const sql_expr_eval_context* ec, int* e)
 {
-	(void)ec; const datum* d = data;
+	const datum* d = data;
 	switch(to_type->type_name)
 	{
-		case SQL_SMALLINT: case SQL_INT: case SQL_BIGINT: case SQL_BOOL:
-			if(d->type == INTEGER)  return mk_int(d->integer);
+		case SQL_BOOL:
+		{
+			int truth;
+			if(is_int_like(d))           truth = (d->integer != 0);
+			else if(d->type == FLOATING) truth = (d->floating != 0);
+			else                         truth = (strtod(d->string, NULL) != 0);
+			return truth ? ec->true_bool : ec->false_bool;
+		}
+		case SQL_SMALLINT: case SQL_INT: case SQL_BIGINT:
+			if(is_int_like(d))      return mk_int(d->integer);
 			if(d->type == FLOATING) return mk_int((int64_t)d->floating);
 			return mk_int(strtoll(d->string, NULL, 10));
 		case SQL_REAL: case SQL_DOUBLE: case SQL_FLOAT: case SQL_DECIMAL: case SQL_NUMERIC:
-			if(d->type == INTEGER)  return mk_float((double)d->integer);
+			if(is_int_like(d))      return mk_float((double)d->integer);
 			if(d->type == FLOATING) return mk_float(d->floating);
 			return mk_float(strtod(d->string, NULL));
 		case SQL_TEXT: case SQL_CHAR: case SQL_VARCHAR: case SQL_STRING: case SQL_CLOB:
@@ -236,7 +246,7 @@ static void* fn_abs(void** p, uint32_t n, const sql_expr_eval_context* ec, int* 
 {
 	(void)ec; if(n != 1) { *e = 1; return NULL; } if(!p[0]) return NULL;
 	datum* d = p[0];
-	if(d->type == INTEGER)  return mk_int(d->integer < 0 ? -d->integer : d->integer);
+	if(is_int_like(d))      return mk_int(d->integer < 0 ? -d->integer : d->integer);
 	if(d->type == FLOATING) return mk_float(d->floating < 0 ? -d->floating : d->floating);
 	*e = 1; return NULL;
 }
@@ -273,7 +283,7 @@ static void* fn_minmax(void** p, uint32_t n, int want_max, int* e)
 	{
 		if(!p[i]) return NULL;                       /* NULL propagates */
 		datum* d = p[i]; if(!is_num(d)) { *e = 1; return NULL; }
-		if(d->type != INTEGER) all_int = 0;
+		if(!is_int_like(d)) all_int = 0;
 		double v = as_dbl(d);
 		if(!have || (want_max ? v > best : v < best)) best = v;
 		have = 1;
@@ -312,49 +322,56 @@ static void* call_function(const dstring* id, void** params, uint32_t params_cou
 /* ================================================================== *
  *  TYPE INFERENCE side.
  *
- *  Every type is HEAP ALLOCATED (malloc) so that a type the library
- *  creates but fails to hand back or delete shows up as a real leak
- *  (caught by TYPE_LIVE below and by valgrind/ASan).  The one exception
- *  is the boolean type, which — as the header requires — is a single
- *  static constant that delete_type must never free.  In this datum model
- *  a boolean IS an integer (TRUE_D/FALSE_D are INTEGER 1/0), so the static
- *  bool type carries tag INT.  SQL NULL infers to the null/bottom type,
- *  represented (per the library's design) as a C NULL pointer.
+ *  A type reuses the SINGLE data_type enum (INTEGER/FLOATING/STRING/BOOLEAN)
+ *  as its tag — the same enum the datum uses — so get_type_for_data is just
+ *  "the value's own data_type".  Every type is HEAP ALLOCATED so that a type
+ *  the library creates but fails to hand back or delete shows up as a real
+ *  leak (caught by TYPE_LIVE and by valgrind/ASan).  The boolean type is the
+ *  one the library never frees (its public delete_type guards t==ec->bool_type);
+ *  we allocate it once and free it ourselves at shutdown.  SQL NULL infers to
+ *  the null/bottom type, represented (per the library's design) as a C NULL.
  *
- *  Ownership contract every callback obeys: a type-returning callback hands
- *  back a FRESH allocation (or the static bool, or NULL) and never one of
- *  its input type pointers — the library deletes the inputs after the call,
- *  so returning an input would be a double-free, not a leak.
+ *  Booleans coerce to integers, never the other way round: TRUE/FALSE act as
+ *  1/0, so a BOOLEAN operand types like an INTEGER in arithmetic/bitwise.
+ *
+ *  Ownership contract: a type-returning callback hands back a FRESH allocation
+ *  (or the shared bool type, or NULL) and never one of its input pointers —
+ *  the library deletes the inputs after the call.
  * ================================================================== */
-enum ty_tag { TY_INT, TY_FLOAT, TY_STRING };
-typedef struct { enum ty_tag tag; } ty;
+typedef struct { data_type tag; } ty;
 
 static long TYPE_LIVE = 0;                  /* outstanding malloc'd (non-bool) types */
-static void* new_type(enum ty_tag t) { ty* x = malloc(sizeof *x); x->tag = t; TYPE_LIVE++; return x; }
+static void* new_type(data_type t)     { ty* x = malloc(sizeof *x); x->tag = t; TYPE_LIVE++; return x; }
 static void* copy_type(const void* t)  { return new_type(((const ty*)t)->tag); }   /* t must be non-NULL */
-static enum ty_tag ty_of(const void* t){ return ((const ty*)t)->tag; }             /* t must be non-NULL */
-static int tag_num(enum ty_tag k)      { return k == TY_INT || k == TY_FLOAT; }
+static data_type ty_of(const void* t)  { return ((const ty*)t)->tag; }             /* t must be non-NULL */
+static int tag_num(data_type k)        { return k == INTEGER || k == FLOATING || k == BOOLEAN; }  /* bool is int-like/numeric */
 static int ty_num(const void* t)       { return t != NULL && tag_num(ty_of(t)); }
-static int ty_is (const void* t, enum ty_tag k) { return t != NULL && ty_of(t) == k; }
+static int ty_is (const void* t, data_type k) { return t != NULL && ty_of(t) == k; }
 
 static const char* type_name(const void* t)
 {
 	if(t == NULL) return "NULL";        /* bottom / SQL NULL */
-	switch(ty_of(t)) { case TY_INT: return "INT"; case TY_FLOAT: return "FLOAT"; case TY_STRING: return "STRING"; }
+	switch(ty_of(t)) { case INTEGER: return "INT"; case FLOATING: return "FLOAT"; case STRING: return "STRING"; case BOOLEAN: return "BOOL"; }
 	return "?";
 }
 
-/* frees a malloc'd type; leaves the static boolean type and NULL untouched */
+/* frees a malloc'd type; NULL is a no-op.  (The library's public delete_type
+ * already guards t==ec->bool_type before ever calling this callback.) */
 static void cb_delete_type(void* t, const sql_expr_eval_context* ec) { (void)ec; if(t == NULL) return; free(t); TYPE_LIVE--; }
 
 static void* get_type_for_data(void* data, const sql_expr_eval_context* ec, int* e)
 {
 	(void)ec; (void)e;
 	if(data == NULL) return NULL;
-	const datum* d = data;
-	if(d->type == INTEGER)  return new_type(TY_INT);
-	if(d->type == FLOATING) return new_type(TY_FLOAT);
-	return new_type(TY_STRING);
+	return new_type(((const datum*)data)->type);      /* a value's data_type IS its type tag (incl. BOOLEAN) */
+}
+
+/* widest of two numeric tags under the coercion order BOOL < INT < FLOAT */
+static data_type wider_num(data_type a, data_type b)
+{
+	if(a == FLOATING || b == FLOATING) return FLOATING;
+	if(a == INTEGER  || b == INTEGER)  return INTEGER;
+	return BOOLEAN;
 }
 
 /* common supertype for CASE / COALESCE ; always a FRESH allocation, never an input */
@@ -365,7 +382,7 @@ static void* unify_types(void* t1, void* t2, const sql_expr_eval_context* ec, in
 	if(t1 == NULL) return copy_type(t2);
 	if(t2 == NULL) return copy_type(t1);
 	if(ty_of(t1) == ty_of(t2)) return new_type(ty_of(t1));
-	if(ty_num(t1) && ty_num(t2)) return new_type(TY_FLOAT);   /* int + float -> float */
+	if(ty_num(t1) && ty_num(t2)) return new_type(wider_num(ty_of(t1), ty_of(t2)));
 	*e = 1; return NULL;                                      /* numeric vs string -> incompatible */
 }
 
@@ -379,30 +396,32 @@ static void* get_type_for_sql_type(const sql_type* t, const sql_expr_eval_contex
 	(void)ec;
 	switch(t->type_name)
 	{
-		case SQL_SMALLINT: case SQL_INT: case SQL_BIGINT: case SQL_BOOL: return new_type(TY_INT);
-		case SQL_REAL: case SQL_DOUBLE: case SQL_FLOAT: case SQL_DECIMAL: case SQL_NUMERIC: return new_type(TY_FLOAT);
-		case SQL_TEXT: case SQL_CHAR: case SQL_VARCHAR: case SQL_STRING: case SQL_CLOB: return new_type(TY_STRING);
+		case SQL_BOOL: return new_type(BOOLEAN);
+		case SQL_SMALLINT: case SQL_INT: case SQL_BIGINT: return new_type(INTEGER);
+		case SQL_REAL: case SQL_DOUBLE: case SQL_FLOAT: case SQL_DECIMAL: case SQL_NUMERIC: return new_type(FLOATING);
+		case SQL_TEXT: case SQL_CHAR: case SQL_VARCHAR: case SQL_STRING: case SQL_CLOB: return new_type(STRING);
 		default: *e = 1; return NULL;
 	}
 }
 
 /* result type of a binary/unary operator, keyed on the exec-callback pointer.
- * Result depends only on the SET of operand tags (flatten-invariant); NULL is type-transparent. */
+ * Result depends only on the SET of operand tags (flatten-invariant); NULL is
+ * type-transparent; a BOOLEAN operand types as an integer here. */
 static void* get_return_type_for_op_exec_callback(void* op, void* t1, void* t2, const sql_expr_eval_context* ec, int* e)
 {
 	if(op == (void*)ec->add || op == (void*)ec->sub || op == (void*)ec->mul || op == (void*)ec->div || op == (void*)ec->mod)
 	{
-		if(ty_is(t1, TY_STRING) || ty_is(t2, TY_STRING)) { *e = 1; return NULL; }   /* non-NULL string in arithmetic is a type error */
-		return (ty_is(t1, TY_FLOAT) || ty_is(t2, TY_FLOAT)) ? new_type(TY_FLOAT) : new_type(TY_INT);
+		if(ty_is(t1, STRING) || ty_is(t2, STRING)) { *e = 1; return NULL; }   /* a non-NULL string in arithmetic is a type error */
+		return (ty_is(t1, FLOATING) || ty_is(t2, FLOATING)) ? new_type(FLOATING) : new_type(INTEGER);  /* bool/int/NULL -> INT */
 	}
 	if(op == (void*)ec->left_shift || op == (void*)ec->right_shift ||
 	   op == (void*)ec->bit_and || op == (void*)ec->bit_or || op == (void*)ec->bit_xor || op == (void*)ec->bit_not)
 	{
-		if(ty_is(t1, TY_STRING) || ty_is(t2, TY_STRING)) { *e = 1; return NULL; }
-		return new_type(TY_INT);
+		if(ty_is(t1, STRING) || ty_is(t2, STRING)) { *e = 1; return NULL; }
+		return new_type(INTEGER);
 	}
-	if(op == (void*)ec->concat) return new_type(TY_STRING);          /* concat is always string-typed, NULL or not */
-	if(op == (void*)ec->like)   return ec->bool_type;               /* static bool (library deletes it -> skipped) */
+	if(op == (void*)ec->concat) return new_type(STRING);            /* concat is always string-typed, NULL or not */
+	if(op == (void*)ec->like)   return ec->bool_type;              /* LIKE yields boolean (shared bool type) */
 	*e = 1; return NULL;
 }
 
@@ -415,29 +434,29 @@ static void* get_return_type_for_function(const dstring* id, void** at, uint32_t
 	memcpy(nm, get_byte_array_dstring(id), L); nm[L] = 0;
 	for(char* c = nm; *c; c++) *c = (char)tolower((unsigned char)*c);
 
-	int any_null = 0, all_int = 1, all_num = 1;
+	int any_null = 0, all_int_like = 1, all_num = 1;
 	for(uint32_t i = 0; i < n; i++)
 	{
 		if(at[i] == NULL) any_null = 1;
-		else { if(ty_of(at[i]) != TY_INT) all_int = 0; if(!ty_num(at[i])) all_num = 0; }
+		else { data_type k = ty_of(at[i]); if(!(k == INTEGER || k == BOOLEAN)) all_int_like = 0; if(!tag_num(k)) all_num = 0; }
 	}
 
-	if(!strcmp(nm, "abs"))    { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return copy_type(at[0]); }
-	if(!strcmp(nm, "length")) { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; return new_type(TY_INT); }
-	if(!strcmp(nm, "upper") || !strcmp(nm, "lower")) { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; return new_type(TY_STRING); }
-	if(!strcmp(nm, "sin") || !strcmp(nm, "cos")) { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(TY_FLOAT); }
-	if(!strcmp(nm, "min") || !strcmp(nm, "max")) { if(n < 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(all_int ? TY_INT : TY_FLOAT); }
-	if(!strcmp(nm, "avg")) { if(n < 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(TY_FLOAT); }
+	if(!strcmp(nm, "abs"))    { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(ty_is(at[0], FLOATING) ? FLOATING : INTEGER); }
+	if(!strcmp(nm, "length")) { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; return new_type(INTEGER); }
+	if(!strcmp(nm, "upper") || !strcmp(nm, "lower")) { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; return new_type(STRING); }
+	if(!strcmp(nm, "sin") || !strcmp(nm, "cos")) { if(n != 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(FLOATING); }
+	if(!strcmp(nm, "min") || !strcmp(nm, "max")) { if(n < 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(all_int_like ? INTEGER : FLOATING); }
+	if(!strcmp(nm, "avg")) { if(n < 1) { *e = 1; return NULL; } if(any_null) return NULL; if(!all_num) { *e = 1; return NULL; } return new_type(FLOATING); }
 	if(!strcmp(nm, "coalesce"))
 	{
-		int seen = 0; enum ty_tag acc = TY_INT;              /* fold arg tags; no intermediate allocation */
+		int seen = 0; data_type acc = INTEGER;              /* fold arg tags; no intermediate allocation */
 		for(uint32_t i = 0; i < n; i++)
 		{
 			if(at[i] == NULL) continue;
-			enum ty_tag ti = ty_of(at[i]);
+			data_type ti = ty_of(at[i]);
 			if(!seen) { acc = ti; seen = 1; }
 			else if(acc == ti) { /* same */ }
-			else if(tag_num(acc) && tag_num(ti)) acc = TY_FLOAT;
+			else if(tag_num(acc) && tag_num(ti)) acc = wider_num(acc, ti);
 			else { *e = 1; return NULL; }
 		}
 		return seen ? new_type(acc) : NULL;                  /* all-NULL args -> bottom */
@@ -464,7 +483,7 @@ static sql_expr_eval_context make_context(void)
 	ec.get_variable = NULL;
 
 	/* ---- type inference wiring (constant expressions only: no variable / sub-query type callbacks) ---- */
-	ec.bool_type = new_type(TY_INT);              /* bool type is heap-allocated too; the library never frees it (it guards t==ec->bool_type) */
+	ec.bool_type = new_type(BOOLEAN);             /* the boolean type; heap-allocated, guarded by the library, freed by us at shutdown */
 	ec.can_compare_types = can_compare_types;
 	ec.get_type_for_sql_type = get_type_for_sql_type;
 	ec.can_cast_types = can_cast_types;
@@ -502,20 +521,27 @@ static int datum_equal(const void* a, const void* b)
 static int same_type(const void* a, const void* b) { if(a == NULL || b == NULL) return a == b; return ty_of(a) == ty_of(b); }
 
 /* does the inferred type predict the type of the actually-evaluated value?
- * NULL value is a valid value of any type; an INT value is accepted under FLOAT (numeric widening). */
+ *  - NULL / unknown_bool values are type-agnostic (members of every type);
+ *  - a TRUE/FALSE value is a BOOL, and — since booleans coerce to integers —
+ *    is also acceptable under INT and FLOAT (but a plain int is NOT a BOOL);
+ *  - a plain INT value is acceptable under FLOAT (numeric widening). */
 static int type_predicts_value(const void* inferred, const void* val, const sql_expr_eval_context* ec)
 {
 	if(val == NULL) return 1;                                   /* NULL is a member of every type */
-	if(val == ec->unknown_bool) return 1;                       /* unknown_bool is the NULL/unknown sentinel: type-agnostic */
-	int vt_int = 0, vt_flt = 0, vt_str = 0;
-	if(val == ec->true_bool || val == ec->false_bool) vt_int = 1;  /* TRUE/FALSE are integer datums */
-	else { const datum* d = val; vt_int = (d->type == INTEGER); vt_flt = (d->type == FLOATING); vt_str = (d->type == STRING); }
+	if(val == ec->unknown_bool) return 1;                       /* unknown/NULL sentinel: type-agnostic */
 	if(inferred == NULL) return 0;                              /* inferred bottom but value is definite */
-	switch(ty_of(inferred))
+	data_type it = ty_of(inferred);
+
+	if(val == ec->true_bool || val == ec->false_bool)           /* a boolean value */
+		return it == BOOLEAN || it == INTEGER || it == FLOATING;
+
+	const datum* d = val;                                       /* a plain int/float/string value */
+	switch(it)
 	{
-		case TY_STRING: return vt_str;
-		case TY_INT:    return vt_int;
-		case TY_FLOAT:  return vt_flt || vt_int;                /* an int is a valid float */
+		case STRING:  return d->type == STRING;
+		case INTEGER: return d->type == INTEGER;
+		case FLOATING: return d->type == FLOATING || d->type == INTEGER;   /* int widens to float */
+		case BOOLEAN: return 0;                                 /* a non-boolean value is not of boolean type */
 	}
 	return 0;
 }
