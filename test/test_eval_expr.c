@@ -163,12 +163,13 @@ static void* bit_or (void* a, void* b, const sql_expr_eval_context* ec, int* e){
 static void* bit_xor(void* a, void* b, const sql_expr_eval_context* ec, int* e){ (void)ec; int er=0; int64_t x=to_i64(a,&er), y=to_i64(b,&er); if(er){*e=1;return NULL;} return mk_int(x ^ y); }
 static void* bit_not(void* a,           const sql_expr_eval_context* ec, int* e){ (void)ec; int er=0; int64_t x=to_i64(a,&er);              if(er){*e=1;return NULL;} return mk_int(~x); }
 
-static void* cast(void* data, const sql_type* to_type, const sql_expr_eval_context* ec, int* e)
+static void* cast(void* data, const void* to_type, const sql_expr_eval_context* ec, int* e)
 {
 	const datum* d = data;
-	switch(to_type->type_name)
+	const data_type* t = to_type;
+	switch(*t)
 	{
-		case SQL_BOOL:
+		case BOOLEAN:
 		{
 			int truth;
 			if(is_int_like(d))           truth = (d->integer != 0);
@@ -176,15 +177,15 @@ static void* cast(void* data, const sql_type* to_type, const sql_expr_eval_conte
 			else                         truth = (strtod(d->string, NULL) != 0);
 			return truth ? ec->true_bool : ec->false_bool;
 		}
-		case SQL_SMALLINT: case SQL_INT: case SQL_BIGINT:
+		case INTEGER:
 			if(is_int_like(d))      return mk_int(d->integer);
 			if(d->type == FLOATING) return mk_int((int64_t)d->floating);
 			return mk_int(strtoll(d->string, NULL, 10));
-		case SQL_REAL: case SQL_DOUBLE: case SQL_FLOAT: case SQL_DECIMAL: case SQL_NUMERIC:
+		case FLOATING:
 			if(is_int_like(d))      return mk_float((double)d->integer);
 			if(d->type == FLOATING) return mk_float(d->floating);
 			return mk_float(strtod(d->string, NULL));
-		case SQL_TEXT: case SQL_CHAR: case SQL_VARCHAR: case SQL_STRING: case SQL_CLOB:
+		case STRING:
 		{ char* s = to_text(d); return mk_str_take(s, strlen(s)); }
 		default: *e = 1; return NULL;     /* unsupported target type */
 	}
@@ -389,7 +390,7 @@ static void* unify_types(void* t1, void* t2, const sql_expr_eval_context* ec, in
 /* the value model's compare() and cast() accept every combination, so these never reject.
  * (they read the input types but must NOT free them — the library owns them) */
 static int can_compare_types(void* a, void* b, const sql_expr_eval_context* ec, int* e) { (void)a; (void)b; (void)ec; (void)e; return 1; }
-static int can_cast_types   (void* to, void* from, const sql_expr_eval_context* ec, int* e) { (void)to; (void)from; (void)ec; (void)e; return 1; }
+static int can_cast_types   (const void* from, const void* to, const sql_expr_eval_context* ec, int* e) { (void)to; (void)from; (void)ec; (void)e; return 1; }
 
 static void* get_type_for_sql_type(const sql_type* t, const sql_expr_eval_context* ec, int* e)
 {
