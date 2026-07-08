@@ -48,7 +48,7 @@ struct sql_expr_eval_context
 	void* (*bit_xor)(void* data1, void* data2, const sql_expr_eval_context* ec_p, int* error_code);
 	void* (*bit_not)(void* data, const sql_expr_eval_context* ec_p, int* error_code);
 
-	void* (*cast)(void* data, const sql_type* to_type, const sql_expr_eval_context* ec_p, int* error_code);
+	void* (*cast)(void* data, const void* to_type, const sql_expr_eval_context* ec_p, int* error_code);
 
 	void* (*create_number)(const dstring* data_bytes, const sql_expr_eval_context* ec_p, int* error_code);
 	void* (*create_string)(const dstring* data_bytes, const sql_expr_eval_context* ec_p, int* error_code);
@@ -87,7 +87,7 @@ struct sql_expr_eval_context
 
 	// for cast operations
 	void* (*get_type_for_sql_type)(const sql_type* type, const sql_expr_eval_context* ec_p, int* error_code);
-	int (*can_cast_types)(void* typ_to, void* typ_from, const sql_expr_eval_context* ec_p, int* error_code);
+	int (*can_cast_types)(const void* typ_from, const void* typ_to, const sql_expr_eval_context* ec_p, int* error_code);
 
 	void* (*get_return_type_for_op_exec_callback)(void* op_exec_func, void* typ1, void* typ2, const sql_expr_eval_context* ec_p, int* error_code);
 	// op_exec_func, here is bit_and, add, sub, left_shift, concat, like etc

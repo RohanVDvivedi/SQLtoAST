@@ -2045,14 +2045,25 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_CAST :
 		{
-			void* a = evaluate_sql_expr(expr->cast_expr, ec_p, error_code);
+			void* t = ec_p->get_type_for_sql_type(expr->cast_type, ec_p, error_code);
 			if(*error_code)
 				return NULL;
-			if(a == NULL || a == ec_p->unknown_bool)
-				return a;
 
-			void* res = ec_p->cast(a, expr->cast_type, ec_p, error_code);
+			void* a = evaluate_sql_expr(expr->cast_expr, ec_p, error_code);
+			if(*error_code)
+			{
+				delete_type(t, ec_p);
+				return NULL;
+			}
+			if(a == NULL || a == ec_p->unknown_bool)
+			{
+				delete_type(t, ec_p);
+				return a;
+			}
+
+			void* res = ec_p->cast(a, t, ec_p, error_code);
 			delete_data(a, ec_p);
+			delete_type(t, ec_p);
 			if(*error_code)
 				return NULL;
 
@@ -2672,7 +2683,7 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 				return NULL;
 			}
 
-			int cc = ec_p->can_cast_types(t, d, ec_p, error_code);
+			int cc = ec_p->can_cast_types(d, t, ec_p, error_code);
 			delete_type(d, ec_p);
 			if(*error_code)
 			{
