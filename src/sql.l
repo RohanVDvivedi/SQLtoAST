@@ -223,7 +223,11 @@
 
 '[^']*'															{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, sqlget_leng(yyscanner)-2); return STRING;}
 
-[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*(\.\*)?		{yylval->sval = new_dstring(sqlget_text(yyscanner), sqlget_leng(yyscanner)); return IDENTIFIER;}
+	/*
+		old very strict identifier rule
+		[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*(\.\*)?
+	*/
+[a-zA-Z_][a-zA-Z0-9_]*(\.([a-zA-Z_][a-zA-Z0-9_]*|[0-9]+))*(\.\*)?		{yylval->sval = new_dstring(sqlget_text(yyscanner), sqlget_leng(yyscanner)); return IDENTIFIER;}
 
 .						{return ILLEGAL_CHARACTER;}
 
