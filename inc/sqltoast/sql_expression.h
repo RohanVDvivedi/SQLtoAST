@@ -10,6 +10,7 @@
 
 // uncommenting this makes serialized parse tree non identical to the one reparsed
 //#define FLATTEN_SQL_DIV_INTO_SQL_MUL_INV
+//#define FLATTEN_SQL_SUB_INTO_SQL_NEG
 
 typedef struct sql_dql sql_dql;
 
