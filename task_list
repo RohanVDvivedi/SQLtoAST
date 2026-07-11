@@ -1,5 +1,8 @@
 PICKED TASKS
 
+ * call back in sql_expression_eval.h to mark an expression's result produced value as marked_constant_expression_value
+ * store a pointer in expression, to store the result of constant expression
+
  * start with converting this parsed query into this exact logical query plan, using building blocks like
      * give index to every operator and plug them like building blocks
      * every sub query gets an independent sequence of operator blocks in the same list
@@ -34,7 +37,5 @@ TO BE PICKED TASKS
 *1 add WITH keyword in CTEs
 
 *2 prepared statements and the dynamic sql
- * named paramaters can be a problem, if we also do constant unfolding and we might loose the order of the params and may end up with wrong params at wrong places
- * we need to support just ?, ?1, ?2, etc and also :a, :b etc
-
-*3 make a function to make queries unfold their constants in sql expressions (use GNU MP for this)
+ * named paramaters
+   * we need to support ?, ?1, ?2, etc and also :a, :b etc
