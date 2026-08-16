@@ -141,13 +141,67 @@ void* get_bool(void* a, const sql_expr_eval_context* ec_p, int* error_code)
 	return ec_p->get_bool(a, ec_p, error_code);
 }
 
+// the real recursive evaluator.
+// interim_context is the one that pre_eval handed out for THIS very expr, it is passed along only so
+// that every child evaluation performed below can be reported to child_eval against it.
+static void* evaluate_sql_expr_INTERNAL(const sql_expression* expr, const sql_expr_eval_context* ec_p, void* interim_context, int* error_code);
+
+// evaluates a single child of expr, and reports it to child_eval, exactly once, and only when the
+// child evaluated without an error_code
+static void* evaluate_child_sql_expr(const sql_expression* expr, const sql_expression* child_expr, const sql_expr_eval_context* ec_p, void* interim_context, int* error_code)
+{
+	void* child_result = evaluate_sql_expr(child_expr, ec_p, error_code);
+	if((*error_code))
+		return NULL;
+
+	if(ec_p->child_eval != NULL)
+		ec_p->child_eval(ec_p, expr, child_expr, child_result, interim_context);
+
+	return child_result;
+}
+
 void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context* ec_p, int* error_code)
+{
+	void* interim_context = NULL;
+
+	// pre_eval may answer the whole expression by itself, this is how a constant expression, whose
+	// value was already folded, is returned without ever walking it again
+	if(ec_p->pre_eval != NULL)
+	{
+		void* pre_result = NULL;
+		interim_context = ec_p->pre_eval(ec_p, expr, &pre_result);
+		if(interim_context == NULL)
+			return pre_result;
+	}
+
+	void* result = evaluate_sql_expr_INTERNAL(expr, ec_p, interim_context, error_code);
+
+	// the expression failed mid way, the interim_context is ours to destroy, post_eval is NOT called
+	if((*error_code))
+	{
+		if(interim_context != NULL && ec_p->destroy_process_context != NULL)
+			ec_p->destroy_process_context(interim_context);
+		return NULL;
+	}
+
+	// post_eval owns the interim_context from here on, and its return value is what we return
+	if(ec_p->post_eval != NULL)
+		return ec_p->post_eval(ec_p, expr, result, interim_context);
+
+	// no post_eval, but a pre_eval created a context that nobody will destroy otherwise
+	if(interim_context != NULL && ec_p->destroy_process_context != NULL)
+		ec_p->destroy_process_context(interim_context);
+
+	return result;
+}
+
+static void* evaluate_sql_expr_INTERNAL(const sql_expression* expr, const sql_expr_eval_context* ec_p, void* interim_context, int* error_code)
 {
 	switch(expr->type)
 	{
 		case SQL_MUL_INV :
 		{
-			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->unary_of, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -162,7 +216,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_NEG :
 		{
-			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->unary_of, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -177,7 +231,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_BITNOT :
 		{
-			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->unary_of, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -192,7 +246,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LOGNOT :
 		{
-			void* a = evaluate_sql_expr(expr->unary_of, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->unary_of, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -213,13 +267,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_ADD :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -241,13 +295,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_SUB :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -269,13 +323,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_MUL :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -297,13 +351,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_DIV :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -325,13 +379,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_MOD :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -353,7 +407,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_GT :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -364,7 +418,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				default :
 				case SQL_CMP_NONE :
 				{
-					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -500,7 +554,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_GTE :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -511,7 +565,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				default :
 				case SQL_CMP_NONE :
 				{
-					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -647,7 +701,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LT :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -658,7 +712,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				default :
 				case SQL_CMP_NONE :
 				{
-					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -794,7 +848,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LTE :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -805,7 +859,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				default :
 				case SQL_CMP_NONE :
 				{
-					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -941,7 +995,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_EQ :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -952,7 +1006,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				default :
 				case SQL_CMP_NONE :
 				{
-					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -1088,7 +1142,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_NEQ :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -1099,7 +1153,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				default :
 				case SQL_CMP_NONE :
 				{
-					void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -1235,13 +1289,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_BITAND :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1263,13 +1317,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_BITOR :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1291,13 +1345,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_BITXOR :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1319,7 +1373,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LOGAND :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
@@ -1333,7 +1387,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(log_a == ec_p->false_bool)
 				return ec_p->false_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
@@ -1356,7 +1410,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LOGOR :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
@@ -1370,7 +1424,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(log_a == ec_p->true_bool)
 				return ec_p->true_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
@@ -1393,7 +1447,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LOGXOR :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
@@ -1407,7 +1461,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(log_a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
@@ -1430,13 +1484,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LSHIFT :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1458,13 +1512,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_RSHIFT :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1486,13 +1540,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_CONCAT :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1516,13 +1570,13 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_LIKE :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(a, ec_p);
@@ -1544,11 +1598,11 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_IS :
 		{
-			void* a = evaluate_sql_expr(expr->left, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->left, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 
-			void* b = evaluate_sql_expr(expr->right, ec_p, error_code);
+			void* b = evaluate_child_sql_expr(expr, expr->right, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(b, ec_p);
@@ -1590,20 +1644,20 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 		case SQL_BTWN :
 		{
-			void* input = evaluate_sql_expr(expr->btwn_input, ec_p, error_code);
+			void* input = evaluate_child_sql_expr(expr, expr->btwn_input, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(input == NULL || input == ec_p->unknown_bool)
 				return ec_p->unknown_bool;
 
-			void* low = evaluate_sql_expr(expr->bounds[0], ec_p, error_code);
+			void* low = evaluate_child_sql_expr(expr, expr->bounds[0], ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(input, ec_p);
 				return NULL;
 			}
 
-			void* high = evaluate_sql_expr(expr->bounds[1], ec_p, error_code);
+			void* high = evaluate_child_sql_expr(expr, expr->bounds[1], ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_data(input, ec_p);
@@ -1656,7 +1710,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				void* a = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 				{
 					delete_data(res, ec_p);
@@ -1692,7 +1746,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				void* a = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 				{
 					delete_data(res, ec_p);
@@ -1729,7 +1783,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)) && res != ec_p->false_bool; i++)
 			{
-				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				void* a = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 					return NULL;
 
@@ -1769,7 +1823,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)) && res != ec_p->true_bool; i++)
 			{
-				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				void* a = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 					return NULL;
 
@@ -1809,7 +1863,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)) && res != ec_p->unknown_bool; i++)
 			{
-				void* a = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				void* a = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 					return NULL;
 
@@ -1850,7 +1904,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				void* s = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, error_code);
+				void* s = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 				{
 					delete_data(res, ec_p);
@@ -1883,7 +1937,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 		}
 		case SQL_IN :
 		{
-			void* a = evaluate_sql_expr(expr->in_input, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->in_input, ec_p, interim_context, error_code);
 			if(*error_code)
 				return NULL;
 			if(a == NULL || a == ec_p->unknown_bool)
@@ -1949,7 +2003,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 				void* res = ec_p->false_bool;
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)) && res != ec_p->true_bool; i++)
 				{
-					void* b = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i), ec_p, error_code);
+					void* b = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->in_expr_list), i), ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -2023,7 +2077,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 			{
-				param_values[i] = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i), ec_p, error_code);
+				param_values[i] = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->param_expr_list), i), ec_p, interim_context, error_code);
 				if(*error_code)
 				{
 					for(cy_uint j = 0; j < i; j++)
@@ -2049,7 +2103,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(*error_code)
 				return NULL;
 
-			void* a = evaluate_sql_expr(expr->cast_expr, ec_p, error_code);
+			void* a = evaluate_child_sql_expr(expr, expr->cast_expr, ec_p, interim_context, error_code);
 			if(*error_code)
 			{
 				delete_type(t, ec_p);
@@ -2110,7 +2164,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			void* a = NULL;
 			if(expr->case_expr != NULL)
 			{
-				a = evaluate_sql_expr(expr->case_expr, ec_p, error_code);
+				a = evaluate_child_sql_expr(expr, expr->case_expr, ec_p, interim_context, error_code);
 				if(*error_code)
 					return NULL;
 				has_a = 1;
@@ -2120,7 +2174,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			{
 				for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
 				{
-					void* when = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->when_exprs), i), ec_p, error_code);
+					void* when = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->when_exprs), i), ec_p, interim_context, error_code);
 					if(*error_code)
 					{
 						delete_data(a, ec_p);
@@ -2157,7 +2211,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 					if(produce_output)
 					{
 						delete_data(a, ec_p);
-						void* result = evaluate_sql_expr(get_from_front_of_arraylist(&(expr->then_exprs), i), ec_p, error_code);
+						void* result = evaluate_child_sql_expr(expr, get_from_front_of_arraylist(&(expr->then_exprs), i), ec_p, interim_context, error_code);
 						if(*error_code)
 							return NULL;
 						return result;
@@ -2168,7 +2222,7 @@ void* evaluate_sql_expr(const sql_expression* expr, const sql_expr_eval_context*
 			if(expr->else_expr)
 			{
 				delete_data(a, ec_p);
-				void* result = evaluate_sql_expr(expr->else_expr, ec_p, error_code);
+				void* result = evaluate_child_sql_expr(expr, expr->else_expr, ec_p, interim_context, error_code);
 				if(*error_code)
 					return NULL;
 				return result;
