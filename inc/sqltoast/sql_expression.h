@@ -190,6 +190,12 @@ struct sql_expression
 			sql_expression* else_expr; // NULL, if absent
 		};
 	};
+
+	// below 2 values are left for the user to implement
+	// it can be possibly used for result of constant expresions
+	// every new call will init them to 0 and NULL
+	int user_meta_flags;
+	void* user_meta_value;
 };
 
 void initialize_expr_list(arraylist* expr_list);

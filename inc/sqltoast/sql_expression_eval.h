@@ -73,6 +73,31 @@ struct sql_expr_eval_context
 
 	//
 	//
+	// pre processing and post processing
+	//
+	//
+
+	// called at the beginning of every expression evaluation
+	// returns interim_context, if NULL is returned, result should be set and that is returned right away
+	// can be used for contant expression evaluation
+	void* (*pre_eval)(const sql_expr_eval_context* ec_p, const sql_expression* expr, void** result);
+
+	// called after every child expression of expr is evaluated use this
+	// called after every non error_code child expression evaluation
+	void (*child_eval)(const sql_expr_eval_context* ec_p, const sql_expression* expr, const sql_expression* child_expr, void* child_result, void* interim_context);
+
+	// called at the end of every expression evaluation, before return is called
+	// mark the result as the output of the expression, the output of this function is what is returned
+	// it must also destroy the interim_context, if any was created by the pre_eval
+	void* (*post_eval)(const sql_expr_eval_context* ec_p, const sql_expression* expr, void* result, void* interim_context);
+
+	// if an expression fails mid way, call this, to destroy the interim_context
+	void (*destroy_process_context)(void* interim_context);
+
+
+
+	//
+	//
 	// below callbacks work with only type (may not be sql_type) dictated by the implementer of ec_p
 	// the below functions may be left unimplemented if you prefer dynamic typing and may never expect to call infer_type_sql_expr() function given below
 	// this (the whole interface) allows users to implement the basic functions and let these functions in this library handle the complex error-prone operator boilerplate

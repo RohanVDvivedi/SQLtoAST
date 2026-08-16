@@ -24,18 +24,25 @@ void insert_in_expr_list(arraylist* expr_list, sql_expression* expr)
 	push_back_to_arraylist(expr_list, expr);
 }
 
-sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_of)
+static sql_expression* new_basic_sql_expr(sql_expression_type type)
 {
 	sql_expression* expr = malloc(sizeof(sql_expression));
 	expr->type = type;
+	expr->user_meta_flags = 0;
+	expr->user_meta_value = NULL;
+	return expr;
+}
+
+sql_expression* new_unary_sql_expr(sql_expression_type type, sql_expression* unary_of)
+{
+	sql_expression* expr = new_basic_sql_expr(type);
 	expr->unary_of = unary_of;
 	return expr;
 }
 
 sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* left, sql_expression* right)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = type;
+	sql_expression* expr = new_basic_sql_expr(type);
 	expr->left = left;
 	expr->right = right;
 	return expr;
@@ -43,8 +50,7 @@ sql_expression* new_binary_sql_expr(sql_expression_type type, sql_expression* le
 
 sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifier cmp_rhs_quantfier, sql_expression* left, void* right)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = type;
+	sql_expression* expr = new_basic_sql_expr(type);
 	expr->cmp_rhs_quantfier = cmp_rhs_quantfier;
 	expr->left = left;
 	expr->right = right;
@@ -53,8 +59,7 @@ sql_expression* new_compare_sql_expr(sql_expression_type type, sql_cmp_quantifie
 
 sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* bounds0, sql_expression* bounds1)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_BTWN;
+	sql_expression* expr = new_basic_sql_expr(SQL_BTWN);
 	expr->btwn_input = input;
 	expr->bounds[0] = bounds0;
 	expr->bounds[1] = bounds1;
@@ -63,16 +68,14 @@ sql_expression* new_between_sql_expr(sql_expression* input, sql_expression* boun
 
 sql_expression* new_flat_sql_expr(sql_expression_type type, arraylist expr_list)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = type;
+	sql_expression* expr = new_basic_sql_expr(type);
 	expr->expr_list = expr_list;
 	return expr;
 }
 
 sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query, arraylist in_expr_list)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_IN;
+	sql_expression* expr = new_basic_sql_expr(SQL_IN);
 	expr->in_input = in_input;
 	expr->in_sub_query = in_sub_query;
 	expr->in_expr_list = in_expr_list;
@@ -81,8 +84,7 @@ sql_expression* new_in_sql_expr(sql_expression* in_input, sql_dql* in_sub_query,
 
 sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, arraylist param_expr_list)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_FUNCTION_CALL;
+	sql_expression* expr = new_basic_sql_expr(SQL_FUNCTION_CALL);
 	expr->aggregate_mode = aggregate_mode;
 	expr->func_name = func_name;
 	expr->param_expr_list = param_expr_list;
@@ -91,8 +93,7 @@ sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, 
 
 sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type* cast_type)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_CAST;
+	sql_expression* expr = new_basic_sql_expr(SQL_CAST);
 	expr->cast_expr = cast_expr;
 	expr->cast_type = cast_type;
 	return expr;
@@ -100,31 +101,27 @@ sql_expression* new_cast_sql_expr(sql_expression* cast_expr, sql_type* cast_type
 
 sql_expression* new_sub_query_sql_expr(sql_expression_type type, sql_dql* sub_query)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = type;
+	sql_expression* expr = new_basic_sql_expr(type);
 	expr->sub_query = sub_query;
 	return expr;
 }
 
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = type;
+	sql_expression* expr = new_basic_sql_expr(type);
 	expr->value = value;
 	return expr;
 }
 
 sql_expression* new_const_non_valued_sql_expr(sql_expression_type type)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = type;
+	sql_expression* expr = new_basic_sql_expr(type);
 	return expr;
 }
 
 sql_expression* new_case_sql_expr(sql_expression* case_expr, arraylist when_exprs, arraylist then_exprs, sql_expression* else_expr)
 {
-	sql_expression* expr = malloc(sizeof(sql_expression));
-	expr->type = SQL_CASE;
+	sql_expression* expr = new_basic_sql_expr(SQL_CASE);
 	expr->case_expr = case_expr;
 	expr->when_exprs = when_exprs;
 	expr->then_exprs = then_exprs;
