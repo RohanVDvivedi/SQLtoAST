@@ -194,6 +194,8 @@ void delete_table_element(sql_table_element* te_p);
 
 %token DELETE
 
+%token RETURNING
+
 /* CTEs */
 
 %type <ptr_list> cte_list

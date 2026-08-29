@@ -152,6 +152,8 @@
 
 (?i:DELETE)				{return DELETE;}
 
+(?i:RETURNING)			{return RETURNING;}
+
 (?i:CREATE)				{return CREATE;}
 (?i:DROP)				{return DROP;}
 (?i:ALTER)				{return ALTER;}
