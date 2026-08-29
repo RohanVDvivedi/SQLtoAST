@@ -38,7 +38,7 @@ void snprint_cte(dstring* str_p, const sql_cte* cte)
 		snprintf_dstring(str_p, ")");
 	}
 
-	snprintf_dstring(str_p, " AS ");
+	snprintf_dstring(str_p, " AS (");
 
 	switch(cte->cte_type)
 	{
@@ -53,6 +53,8 @@ void snprint_cte(dstring* str_p, const sql_cte* cte)
 			break;
 		}
 	}
+
+	snprintf_dstring(str_p, ")");
 }
 
 void delete_dstring(dstring* d);
