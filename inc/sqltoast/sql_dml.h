@@ -3,6 +3,7 @@
 
 #include<sqltoast/sql_expression.h>
 #include<sqltoast/sql_dql.h>
+#include<sqltoast/sql_cte.h>
 
 typedef enum sql_dml_type sql_dml_type;
 enum sql_dml_type

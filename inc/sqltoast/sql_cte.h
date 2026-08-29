@@ -1,9 +1,6 @@
 #ifndef SQL_CTE_H
 #define SQL_CTE_H
 
-#include<sqltoast/sql_dql.h>
-#include<sqltoast/sql_dml.h>
-
 #include<cutlery/arraylist.h>
 #include<cutlery/dstring.h>
 
@@ -13,6 +10,9 @@ enum sql_cte_type
 	CTE_DQL,
 	CTE_DML,
 };
+
+typedef struct sql_dql sql_dql;
+typedef struct sql_dml sql_dml;
 
 typedef struct sql_cte sql_cte;
 struct sql_cte

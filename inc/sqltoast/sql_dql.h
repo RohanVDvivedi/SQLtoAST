@@ -9,6 +9,7 @@ enum set_op_mod
 };
 
 #include<sqltoast/sql_expression.h>
+#include<sqltoast/sql_cte.h>
 
 #include<cutlery/arraylist.h>
 #include<cutlery/dstring.h>

@@ -1,5 +1,8 @@
 #include<sqltoast/sql_cte.h>
 
+#include<sqltoast/sql_dql.h>
+#include<sqltoast/sql_dml.h>
+
 #include<sqltoast/arraylist_deleter.h>
 
 #include<stdlib.h>
