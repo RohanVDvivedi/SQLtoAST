@@ -10,7 +10,7 @@ As the name "SQL-to-AST" suggests this C library converts SQL to an AST, that ca
 
 **Build from source :**
  * `cd SQLtoAST`
- * `make clean all`
+ * `make clean all` *(run it twice if the final library is not built the first time, most often the case)*
 
 **Install from the build :**
  * `sudo make install`
