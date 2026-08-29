@@ -655,7 +655,8 @@ object_type :
 			| TRIGGER 			{$$ = SQL_TRIGGER;}
 
 dml_query :
-			insert_query 								{$$ = $1;}
+			OPEN_BRACKET dml_query CLOSE_BRACKET 		{$$ = $2;}
+			| insert_query 								{$$ = $1;}
 			| update_query 								{$$ = $1;}
 			| delete_query 								{$$ = $1;}
 			| WITH cte_list insert_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
