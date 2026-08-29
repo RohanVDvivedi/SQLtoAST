@@ -61,7 +61,6 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 {
 	if(get_element_count_arraylist(&(dml->with_ctes)) > 0)
 	{
-		snprintf_dstring(str_p, "(");
 		snprintf_dstring(str_p, "WITH ");
 		if(dml->with_recursive_ctes)
 			snprintf_dstring(str_p, "RECURSIVE ");
@@ -73,7 +72,7 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 			const sql_cte* cte = get_from_front_of_arraylist(&(dml->with_ctes), i);
 			snprint_cte(str_p, cte);
 		}
-		snprintf_dstring(str_p, " ");
+		snprintf_dstring(str_p, " (");
 	}
 
 	switch(dml->type)
