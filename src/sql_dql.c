@@ -9,6 +9,8 @@ sql_dql* new_dql(sql_dql_type type)
 {
 	sql_dql* dql = malloc(sizeof(sql_dql));
 
+	initialize_arraylist(&(dql->with_ctes), 0);
+
 	dql->type = type;
 
 	switch(dql->type)
@@ -494,6 +496,8 @@ void delete_dql(sql_dql* dql)
 {
 	if(dql == NULL)
 		return;
+
+	delete_all_and_deinitialize_arraylist_1d(&(dql->with_ctes), (void(*)(void*))delete_cte);
 
 	switch(dql->type)
 	{

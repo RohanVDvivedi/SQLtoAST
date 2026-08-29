@@ -170,6 +170,8 @@ enum set_op_type
 typedef struct sql_dql sql_dql;
 struct sql_dql
 {
+	arraylist with_ctes;
+
 	sql_dql_type type;
 
 	union

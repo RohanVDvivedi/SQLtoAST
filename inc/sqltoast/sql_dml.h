@@ -62,6 +62,8 @@ struct sql_delete
 typedef struct sql_dml sql_dml;
 struct sql_dml
 {
+	arraylist with_ctes;
+
 	sql_dml_type type;
 
 	union

@@ -17,6 +17,8 @@ sql_dml* new_dml(sql_dml_type type)
 {
 	sql_dml* dml = malloc(sizeof(sql_dml));
 
+	initialize_arraylist(&(dml->with_ctes), 0);
+
 	dml->type = type;
 
 	switch(dml->type)
@@ -224,6 +226,8 @@ void delete_dml(sql_dml* dml)
 {
 	if(dml == NULL)
 		return;
+
+	delete_all_and_deinitialize_arraylist_1d(&(dml->with_ctes), (void(*)(void*))delete_cte);
 
 	switch(dml->type)
 	{
