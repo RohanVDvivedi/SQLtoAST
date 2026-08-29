@@ -666,11 +666,14 @@ dml_query :
 			| WITH RECURSIVE cte_list delete_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
 
 insert_query :
-			INSERT INTO IDENTIFIER dql_query														{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.input_data_query = $4;}
-			| INSERT INTO IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET dql_query			{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.column_name_list = $5; $$->insert_query.input_data_query = $7;}
+			INSERT INTO IDENTIFIER dql_query																			{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.input_data_query = $4;}
+			| INSERT INTO IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET dql_query								{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.column_name_list = $5; $$->insert_query.input_data_query = $7;}
+			| INSERT INTO IDENTIFIER dql_query RETURNING projection_list												{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.input_data_query = $4; $$->returning_projections = $6;}
+			| INSERT INTO IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET dql_query RETURNING projection_list		{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.column_name_list = $5; $$->insert_query.input_data_query = $7; $$->returning_projections = $9;}
 
 update_query :
-			UPDATE IDENTIFIER set_clause where_clause 	{$$ = new_dml(UPDATE_QUERY); $$->update_query.table_name = $2; $$->update_query.values_to_be_set = $3; $$->update_query.where_expr = $4;}
+			UPDATE IDENTIFIER set_clause where_clause 								{$$ = new_dml(UPDATE_QUERY); $$->update_query.table_name = $2; $$->update_query.values_to_be_set = $3; $$->update_query.where_expr = $4;}
+			| UPDATE IDENTIFIER set_clause where_clause RETURNING projection_list 	{$$ = new_dml(UPDATE_QUERY); $$->update_query.table_name = $2; $$->update_query.values_to_be_set = $3; $$->update_query.where_expr = $4; $$->returning_projections = $6;}
 
 set_clause :
 			SET attribute_assignment_list 			{$$ = $2;}
@@ -692,7 +695,8 @@ defaultable_expr :
 			| DEFAULT 		{$$ = NULL;}
 
 delete_query :
-			DELETE FROM IDENTIFIER where_clause 		{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
+			DELETE FROM IDENTIFIER where_clause 								{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4;}
+			| DELETE FROM IDENTIFIER where_clause RETURNING projection_list 	{$$ = new_dml(DELETE_QUERY); $$->delete_query.table_name = $3; $$->delete_query.where_expr = $4; $$->returning_projections = $6;}
 
 dql_query :
 			select_query 										{$$ = $1;}
