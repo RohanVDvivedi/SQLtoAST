@@ -1,10 +1,8 @@
 PICKED TASKS
 
- * create SQL_TYPE
- * alter SQL_TYPE
-
- * create SQL_FUNCTION
- * create SQL_PROCEDURE
+ * prepared statements and the dynamic sql
+ * named paramaters
+   * we need to support ?, ?1, ?2, etc and also :a, :b etc
 
  * start with converting this parsed query into this exact logical query plan, using building blocks like
      * give index to every operator and plug them like building blocks
@@ -21,17 +19,17 @@ PICKED TASKS
 
 TO BE PICKED TASKS
 
-*0
  remaining parts of parsing DDL query
- * create queries
+ * create/alter SQL_TYPE
+   * deprioritized because RhenDB will not have user defined types and everything is off-loaded to jsonb
+ * create SQL_FUNCTION/SQL_PROCEDURE
+   * deprioritized because RhenDB will at the present moment rely solely on built-in functions and will not support procedures for now
+ * pending create queries
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
- * alter queries
+ * pending alter queries
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
-	SQL_TRIGGER,
-
-*2 prepared statements and the dynamic sql
- * named paramaters
-   * we need to support ?, ?1, ?2, etc and also :a, :b etc
+	SQL_TRIGGER
+   * deprioritzed because they are arcane
