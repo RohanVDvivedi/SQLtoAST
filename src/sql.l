@@ -109,6 +109,8 @@
 (?i:TIME)				{return TIME;}
 (?i:TIMESTAMP)			{return TIMESTAMP;}
 
+(?i:RECURSIVE)			{return RECURSIVE;}
+
 (?i:INTERSECT)			{return INTERSECT;}
 (?i:UNION)				{return UNION;}
 (?i:EXCEPT)				{return EXCEPT;}

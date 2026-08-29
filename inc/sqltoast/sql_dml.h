@@ -62,6 +62,7 @@ struct sql_delete
 typedef struct sql_dml sql_dml;
 struct sql_dml
 {
+	unsigned int with_recursive_ctes : 1;
 	arraylist with_ctes;
 
 	sql_dml_type type;

@@ -170,6 +170,7 @@ enum set_op_type
 typedef struct sql_dql sql_dql;
 struct sql_dql
 {
+	unsigned int with_recursive_ctes : 1;
 	arraylist with_ctes;
 
 	sql_dql_type type;

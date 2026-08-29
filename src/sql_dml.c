@@ -17,6 +17,7 @@ sql_dml* new_dml(sql_dml_type type)
 {
 	sql_dml* dml = malloc(sizeof(sql_dml));
 
+	dml->with_recursive_ctes = 0;
 	initialize_arraylist(&(dml->with_ctes), 0);
 
 	dml->type = type;
@@ -61,7 +62,9 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 	if(get_element_count_arraylist(&(dml->with_ctes)) > 0)
 	{
 		snprintf_dstring(str_p, "(");
-		snprintf_dstring(str_p, "WITH");
+		snprintf_dstring(str_p, "WITH ");
+		if(dml->with_recursive_ctes)
+			snprintf_dstring(str_p, "RECURSIVE ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->with_ctes)); i++)
 		{
 			if(i != 0)

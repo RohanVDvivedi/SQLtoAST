@@ -9,6 +9,7 @@ sql_dql* new_dql(sql_dql_type type)
 {
 	sql_dql* dql = malloc(sizeof(sql_dql));
 
+	dql->with_recursive_ctes = 0;
 	initialize_arraylist(&(dql->with_ctes), 0);
 
 	dql->type = type;
@@ -216,6 +217,8 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 	{
 		snprintf_dstring(str_p, "(");
 		snprintf_dstring(str_p, "WITH");
+		if(dql->with_recursive_ctes)
+			snprintf_dstring(str_p, "RECURSIVE ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->with_ctes)); i++)
 		{
 			if(i != 0)

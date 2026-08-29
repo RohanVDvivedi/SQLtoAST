@@ -40,6 +40,8 @@ void delete_table_element(sql_table_element* te_p);
 
 	sql_dml* dml_query;
 
+	sql_cte* cte;
+
 	sql_ddl* ddl_query;
 
 	sql_table_element* tab_element;
@@ -76,6 +78,7 @@ void delete_table_element(sql_table_element* te_p);
 %destructor { delete_sql($$); } <sql_query>
 %destructor { delete_dql($$); } <dql_query>
 %destructor { delete_dml($$); } <dml_query>
+%destructor { delete_cte($$); } <cte>
 %destructor { delete_ddl($$); } <ddl_query>
 %destructor { delete_table_element($$); } <tab_element>
 %destructor { delete_columns_to_be_set($$); } <attribute_assignment>
@@ -190,6 +193,13 @@ void delete_table_element(sql_table_element* te_p);
 %type <dml_query> delete_query
 
 %token DELETE
+
+/* CTEs */
+
+%type <ptr_list> cte_list
+%type <cte> cte
+
+%token RECURSIVE
 
 /* DDL queries */
 %type <ddl_query> ddl_query
@@ -420,6 +430,7 @@ void delete_table_element(sql_table_element* te_p);
 /* Precedence + Associativity */
 
 /* Lowest precedence first (so Bison gives them the lowest binding) */
+%right WITH
 
 %left UNION EXCEPT
 %left INTERSECT
@@ -641,9 +652,15 @@ object_type :
 			| TRIGGER 			{$$ = SQL_TRIGGER;}
 
 dml_query :
-			insert_query 			{$$ = $1;}
-			| update_query 			{$$ = $1;}
-			| delete_query 			{$$ = $1;}
+			insert_query 								{$$ = $1;}
+			| update_query 								{$$ = $1;}
+			| delete_query 								{$$ = $1;}
+			| WITH cte_list insert_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
+			| WITH cte_list update_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
+			| WITH cte_list delete_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
+			| WITH RECURSIVE cte_list insert_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
+			| WITH RECURSIVE cte_list update_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
+			| WITH RECURSIVE cte_list delete_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
 
 insert_query :
 			INSERT INTO IDENTIFIER dql_query														{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.input_data_query = $4;}
@@ -677,6 +694,8 @@ delete_query :
 dql_query :
 			select_query 										{$$ = $1;}
 			| values_query 										{$$ = $1;}
+			| WITH cte_list dql_query 							{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
+			| WITH RECURSIVE cte_list dql_query 				{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
 			| dql_query INTERSECT set_op_mod dql_query 			{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_INTERSECT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| dql_query UNION set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_UNION; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| dql_query EXCEPT set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_EXCEPT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
@@ -808,6 +827,17 @@ offset_clause :
 limit_clause :
 										{$$ = NULL;}
 				| LIMIT expr 			{$$ = $2;}
+
+cte_list :
+										{initialize_arraylist(&($$), 0);}
+			| cte 						{initialize_arraylist(&($$), 8); push_back_to_arraylist(&($$), $1);}
+			| cte_list COMMA cte 		{push_back_to_arraylist(&($1), $3); $$ = $1;}
+
+cte :
+		IDENTIFIER AS dql_query													{sql_cte* cte = new_cte(CTE_DQL); cte->cte_name = $1; cte->dql_query = $3; $$ = cte;}
+		| IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET AS dql_query	{sql_cte* cte = new_cte(CTE_DQL); cte->cte_name = $1; cte->cte_column_names = $3; cte->dql_query = $6; $$ = cte;}
+		| IDENTIFIER AS dml_query 												{sql_cte* cte = new_cte(CTE_DML); cte->cte_name = $1; cte->dml_query = $3; $$ = cte;}
+		| IDENTIFIER OPEN_BRACKET identifier_list CLOSE_BRACKET AS dml_query 	{sql_cte* cte = new_cte(CTE_DML); cte->cte_name = $1; cte->cte_column_names = $3; cte->dml_query = $6; $$ = cte;}
 
 expr :
 			OPEN_BRACKET expr CLOSE_BRACKET 														{$$ = $2;}
