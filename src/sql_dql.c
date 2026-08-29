@@ -216,17 +216,18 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 	if(get_element_count_arraylist(&(dql->with_ctes)) > 0)
 	{
 		snprintf_dstring(str_p, "(");
-		snprintf_dstring(str_p, "WITH");
+		snprintf_dstring(str_p, "WITH ");
 		if(dql->with_recursive_ctes)
 			snprintf_dstring(str_p, "RECURSIVE ");
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->with_ctes)); i++)
 		{
 			if(i != 0)
-				snprintf_dstring(str_p, ",");
+				snprintf_dstring(str_p, ", ");
 
 			const sql_cte* cte = get_from_front_of_arraylist(&(dql->with_ctes), i);
 			snprint_cte(str_p, cte);
 		}
+		snprintf_dstring(str_p, " ");
 	}
 
 	switch(dql->type)

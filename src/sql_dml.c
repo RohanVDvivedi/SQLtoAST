@@ -68,11 +68,12 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->with_ctes)); i++)
 		{
 			if(i != 0)
-				snprintf_dstring(str_p, ",");
+				snprintf_dstring(str_p, ", ");
 
 			const sql_cte* cte = get_from_front_of_arraylist(&(dml->with_ctes), i);
 			snprint_cte(str_p, cte);
 		}
+		snprintf_dstring(str_p, " ");
 	}
 
 	switch(dml->type)
