@@ -1,5 +1,13 @@
 PICKED TASKS
 
+ * add WITH keyword in CTEs
+
+ * create SQL_TYPE
+ * alter SQL_TYPE
+
+ * create SQL_FUNCTION
+ * create SQL_PROCEDURE
+
  * start with converting this parsed query into this exact logical query plan, using building blocks like
      * give index to every operator and plug them like building blocks
      * every sub query gets an independent sequence of operator blocks in the same list
@@ -13,16 +21,11 @@ PICKED TASKS
    * sort (may be eliminated if the input row is already sorted from previous sorting or in index scan)
    * limit/offset operator
 
- * create SQL_TYPE
- * alter SQL_TYPE
-
 TO BE PICKED TASKS
 
 *0
  remaining parts of parsing DDL query
  * create queries
-	SQL_FUNCTION, // only create and drop for function and procedure
-	SQL_PROCEDURE,
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
@@ -30,8 +33,6 @@ TO BE PICKED TASKS
 	SQL_DOMAIN,
 	SQL_SEQUENCE,
 	SQL_TRIGGER,
-
-*1 add WITH keyword in CTEs
 
 *2 prepared statements and the dynamic sql
  * named paramaters
