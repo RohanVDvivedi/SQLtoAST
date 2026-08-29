@@ -197,6 +197,7 @@ void delete_table_element(sql_table_element* te_p);
 /* CTEs */
 
 %type <ptr_list> cte_list
+%destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_cte); } cte_list
 %type <cte> cte
 
 %token RECURSIVE
