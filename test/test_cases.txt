@@ -206,3 +206,43 @@ ALTER TABLE employees RENAME COLUMN salary TO monthly_salary
 ALTER TABLE employees RENAME COLUMN created_at TO created_timestamp
 ALTER TABLE employees RENAME TO staff
 ALTER TABLE staff SET SCHEMA hr
+WITH x AS (SELECT id, name FROM users) SELECT * FROM x
+WITH x (user_id, user_name) AS (SELECT id, name FROM users) SELECT user_id, user_name FROM x
+WITH x AS (SELECT id FROM users WHERE age > 18) SELECT * FROM x WHERE id > 10
+WITH a AS (SELECT id FROM users), b AS (SELECT id FROM a) SELECT * FROM b
+WITH a AS (SELECT id FROM users), b AS (SELECT id FROM a), c AS (SELECT id FROM b) SELECT * FROM c
+WITH a (x) AS (VALUES (1), (2), (3)) SELECT * FROM a
+WITH a (x, y) AS (VALUES (1, 10), (2, 20), (3, 30)) SELECT x, y FROM a
+WITH a AS (SELECT id FROM users UNION SELECT id FROM users) SELECT * FROM a
+WITH a AS (SELECT id FROM users UNION ALL SELECT id FROM users) SELECT * FROM a
+WITH a AS (SELECT id FROM users INTERSECT SELECT id FROM users) SELECT * FROM a
+WITH a AS (SELECT id FROM users EXCEPT SELECT id FROM users) SELECT * FROM a
+WITH a AS (SELECT id FROM users UNION SELECT id FROM users INTERSECT SELECT id FROM users) SELECT * FROM a
+WITH a AS (SELECT id FROM users), b AS (SELECT id FROM orders) SELECT * FROM a UNION SELECT * FROM b
+WITH a AS (SELECT id FROM users), b AS (SELECT id FROM users) SELECT * FROM a INTERSECT SELECT * FROM b
+WITH a AS (SELECT id FROM users), b AS (SELECT id FROM users) SELECT * FROM a EXCEPT SELECT * FROM b
+WITH a AS (SELECT id FROM users) SELECT * FROM (SELECT * FROM a) q
+WITH a AS (SELECT id FROM users) SELECT * FROM (WITH b AS (SELECT id FROM a) SELECT * FROM b) q
+WITH a AS (WITH b AS (SELECT id FROM users) SELECT * FROM b) SELECT * FROM a
+WITH a AS (SELECT id FROM users), b AS (WITH c AS (SELECT id FROM a) SELECT * FROM c) SELECT * FROM b
+WITH a AS (SELECT id FROM users) SELECT * FROM (WITH b AS (SELECT id FROM a) SELECT * FROM b UNION SELECT id FROM a) q
+WITH deleted_users AS (DELETE FROM users WHERE active = false RETURNING id, name) SELECT * FROM deleted_users
+WITH updated_users AS (UPDATE users SET active = true WHERE age >= 18 RETURNING id, name, active) SELECT * FROM updated_users
+WITH inserted_users AS (INSERT INTO users (id, name, age) VALUES (100, 'alice', 25) RETURNING id, name) SELECT * FROM inserted_users
+WITH a AS (INSERT INTO users (id, name, age) VALUES (101, 'bob', 30) RETURNING id, name), b AS (SELECT * FROM a) SELECT * FROM b
+WITH a AS (UPDATE users SET age = age + 1 WHERE id = 1 RETURNING id, age), b AS (SELECT * FROM a) SELECT * FROM b
+WITH a AS (DELETE FROM orders WHERE amount < 10 RETURNING id, user_id), b AS (SELECT * FROM a) SELECT * FROM b
+WITH a AS (SELECT id, name FROM users), b AS (INSERT INTO users (id, name, age) VALUES (102, 'carol', 40) RETURNING id, name) SELECT * FROM a
+WITH a AS (INSERT INTO users (id, name, age) VALUES (103, 'dave', 20) RETURNING id) UPDATE users SET active = true WHERE id IN (SELECT id FROM a) RETURNING id, active
+WITH a AS (UPDATE users SET active = false WHERE age < 18 RETURNING id) DELETE FROM orders WHERE user_id IN (SELECT id FROM a) RETURNING id, user_id
+WITH a AS (SELECT id FROM users), b AS (DELETE FROM orders WHERE user_id IN (SELECT id FROM a) RETURNING id, user_id) SELECT * FROM b
+WITH a AS (SELECT id, name FROM users) INSERT INTO archive (id, user_id, amount) SELECT id, id, age FROM a RETURNING id, user_id
+WITH a AS (SELECT id FROM users) UPDATE users SET active = false WHERE id IN (SELECT id FROM a) RETURNING id, name, active
+WITH a AS (SELECT id FROM users) DELETE FROM users WHERE id IN (SELECT id FROM a) RETURNING id, name
+WITH a (id, name) AS (SELECT id, name FROM users), b (id, name) AS (SELECT id, name FROM a) SELECT * FROM b
+WITH a AS (SELECT id FROM users), b AS (SELECT id FROM a UNION SELECT id FROM users), c AS (SELECT id FROM b INTERSECT SELECT id FROM users) SELECT * FROM c
+WITH a AS (SELECT id FROM users) SELECT * FROM (SELECT id FROM a UNION SELECT id FROM users) q WHERE id > 10
+WITH a AS (VALUES (1), (2)) SELECT * FROM (WITH b AS (VALUES (3), (4)) SELECT * FROM a UNION ALL SELECT * FROM b) q
+WITH a AS (INSERT INTO users (id, name, age) VALUES (104, 'eve', 22) RETURNING id), b AS (UPDATE users SET active = true WHERE id IN (SELECT id FROM a) RETURNING id, active), c AS (SELECT * FROM b) SELECT * FROM c
+WITH a (x) AS (VALUES (1), (2)), b (y) AS (WITH c (z) AS (SELECT x FROM a) SELECT z FROM c) SELECT y FROM b UNION SELECT x FROM a
+WITH a (id, name) AS (SELECT id, name FROM users WHERE active = true), b (user_id, order_count) AS (SELECT user_id, count(*) FROM orders WHERE user_id IN (SELECT id FROM a) GROUP BY user_id) UPDATE users SET active = false WHERE id IN (SELECT user_id FROM b WHERE order_count > 2) RETURNING id, name, active
