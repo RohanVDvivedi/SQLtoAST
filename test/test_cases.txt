@@ -246,3 +246,5 @@ WITH a AS (VALUES (1), (2)) SELECT * FROM (WITH b AS (VALUES (3), (4)) SELECT * 
 WITH a AS (INSERT INTO users (id, name, age) VALUES (104, 'eve', 22) RETURNING id), b AS (UPDATE users SET active = true WHERE id IN (SELECT id FROM a) RETURNING id, active), c AS (SELECT * FROM b) SELECT * FROM c
 WITH a (x) AS (VALUES (1), (2)), b (y) AS (WITH c (z) AS (SELECT x FROM a) SELECT z FROM c) SELECT y FROM b UNION SELECT x FROM a
 WITH a (id, name) AS (SELECT id, name FROM users WHERE active = true), b (user_id, order_count) AS (SELECT user_id, count(*) FROM orders WHERE user_id IN (SELECT id FROM a) GROUP BY user_id) UPDATE users SET active = false WHERE id IN (SELECT user_id FROM b WHERE order_count > 2) RETURNING id, name, active
+with recursive x as select * from t, y as select r,s,t from s select a, b from z union select rohan, dvivedi
+with x as select * from t, y as select r,s,t from s select a, b from z union select rohan, dvivedi
