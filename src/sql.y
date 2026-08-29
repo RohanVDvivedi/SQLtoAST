@@ -202,6 +202,8 @@ void delete_table_element(sql_table_element* te_p);
 %destructor { delete_all_and_deinitialize_arraylist_1d(&($$), (void(*)(void*))delete_cte); } cte_list
 %type <cte> cte
 
+%type <uval> recursive_opt
+
 %token RECURSIVE
 
 /* DDL queries */
@@ -655,16 +657,15 @@ object_type :
 			| TRIGGER 			{$$ = SQL_TRIGGER;}
 
 dml_query :
-			OPEN_BRACKET dml_query CLOSE_BRACKET 		{$$ = $2;}
-			| insert_query 								{$$ = $1;}
+			insert_query 								{$$ = $1;}
 			| update_query 								{$$ = $1;}
 			| delete_query 								{$$ = $1;}
-			| WITH cte_list insert_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
-			| WITH cte_list update_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
-			| WITH cte_list delete_query 				{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
-			| WITH RECURSIVE cte_list insert_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
-			| WITH RECURSIVE cte_list update_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
-			| WITH RECURSIVE cte_list delete_query 		{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
+			| OPEN_BRACKET dml_query CLOSE_BRACKET 		{$$ = $2;}
+			| WITH recursive_opt cte_list dml_query 	{$4->with_ctes = $3; $4->with_recursive_ctes = $2; $$ = $4;}
+
+recursive_opt :
+							{$$ = 0;}
+			| RECURSIVE 	{$$ = 1;}
 
 insert_query :
 			INSERT INTO IDENTIFIER dql_query																			{$$ = new_dml(INSERT_QUERY); $$->insert_query.table_name = $3; $$->insert_query.input_data_query = $4;}
@@ -702,12 +703,11 @@ delete_query :
 dql_query :
 			select_query 										{$$ = $1;}
 			| values_query 										{$$ = $1;}
-			| WITH cte_list dql_query 							{$3->with_ctes = $2; $3->with_recursive_ctes = 0; $$ = $3;}
-			| WITH RECURSIVE cte_list dql_query 				{$4->with_ctes = $3; $4->with_recursive_ctes = 1; $$ = $4;}
+			| OPEN_BRACKET dql_query CLOSE_BRACKET				{$$ = $2;}
+			| WITH recursive_opt cte_list dql_query 			{$4->with_ctes = $3; $4->with_recursive_ctes = $2; $$ = $4;}
 			| dql_query INTERSECT set_op_mod dql_query 			{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_INTERSECT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| dql_query UNION set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_UNION; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
 			| dql_query EXCEPT set_op_mod dql_query				{$$ = new_dql(SET_OPERATION); $$->set_operation.op_type = SQL_SET_EXCEPT; $$->set_operation.op_mod = $3; $$->set_operation.left = $1; $$->set_operation.right = $4;}
-			| OPEN_BRACKET dql_query CLOSE_BRACKET				{$$ = $2;}
 
 values_query :
 			VALUES values_rows_list 					{$$ = new_dql(VALUES_QUERY); $$->values_query.values = $2;}
