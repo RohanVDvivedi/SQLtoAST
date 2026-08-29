@@ -73,6 +73,8 @@ struct sql_dml
 		sql_update update_query;
 		sql_delete delete_query;
 	};
+
+	arraylist returning_projections; // same as list of projections in select statement
 };
 
 columns_to_be_set* new_columns_to_be_set(cy_uint capacity);

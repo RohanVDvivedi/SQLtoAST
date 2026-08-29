@@ -54,6 +54,8 @@ sql_dml* new_dml(sql_dml_type type)
 		}
 	}
 
+	initialize_arraylist(&(dml->returning_projections), 0);
+
 	return dml;
 }
 
@@ -171,6 +173,25 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 		}
 	}
 
+	if(get_element_count_arraylist(&(dml->returning_projections)) > 0)
+	{
+		snprintf_dstring(str_p, " RETURNING ");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->returning_projections)); i++)
+		{
+			if(i != 0)
+				snprintf_dstring(str_p, ",");
+			const projection* p = get_from_front_of_arraylist(&(dml->returning_projections), i);
+			snprintf_dstring(str_p, "(");
+			snprint_sql_expr(str_p, p->projection_expr);
+			snprintf_dstring(str_p, ")");
+			if(!is_empty_dstring(&(p->as)))
+			{
+				snprintf_dstring(str_p, " AS ");
+				concatenate_dstring(str_p, &(p->as));
+			}
+		}
+	}
+
 	if(get_element_count_arraylist(&(dml->with_ctes)) > 0)
 	{
 		snprintf_dstring(str_p, ")");
@@ -244,6 +265,8 @@ void delete_dstring(dstring* d)
 	free(d);
 }
 
+void delete_projection(projection* p);
+
 void delete_dml(sql_dml* dml)
 {
 	if(dml == NULL)
@@ -285,6 +308,8 @@ void delete_dml(sql_dml* dml)
 			break;
 		}
 	}
+
+	delete_all_and_deinitialize_arraylist_1d(&(dml->returning_projections), (void(*)(void*))delete_projection);
 
 	free(dml);
 }
