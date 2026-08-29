@@ -32,6 +32,8 @@ struct sql_cte
 
 sql_cte* new_cte(sql_cte_type cte_type);
 
+void snprint_cte(dstring* str_p, const sql_cte* cte);
+
 void delete_cte(sql_cte* cte);
 
 #endif
