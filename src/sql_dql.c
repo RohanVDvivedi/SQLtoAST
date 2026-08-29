@@ -212,6 +212,20 @@ static void snprint_relation_input(dstring* str_p, const relation_input* ri_p)
 
 void snprint_dql(dstring* str_p, const sql_dql* dql)
 {
+	if(get_element_count_arraylist(&(dql->with_ctes)) > 0)
+	{
+		snprintf_dstring(str_p, "(");
+		snprintf_dstring(str_p, "WITH");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql->with_ctes)); i++)
+		{
+			if(i != 0)
+				snprintf_dstring(str_p, ",");
+
+			const sql_cte* cte = get_from_front_of_arraylist(&(dql->with_ctes), i);
+			snprint_cte(str_p, cte);
+		}
+	}
+
 	switch(dql->type)
 	{
 		case SELECT_QUERY :
@@ -228,7 +242,7 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 				{
 					if(i != 0)
 						snprintf_dstring(str_p, ",");
-					projection* p = (projection*) get_from_front_of_arraylist(&(dql->select_query.projections), i);
+					const projection* p = get_from_front_of_arraylist(&(dql->select_query.projections), i);
 					snprintf_dstring(str_p, "(");
 					snprint_sql_expr(str_p, p->projection_expr);
 					snprintf_dstring(str_p, ")");
@@ -419,6 +433,11 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 			snprintf_dstring(str_p, " (");snprint_dql(str_p, dql->set_operation.right);snprintf_dstring(str_p, ")");
 			break;
 		}
+	}
+
+	if(get_element_count_arraylist(&(dql->with_ctes)) > 0)
+	{
+		snprintf_dstring(str_p, ")");
 	}
 }
 

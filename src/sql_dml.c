@@ -58,6 +58,20 @@ sql_dml* new_dml(sql_dml_type type)
 
 void snprint_dml(dstring* str_p, const sql_dml* dml)
 {
+	if(get_element_count_arraylist(&(dml->with_ctes)) > 0)
+	{
+		snprintf_dstring(str_p, "(");
+		snprintf_dstring(str_p, "WITH");
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dml->with_ctes)); i++)
+		{
+			if(i != 0)
+				snprintf_dstring(str_p, ",");
+
+			const sql_cte* cte = get_from_front_of_arraylist(&(dml->with_ctes), i);
+			snprint_cte(str_p, cte);
+		}
+	}
+
 	switch(dml->type)
 	{
 		case INSERT_QUERY :
@@ -152,6 +166,11 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 
 			break;
 		}
+	}
+
+	if(get_element_count_arraylist(&(dml->with_ctes)) > 0)
+	{
+		snprintf_dstring(str_p, ")");
 	}
 }
 
