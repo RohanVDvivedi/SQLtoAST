@@ -227,7 +227,7 @@
 
 '[^']*'															{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, sqlget_leng(yyscanner)-2); return STRING;}
 
-\?[a-zA-Z_][a-zA-Z0-9_]* 										{yylval->sval = new_dstring(sqlget_text(yyscanner) + 1, sqlget_leng(yyscanner)-2); return PARAMETER;}
+\?[a-zA-Z0-9_]* 												{yylval->sval = new_dstring(sqlget_text(yyscanner), sqlget_leng(yyscanner)); return PARAMETER;}
 
 	/*
 		old very strict identifier rule

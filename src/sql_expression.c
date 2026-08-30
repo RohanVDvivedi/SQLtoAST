@@ -876,7 +876,7 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 		case SQL_PARAMETER :
 		{
 			if(expr->parameter_resolution == NULL)
-				snprintf_dstring(str_p, "NULL");
+				concatenate_dstring(str_p, &(expr->parameter_name));
 			else
 			{
 				snprintf_dstring(str_p, "(");
