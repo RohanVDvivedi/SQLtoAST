@@ -327,6 +327,7 @@ void delete_table_element(sql_table_element* te_p);
 %type <ival> integer
 %type <uval> with_or_without_timezone
 
+%token <sval> PARAMETER
 %token <sval> IDENTIFIER
 %token <sval> INTEGER
 %token <sval> NUMBER
@@ -888,6 +889,7 @@ expr :
 			| INTEGER 																				{$$ = new_valued_sql_expr(SQL_NUM, $1);}
 			| NUMBER																				{$$ = new_valued_sql_expr(SQL_NUM, $1);}
 			| STRING																				{$$ = new_valued_sql_expr(SQL_STR, $1);}
+			| PARAMETER 																			{$$ = new_parameter_sql_expr($1);}
 			| IDENTIFIER																			{$$ = new_valued_sql_expr(SQL_VAR, $1);}
 			| MUL																					{$$ = new_valued_sql_expr(SQL_VAR, new_dstring("*", 1));}
 			| TRUE																					{$$ = new_const_non_valued_sql_expr(SQL_TRUE);}
