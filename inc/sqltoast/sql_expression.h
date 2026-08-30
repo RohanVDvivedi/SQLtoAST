@@ -70,6 +70,8 @@ enum sql_expression_type
 	SQL_NUM,
 	SQL_STR,
 
+	SQL_PARAMETER,
+
 	// reflects a constant
 
 	SQL_VAR,
@@ -158,6 +160,17 @@ struct sql_expression
 		// for constant or variable
 		dstring value;
 
+		// for parameter
+		struct
+		{
+			// parsed and always has ? in the prefix
+			dstring parameter_name;
+
+			// value that this parameter got resolved into
+			// this is left NULL by the parser
+			const sql_expression* parameter_resolution; // this attribute will not be owned by the sql_expression and you have to do all the work of setting and free it later
+		};
+
 		// for sql_function
 		struct
 		{
@@ -221,6 +234,9 @@ sql_expression* new_sub_query_sql_expr(sql_expression_type type, sql_dql* sub_qu
 
 // for NUM, STR and VAR
 sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value);
+
+// for PARAMETER
+sql_expression* new_parameter_sql_expr(dstring parameter_name);
 
 // for unknown, true, false and null
 sql_expression* new_const_non_valued_sql_expr(sql_expression_type type);

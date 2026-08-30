@@ -113,6 +113,14 @@ sql_expression* new_valued_sql_expr(sql_expression_type type, dstring value)
 	return expr;
 }
 
+sql_expression* new_parameter_sql_expr(dstring parameter_name)
+{
+	sql_expression* expr = new_basic_sql_expr(SQL_PARAMETER);
+	expr->parameter_name = parameter_name;
+	expr->parameter_resolution = NULL;
+	return expr;
+}
+
 sql_expression* new_const_non_valued_sql_expr(sql_expression_type type)
 {
 	sql_expression* expr = new_basic_sql_expr(type);
@@ -404,6 +412,15 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 		case SQL_UNKNOWN :
 		case SQL_NULL :
 		{
+			return expr;
+		}
+
+		case SQL_PARAMETER :
+		{
+			/* opting to not flatten SQL_PARAMETER as they change with every query
+			if(expr->parameter_resolution != NULL)
+				expr->parameter_resolution = flatten_similar_associative_operators_in_sql_expression(expr->parameter_resolution);
+			*/
 			return expr;
 		}
 
@@ -856,6 +873,19 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 			break;
 		}
 
+		case SQL_PARAMETER :
+		{
+			if(expr->parameter_resolution == NULL)
+				snprintf_dstring(str_p, "NULL");
+			else
+			{
+				snprintf_dstring(str_p, "(");
+				snprint_sql_expr(str_p, expr->parameter_resolution);
+				snprintf_dstring(str_p, ")");
+			}
+			break;
+		}
+
 		case SQL_FUNCTION_CALL :
 		{
 			concatenate_dstring(str_p, &(expr->func_name));
@@ -1026,6 +1056,12 @@ void delete_sql_expr(sql_expression* expr)
 		case SQL_VAR :
 		{
 			deinit_dstring(&(expr->value));
+			break;
+		}
+
+		case SQL_PARAMETER :
+		{
+			deinit_dstring(&(expr->parameter_name));
 			break;
 		}
 
