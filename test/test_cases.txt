@@ -248,3 +248,4 @@ WITH a (x) AS (VALUES (1), (2)), b (y) AS (WITH c (z) AS (SELECT x FROM a) SELEC
 WITH a (id, name) AS (SELECT id, name FROM users WHERE active = true), b (user_id, order_count) AS (SELECT user_id, count(*) FROM orders WHERE user_id IN (SELECT id FROM a) GROUP BY user_id) UPDATE users SET active = false WHERE id IN (SELECT user_id FROM b WHERE order_count > 2) RETURNING id, name, active
 with recursive x as select * from t, y as select r,s,t from s select a, b from z union select rohan, dvivedi
 with x as select * from t, y as select r,s,t from s select a, b from z union select rohan, dvivedi
+select a,b,c,?1,?2 from t join r on t.id = ?a and t.r_id = r.id where t.j between ?_ab123 and ?123a_
