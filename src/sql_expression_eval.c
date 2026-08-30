@@ -72,6 +72,7 @@ int has_sub_query_in_sql_exp(const sql_expression* expr)
 		case SQL_NUM :
 		case SQL_STR :
 		case SQL_VAR :
+		case SQL_PARAMETER :
 			return 0;
 
 		case SQL_TRUE :
@@ -2054,6 +2055,15 @@ static void* evaluate_sql_expr_INTERNAL(const sql_expression* expr, const sql_ex
 			return ec_p->get_variable(&(expr->value), ec_p, error_code);
 		}
 
+		case SQL_PARAMETER :
+		{
+			// bypass it to the resolved paramater
+			void* a = evaluate_child_sql_expr(expr, expr->parameter_resolution, ec_p, interim_context, error_code);
+			if(*error_code)
+				return NULL;
+			return a;
+		}
+
 		case SQL_TRUE :
 		{
 			return ec_p->true_bool;
@@ -2689,6 +2699,14 @@ void* infer_type_sql_expr(const sql_expression* expr, const sql_expr_eval_contex
 
 		case SQL_VAR :
 			return ec_p->get_type_for_variable(&(expr->value), ec_p, error_code);
+
+		case SQL_PARAMETER :
+		{
+			void* t = infer_type_sql_expr(expr->parameter_resolution, ec_p, error_code);
+			if(*error_code)
+				return NULL;
+			return t;
+		}
 
 		case SQL_TRUE :
 		case SQL_FALSE :
