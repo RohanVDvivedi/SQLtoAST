@@ -1,8 +1,7 @@
 PICKED TASKS
 
- * start with converting this parsed query into this exact logical query plan, using building blocks like
-     * give index to every operator and plug them like building blocks
-     * every sub query gets an independent sequence of operator blocks in the same list
+* LOGICAL QUERY PLAN (read about relational algebra)
+  * start with making structs fro these
    * join left/right/inner/outer
    * non_join semi and anti joins
    * aggregation with/without group_by_expressions, with/without aggregate_expressions
@@ -12,6 +11,8 @@ PICKED TASKS
    * union
    * sort (may be eliminated if the input row is already sorted from previous sorting or in index scan)
    * limit/offset operator
+
+* write new expression avaluator that uses a byte code array and a slot machine to evaluate expressions
 
 TO BE PICKED TASKS
 
