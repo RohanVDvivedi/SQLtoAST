@@ -12,7 +12,7 @@ PICKED TASKS
    * sort (may be eliminated if the input row is already sorted from previous sorting or in index scan)
    * limit/offset operator
 
-* write new expression avaluator that uses a byte code array and a slot machine to evaluate expressions
+* write new expression evaluator that uses a byte code array and a slot machine to evaluate expressions, but uses the same expression evaluator
 
 TO BE PICKED TASKS
 
