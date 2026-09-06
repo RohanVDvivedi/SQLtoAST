@@ -109,8 +109,7 @@ struct sort_info
 
 	uint32_t keys_count;
 	uint32_t* key_positions;
-
-	unsigned int is_desc:1;
+	unsigned int* is_key_dir_desc;
 };
 
 typedef struct distinct_info distinct_info;
