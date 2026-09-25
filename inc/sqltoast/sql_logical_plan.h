@@ -91,13 +91,20 @@ struct projection_info
 	arraylist projection_exprs;
 };
 
+typedef struct column_position column_position;
+struct column_position
+{
+	uint32_t intermediate_relation_id; // set to UINT32_MAX, if there is no join prior to this operator
+	uint32_t intermediate_column_id;
+};
+
 typedef struct aggregate_call aggregate_call;
 struct aggregate_call
 {
 	void* function_handle;
 
 	uint32_t parameter_count;
-	uint32_t* parameter_positions;
+	column_position* parameter_positions;
 };
 
 typedef struct aggregation_info aggregation_info;
@@ -106,7 +113,7 @@ struct aggregation_info
 	logical_operator* input_operator;
 
 	uint32_t keys_count;
-	uint32_t* key_positions;
+	column_position* key_positions;
 
 	arraylist aggregate_function_calls; // has pointers for aggregate_call structs
 };
@@ -117,7 +124,7 @@ struct sort_info
 	logical_operator* input_operator;
 
 	uint32_t keys_count;
-	uint32_t* key_positions;
+	column_position* key_positions;
 	unsigned int* is_key_dir_desc;
 };
 
