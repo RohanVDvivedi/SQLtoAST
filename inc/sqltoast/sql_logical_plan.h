@@ -59,7 +59,13 @@ enum logical_operator_type
 	// output control operators
 	OFFSET_LOGI_OP,
 	LIMIT_LOGI_OP,
+
+	// data modification operators
+	INSERT_LOGI_OP,
+	DELETE_LOGI_OP,
 };
+
+typedef struct logical_operator logical_operator;
 
 typedef struct table_scan_info table_scan_info;
 struct table_scan_info
@@ -71,14 +77,16 @@ struct table_scan_info
 typedef struct selection_info selection_info;
 struct selection_info
 {
-	uint32_t input_operator_index;
+	logical_operator* input_operator;
+
 	sql_expression* selection_expr;
 };
 
 typedef struct projection_info projection_info;
 struct projection_info
 {
-	uint32_t input_operator_index;
+	logical_operator* input_operator;
+
 	arraylist projection_exprs;
 };
 
@@ -94,7 +102,7 @@ struct aggregate_call
 typedef struct aggregation_info aggregation_info;
 struct aggregation_info
 {
-	uint32_t input_operator_index;
+	logical_operator* input_operator;
 
 	uint32_t keys_count;
 	uint32_t* key_positions;
@@ -105,7 +113,7 @@ struct aggregation_info
 typedef struct sort_info sort_info;
 struct sort_info
 {
-	uint32_t input_operator_index;
+	logical_operator* input_operator;
 
 	uint32_t keys_count;
 	uint32_t* key_positions;
@@ -115,28 +123,39 @@ struct sort_info
 typedef struct distinct_info distinct_info;
 struct distinct_info
 {
-	uint32_t input_operator_index;
+	logical_operator* input_operator;
 };
 
 typedef struct join_info join_info;
 struct join_info
 {
-	uint32_t input_operator_index[2];
+	logical_operator* input_operator[2];
+
 	sql_expression* join_expr;
 };
 
 typedef struct set_op_info set_op_info;
 struct set_op_info
 {
-	uint32_t input_operator_index[2];
+	logical_operator* input_operator[2];
+
 	unsigned int is_all:1; // if is_all == 0, implies it must have a distinct output
 };
 
 typedef struct output_control_op_info output_control_op_info;
 struct output_control_op_info
 {
-	uint32_t input_operator_index;
+	logical_operator* input_operator;
+
 	uint64_t count;
+};
+
+typedef struct data_mod_op_info data_mod_op_info;
+struct data_mod_op_info
+{
+	logical_operator* input_operator;
+
+	void* table_handle;
 };
 
 typedef struct logical_operator logical_operator;
@@ -146,19 +165,23 @@ struct logical_operator
 
 	union
 	{
-		table_scan_info table_scan_info;
-		selection_info selection_info;
-		projection_info projection_info;
-		aggregation_info aggregation_info;
-		sort_info sort_info;
-		distinct_info distinct_info;
-		join_info join_info;
-		set_op_info set_op_info;
-		output_control_op_info output_control_op_info;
+		table_scan_info table_scan_info;					// type = TABLE_SCAN_LOGI_OP
+		selection_info selection_info;						// type = SELECTION_LOGI_OP
+		projection_info projection_info;					// type = PROJECTION_LOGI_OP
+		aggregation_info aggregation_info;					// type = AGGREGATION_LOGI_OP
+		sort_info sort_info;								// type = SORT_LOGI_OP
+		distinct_info distinct_info;						// type = DISTINCT_LOGI_OP
+		join_info join_info;								// type = INNER_JOIN_LOGI_OP LEFT_JOIN_LOGI_OP RIGHT_JOIN_LOGI_OP FULL_JOIN_LOGI_OP SEMI_JOIN_LOGI_OP ANTI_JOIN_LOGI_OP
+		set_op_info set_op_info;							// type = UNION_LOGI_OP INTERSECT_LOGI_OP EXCEPT_LOGI_OP
+		output_control_op_info output_control_op_info;		// type = OFFSET_LOGI_OP LIMIT_LOGI_OP
+		data_mod_op_info data_mod_op_info;					// type = INSERT_LOGI_OP DELETE_LOGI_OP
 	};
 };
 
 // sql must be DQL or DML
-logical_operator* get_logical_plan_for_sql(sql* sql, uint32_t* result_operators_count, schema_query_interface* sqi);
+// returns a tree or a DAG of logical operator nodes
+logical_operator* get_logical_plan_for_sql(sql* sql, schema_query_interface* sqi);
+
+void delete_logical_plan(logical_operator* root);
 
 #endif
