@@ -1,16 +1,7 @@
 PICKED TASKS
 
-* LOGICAL QUERY PLAN (read about relational algebra)
-  * start with making structs fro these
-   * join left/right/inner/outer
-   * non_join semi and anti joins
-   * aggregation with/without group_by_expressions, with/without aggregate_expressions
-   * projection (add drop column attribute based projection if there is no need of it in later stages of the pipeline) (computed column can be computed at last most time)
-   * selection (and can be broken into several stages alloing operator push down)
-   * relation_scan (on range selection push down can become index scan)
-   * union
-   * sort (may be eliminated if the input row is already sorted from previous sorting or in index scan)
-   * limit/offset operator
+* LOGICAL QUERY PLAN
+ * implement everything except the CTE parts
 
 * write new expression evaluator that uses a byte code array and a slot machine to evaluate expressions, but uses the same expression evaluator
 
