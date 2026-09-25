@@ -15,7 +15,7 @@
 	OFFSET
 	LIMIT
 	INSERT/DELETE - if DML
-	 - again the same sequence if it is returning query
+	PROJECTION if returning is present -> can be input to some other query
 */
 
 logical_operator* get_logical_plan_for_sql(sql* sql, schema_query_interface* sqi);
