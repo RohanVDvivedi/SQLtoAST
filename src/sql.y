@@ -951,7 +951,9 @@ aggregate_distinct_opt :
 						| ALL 					{$$ = SQL_RESULT_SET_ALL;}
 						| DISTINCT 				{$$ = SQL_RESULT_SET_DISTINCT;}
 
-func_expr : IDENTIFIER OPEN_BRACKET aggregate_distinct_opt expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3, $4);}
+func_expr :
+			IDENTIFIER OPEN_BRACKET aggregate_distinct_opt expr_list CLOSE_BRACKET					{$$ = new_func_sql_expr($1, $3, $4);}
+			| IDENTIFIER OPEN_BRACKET CLOSE_BRACKET													{arraylist empty_params; initialize_arraylist(&empty_params, 0); $$ = new_func_sql_expr($1, SQL_RESULT_SET_ALL, empty_params);}
 
 sub_query_expr :
 			dql_query 															{$$ = new_sub_query_sql_expr(SQL_SUB_QUERY, $1);}
