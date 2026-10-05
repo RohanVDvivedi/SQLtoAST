@@ -1,5 +1,11 @@
 PICKED TASKS
 
+* are_equal calls for dql, dml and expression
+
+* expression dfs iterator
+
+* function expression calls carry a flag if aggregate and aggregated_column
+
 * LOGICAL QUERY PLAN
  * implement everything except the CTE parts
 
