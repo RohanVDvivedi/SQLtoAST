@@ -186,9 +186,21 @@ struct logical_operator
 	};
 };
 
+typedef enum logical_plan_error logical_plan_error;
+enum logical_plan_error
+{
+	LOGICAL_PLAN_SUCCESS = 0,
+	LOGICAL_PLAN_UNIDENTIFIED_TABLE = -1,
+	LOGICAL_PLAN_UNIDENTIFIED_COLUMN = -2,
+	LOGICAL_PLAN_UNIDENTIFIED_FUNCTION = -3,
+	LOGICAL_PLAN_FUNCTION_NOT_AGGREGATE = -4,
+	LOGICAL_PLAN_UNSUPPORTED_QUERY = -5,
+};
+
 // sql must be DQL or DML
 // returns a tree or a DAG of logical operator nodes
-logical_operator* get_logical_plan_for_sql(sql* sql, schema_query_interface* sqi);
+// error == 0, implies success
+logical_operator* get_logical_plan_for_sql(const sql* sql, schema_query_interface* sqi, logical_plan_error* error);
 
 void delete_logical_plan(logical_operator* root);
 
