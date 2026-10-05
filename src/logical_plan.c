@@ -91,7 +91,6 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 			delete_logical_plan(input_operator[1]);
 			(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
 			return NULL;
-
 		}
 		case VALUES_QUERY :
 		{
