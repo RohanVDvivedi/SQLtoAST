@@ -198,6 +198,104 @@ void snprint_dml(dstring* str_p, const sql_dml* dml)
 	}
 }
 
+int are_equal_dml(const sql_dml* dml1, const sql_dml* dml2)
+{
+	if(dml1 == dml2)
+		return 1;
+	if(dml1 == NULL || dml2 == NULL) // both NULL, is fine handled above
+		return 0;
+
+	{
+		if(get_element_count_arraylist(&(dml1->with_ctes)) != get_element_count_arraylist(&(dml2->with_ctes)))
+			return 0;
+		if(get_element_count_arraylist(&(dml1->with_ctes)) > 0 && dml1->with_recursive_ctes != dml2->with_recursive_ctes)
+			return 0;
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dml1->with_ctes)); i++)
+			if(!are_equal_cte(get_from_front_of_arraylist(&(dml1->with_ctes), i), get_from_front_of_arraylist(&(dml2->with_ctes), i)))
+				return 0;
+	}
+
+	if(dml1->type != dml2->type)
+		return 0;
+	switch(dml1->type)
+	{
+		case INSERT_QUERY :
+		{
+			if(0 != compare_dstring(&(dml1->insert_query.table_name), &(dml2->insert_query.table_name)))
+				return 0;
+
+			if(get_element_count_arraylist(&(dml1->insert_query.column_name_list)) != get_element_count_arraylist(&(dml2->insert_query.column_name_list)))
+				return 0;
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dml1->insert_query.column_name_list)); i++)
+				if(0 != compare_dstring(get_from_front_of_arraylist(&(dml1->insert_query.column_name_list), i), get_from_front_of_arraylist(&(dml2->insert_query.column_name_list), i)))
+					return 0;
+
+			if(!are_equal_dql(dml1->insert_query.input_data_query, dml2->insert_query.input_data_query))
+				return 0;
+
+			break;
+		}
+		case UPDATE_QUERY :
+		{
+			if(0 != compare_dstring(&(dml1->update_query.table_name), &(dml2->update_query.table_name)))
+				return 0;
+
+			{
+				if(get_element_count_arraylist(&(dml1->update_query.values_to_be_set)) != get_element_count_arraylist(&(dml2->update_query.values_to_be_set)))
+					return 0;
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dml1->update_query.values_to_be_set)); i++)
+				{
+					const columns_to_be_set* c1 = get_from_front_of_arraylist(&(dml1->update_query.values_to_be_set), i);
+					const columns_to_be_set* c2 = get_from_front_of_arraylist(&(dml2->update_query.values_to_be_set), i);
+
+					if(get_element_count_arraylist(&(c1->column_names)) != get_element_count_arraylist(&(c2->column_names)))
+						return 0;
+					for(cy_uint j = 0; j < get_element_count_arraylist(&(c1->column_names)); j++)
+						if(0 != compare_dstring(get_from_front_of_arraylist(&(c1->column_names), j), get_from_front_of_arraylist(&(c2->column_names), j)))
+							return 0;
+
+					if(get_element_count_arraylist(&(c1->value_exprs)) != get_element_count_arraylist(&(c2->value_exprs)))
+						return 0;
+					for(cy_uint j = 0; j < get_element_count_arraylist(&(c1->value_exprs)); j++)
+						if(!are_equal_sql_expr(get_from_front_of_arraylist(&(c1->value_exprs), j), get_from_front_of_arraylist(&(c2->value_exprs), j)))
+							return 0;
+				}
+			}
+
+			if(!are_equal_sql_expr(dml1->update_query.where_expr, dml2->update_query.where_expr))
+				return 0;
+
+			break;
+		}
+		case DELETE_QUERY :
+		{
+			if(0 != compare_dstring(&(dml1->delete_query.table_name), &(dml2->delete_query.table_name)))
+				return 0;
+
+			if(!are_equal_sql_expr(dml1->delete_query.where_expr, dml2->delete_query.where_expr))
+				return 0;
+
+			break;
+		}
+	}
+
+	{
+		if(get_element_count_arraylist(&(dml1->returning_projections)) != get_element_count_arraylist(&(dml2->returning_projections)))
+			return 0;
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dml1->returning_projections)); i++)
+		{
+			const projection* p1 = get_from_front_of_arraylist(&(dml1->returning_projections), i);
+			const projection* p2 = get_from_front_of_arraylist(&(dml2->returning_projections), i);
+			if(!are_equal_sql_expr(p1->projection_expr, p2->projection_expr))
+				return 0;
+			if(0 != compare_dstring(&(p1->as), &(p2->as)))
+				return 0;
+		}
+	}
+
+	return 1;
+}
+
 void flatten_exprs_dml(sql_dml* dml)
 {
 	switch(dml->type)
