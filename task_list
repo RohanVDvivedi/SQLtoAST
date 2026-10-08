@@ -1,10 +1,10 @@
 PICKED TASKS
 
-* are_equal calls for dql, dml and expression
+* are_equal function review
 
 * expression dfs iterator
 
-* function expression calls carry a flag if aggregate and aggregated_column
+* function expression calls carry a flag if aggregate and aggregated_intermediate_name a dstring
 
 * for logical plan collect all aggregate function calls, and ensure that there are no nested aggregate function calls per query in any of it's expression
 
