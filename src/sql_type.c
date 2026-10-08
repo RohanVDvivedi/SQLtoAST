@@ -86,6 +86,47 @@ void snprint_sql_type(dstring* str_p, const sql_type* t)
 	}
 }
 
+int are_equal_sql_type(const sql_type* t1, const sql_type* t2)
+{
+	if(t1 == t2)
+		return 1;
+	if(t1 == NULL || t2 == NULL)
+		return 0;
+
+	if(t1->type_name != t2->type_name)
+		return 0;
+
+	if(t1->type_name != SQL_CUSTOM_TYPE)
+	{
+		if(t1->spec_size != t2->spec_size)
+			return 0;
+		for(int i = 0; i < t1->spec_size; i++)
+			if(t1->spec[i] != t2->spec[i])
+				return 0;
+		if(t1->type_name == SQL_TIME || t1->type_name == SQL_TIMESTAMP)
+			if(t1->with_time_zone != t2->with_time_zone)
+				return 0;
+	}
+	else
+	{
+		if(0 != compare_dstring(&(t1->custom_type_name), &(t2->custom_type_name)))
+			return 0;
+	}
+
+	if(t1->for_array != t2->for_array)
+		return 0;
+	if(t1->for_array)
+	{
+		if(t1->array_dims_size != t2->array_dims_size)
+			return 0;
+		for(int i = 0; i < t1->array_dims_size; i++)
+			if(t1->array_dims[i] != t2->array_dims[i])
+				return 0;
+	}
+
+	return 1;
+}
+
 void delete_sql_type(sql_type* t)
 {
 	if(t == NULL)
