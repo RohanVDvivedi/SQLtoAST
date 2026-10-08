@@ -85,6 +85,8 @@ void flatten_exprs_dml(sql_dml* dml);
 
 void snprint_dml(dstring* str_p, const sql_dml* dml);
 
+int are_equal_dml(const sql_dml* dml1, const sql_dml* dml2);
+
 void delete_dml(sql_dml* dml);
 
 #endif

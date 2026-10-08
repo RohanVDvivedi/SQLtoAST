@@ -248,6 +248,8 @@ sql_expression* flatten_similar_associative_operators_in_sql_expression(sql_expr
 
 void snprint_sql_expr(dstring* str_p, const sql_expression* expr);
 
+int are_equal_sql_expr(const sql_expression* expr1, const sql_expression* expr2);
+
 void delete_sql_expr(sql_expression* expr);
 
 #endif

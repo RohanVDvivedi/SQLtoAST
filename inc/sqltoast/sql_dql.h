@@ -201,6 +201,8 @@ void flatten_exprs_dql(sql_dql* dql);
 
 void snprint_dql(dstring* str_p, const sql_dql* dql);
 
+int are_equal_dql(const sql_dql* dql1, const sql_dql* dql2);
+
 void delete_dql(sql_dql* dql);
 
 #endif
