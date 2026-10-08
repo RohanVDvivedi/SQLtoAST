@@ -966,6 +966,216 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 	}
 }
 
+int are_equal_sql_expr(const sql_expression* expr1, const sql_expression* expr2)
+{
+	if(expr1 == expr2)
+		return 0;
+	if(expr1 == NULL || expr2 == NULL) // both NULL, is fine handled above
+		return 0;
+
+	if(expr1->type != expr2->type)
+		return 0;
+	switch(expr1->type)
+	{
+		case SQL_MUL_INV :
+		case SQL_NEG :
+		case SQL_BITNOT :
+		case SQL_LOGNOT :
+		{
+			if(!are_equal_sql_expr(expr1->unary_of, expr2->unary_of))
+				return 0;
+			break;
+		}
+
+		case SQL_ADD :
+		case SQL_SUB :
+		case SQL_MUL :
+		case SQL_DIV :
+		case SQL_MOD :
+		{
+			if(!are_equal_sql_expr(expr1->left, expr2->left))
+				return 0;
+			if(!are_equal_sql_expr(expr1->right, expr2->right))
+				return 0;
+			break;
+		}
+
+		case SQL_GT :
+		case SQL_GTE :
+		case SQL_LT :
+		case SQL_LTE :
+		case SQL_EQ :
+		case SQL_NEQ :
+		{
+			if(!are_equal_sql_expr(expr1->left, expr2->left))
+				return 0;
+			if(expr1->cmp_rhs_quantfier != expr2->cmp_rhs_quantfier)
+				return 0;
+			if(expr1->cmp_rhs_quantfier == SQL_CMP_NONE)
+			{
+				if(!are_equal_sql_expr(expr1->right, expr2->right))
+					return 0;
+			}
+			else
+			{
+				if(!are_equal_dql(expr1->right_sub_query, expr2->right_sub_query))
+					return 0;
+			}
+			break;
+		}
+
+		case SQL_BITAND :
+		case SQL_BITOR :
+		case SQL_BITXOR :
+		case SQL_LOGAND :
+		case SQL_LOGOR :
+		case SQL_LOGXOR :
+		case SQL_LSHIFT :
+		case SQL_RSHIFT :
+		case SQL_CONCAT :
+		case SQL_LIKE :
+		case SQL_IS :
+		{
+			if(!are_equal_sql_expr(expr1->left, expr2->left))
+				return 0;
+			if(!are_equal_sql_expr(expr1->right, expr2->right))
+				return 0;
+			break;
+		}
+
+		case SQL_BTWN :
+		{
+			if(!are_equal_sql_expr(expr1->btwn_input, expr2->btwn_input))
+				return 0;
+			if(!are_equal_sql_expr(expr1->bounds[0], expr2->bounds[0]))
+				return 0;
+			if(!are_equal_sql_expr(expr1->bounds[1], expr2->bounds[1]))
+				return 0;
+			break;
+		}
+
+		case SQL_ADD_FLAT :
+		case SQL_MUL_FLAT :
+		case SQL_LOGAND_FLAT :
+		case SQL_LOGOR_FLAT :
+		case SQL_LOGXOR_FLAT :
+		case SQL_CONCAT_FLAT :
+		{
+			if(get_element_count_arraylist(&(expr1->expr_list)) != get_element_count_arraylist(&(expr2->expr_list)))
+				return 0;
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr1->expr_list)); i++)
+			{
+				if(!are_equal_sql_expr(get_from_front_of_arraylist(&(expr1->expr_list), i), get_from_front_of_arraylist(&(expr2->expr_list), i)))
+					return 0;
+			}
+			break;
+		}
+
+		case SQL_IN :
+		{
+			if(!are_equal_sql_expr(expr1->in_input, expr2->in_input))
+				return 0;
+
+			if(!are_equal_dql(expr1->in_sub_query, expr2->in_sub_query))
+				return 0;
+
+			if(get_element_count_arraylist(&(expr1->in_expr_list)) != get_element_count_arraylist(&(expr2->in_expr_list)))
+				return 0;
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr1->in_expr_list)); i++)
+			{
+				if(!are_equal_sql_expr(get_from_front_of_arraylist(&(expr1->in_expr_list), i), get_from_front_of_arraylist(&(expr2->in_expr_list), i)))
+					return 0;
+			}
+			break;
+		}
+
+		case SQL_STR :
+		case SQL_NUM :
+		case SQL_VAR :
+		{
+			if(0 != compare_dstring(&(expr1->value), &(expr2->value)))
+				return 0;
+			break;
+		}
+
+		case SQL_TRUE :
+		case SQL_FALSE :
+		case SQL_UNKNOWN :
+		case SQL_NULL :
+		{
+			break;
+		}
+
+		case SQL_PARAMETER :
+		{
+			if(0 != compare_dstring(&(expr1->parameter_name), &(expr2->parameter_name)))
+				return 0;
+			if(expr1->parameter_resolution != NULL && expr2->parameter_resolution != NULL) // only when both paramerters are resolved in this expression, can be compare them
+				if(!are_equal_sql_expr(expr1->parameter_resolution, expr2->parameter_resolution))
+					return 0;
+			break;
+		}
+
+		case SQL_FUNCTION_CALL :
+		{
+			if(0 != compare_dstring(&(expr1->func_name), &(expr2->func_name)))
+				return 0;
+			if(expr1->aggregate_mode != expr2->aggregate_mode)
+				return 0;
+			if(get_element_count_arraylist(&(expr1->param_expr_list)) != get_element_count_arraylist(&(expr2->param_expr_list)))
+				return 0;
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr1->param_expr_list)); i++)
+				if(!are_equal_sql_expr(get_from_front_of_arraylist(&(expr1->param_expr_list), i), get_from_front_of_arraylist(&(expr2->param_expr_list), i)))
+					return 0;
+			break;
+		}
+
+		case SQL_CAST :
+		{
+			if(!are_equal_sql_expr(expr1->cast_expr, expr2->cast_expr))
+				return 0;
+			if(!are_equal_sql_type(expr1->cast_type, expr2->cast_type))
+				return 0;
+			break;
+		}
+
+		case SQL_SUB_QUERY :
+		case SQL_EXISTS :
+		{
+			if(!are_equal_dql(expr1->sub_query, expr2->sub_query))
+				return 0;
+			break;
+		}
+
+		case SQL_CASE :
+		{
+			if(!are_equal_sql_expr(expr1->case_expr, expr2->case_expr))
+				return 0;
+
+			if(get_element_count_arraylist(&(expr1->when_exprs)) != get_element_count_arraylist(&(expr2->when_exprs)))
+				return 0;
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr1->when_exprs)); i++)
+				if(!are_equal_sql_expr(get_from_front_of_arraylist(&(expr1->when_exprs), i), get_from_front_of_arraylist(&(expr2->when_exprs), i)))
+					return 0;
+
+			if(get_element_count_arraylist(&(expr1->then_exprs)) != get_element_count_arraylist(&(expr2->then_exprs)))
+				return 0;
+
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr1->then_exprs)); i++)
+				if(!are_equal_sql_expr(get_from_front_of_arraylist(&(expr1->then_exprs), i), get_from_front_of_arraylist(&(expr2->then_exprs), i)))
+					return 0;
+
+			if(!are_equal_sql_expr(expr1->else_expr, expr2->else_expr))
+				return 0;
+			break;
+		}
+	}
+
+	return 1;
+}
+
 void delete_sql_expr(sql_expression* expr)
 {
 	if(expr == NULL)

@@ -61,6 +61,8 @@ sql_type* new_sql_type(sql_type_name type_name);
 
 void snprint_sql_type(dstring* str_p, const sql_type* t);
 
+int are_equal_sql_type(const sql_type* t1, const sql_type* t2);
+
 void delete_sql_type(sql_type* t);
 
 #endif

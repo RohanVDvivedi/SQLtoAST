@@ -484,7 +484,7 @@ static int are_equal_relation_input(const relation_input* ri1_p, const relation_
 int are_equal_dql(const sql_dql* dql1, const sql_dql* dql2)
 {
 	if(dql1 == dql2)
-		return 0;
+		return 1;
 	if(dql1 == NULL || dql2 == NULL) // both NULL, is fine handled above
 		return 0;
 
