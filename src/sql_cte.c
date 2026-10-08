@@ -33,7 +33,7 @@ void snprint_cte(dstring* str_p, const sql_cte* cte)
 		{
 			if(i != 0)
 				snprintf_dstring(str_p, ",");
-			concatenate_dstring(str_p, (dstring*) get_from_front_of_arraylist(&(cte->cte_column_names), i));
+			concatenate_dstring(str_p, (const dstring*) get_from_front_of_arraylist(&(cte->cte_column_names), i));
 		}
 		snprintf_dstring(str_p, ")");
 	}
@@ -55,6 +55,40 @@ void snprint_cte(dstring* str_p, const sql_cte* cte)
 	}
 
 	snprintf_dstring(str_p, ")");
+}
+
+int are_equal_cte(const sql_cte* cte1, const sql_cte* cte2)
+{
+	if(cte1 == cte2)
+		return 1;
+	if(cte1 == NULL || cte2 == NULL)
+		return 0;
+
+	if(!compare_dstring(&(cte1->cte_name), &(cte2->cte_name)))
+		return 0;
+	if(get_element_count_arraylist(&(cte1->cte_column_names)) != get_element_count_arraylist(&(cte2->cte_column_names)))
+		return 0;
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(cte1->cte_column_names)); i++)
+		if(!compare_dstring(get_from_front_of_arraylist(&(cte1->cte_column_names), i), get_from_front_of_arraylist(&(cte2->cte_column_names), i)))
+			return 0;
+	if(cte1->cte_type != cte2->cte_type)
+		return 0;
+	switch(cte1->cte_type)
+	{
+		case CTE_DQL :
+		{
+			if(!are_equal_dql(cte1->dql_query, cte2->dql_query))
+				return 0;
+			break;
+		}
+		case CTE_DML :
+		{
+			if(!are_equal_dml(cte1->dml_query, cte2->dml_query))
+				return 0;
+			break;
+		}
+	}
+	return 1;
 }
 
 void delete_dstring(dstring* d);
