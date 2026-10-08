@@ -34,6 +34,8 @@ sql_cte* new_cte(sql_cte_type cte_type);
 
 void snprint_cte(dstring* str_p, const sql_cte* cte);
 
+int are_equal_cte(const sql_cte* cte1, const sql_cte* cte2);
+
 void delete_cte(sql_cte* cte);
 
 #endif

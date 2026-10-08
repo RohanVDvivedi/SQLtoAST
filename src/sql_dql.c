@@ -331,7 +331,7 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 				{
 					if(i != 0)
 						snprintf_dstring(str_p, ",");
-					sql_expression* g = (sql_expression*) get_from_front_of_arraylist(&(dql->select_query.group_by), i);
+					const sql_expression* g = get_from_front_of_arraylist(&(dql->select_query.group_by), i);
 					snprintf_dstring(str_p, "(");
 					snprint_sql_expr(str_p, g);
 					snprintf_dstring(str_p, ")");
@@ -353,7 +353,7 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 				{
 					if(i != 0)
 						snprintf_dstring(str_p, ",");
-					order_by* o = (order_by*) get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
+					const order_by* o = get_from_front_of_arraylist(&(dql->select_query.ordered_by), i);
 					snprintf_dstring(str_p, "(");
 					snprint_sql_expr(str_p, o->ordering_expr);
 					snprintf_dstring(str_p, ") %s", ((o->dir == ORDER_BY_ASC) ? "ASC" : "DESC"));
@@ -442,6 +442,206 @@ void snprint_dql(dstring* str_p, const sql_dql* dql)
 	{
 		snprintf_dstring(str_p, ")");
 	}
+}
+
+static int are_equal_relation_input(const relation_input* ri1_p, const relation_input* ri2_p)
+{
+	if(ri1_p->type != ri2_p->type)
+		return 0;
+	switch(ri1_p->type)
+	{
+		case RELATION :
+		{
+			if(0 != compare_dstring(&(ri1_p->relation_name), &(ri2_p->relation_name)))
+				return 0;
+			break;
+		}
+		case SUB_QUERY :
+		{
+			if(!are_equal_dql(ri1_p->sub_query, ri2_p->sub_query))
+				return 0;
+			break;
+		}
+		case FUNCTION_CALL :
+		{
+			if(!are_equal_sql_expr(ri1_p->function_call, ri2_p->function_call))
+				return 0;
+			break;
+		}
+	}
+	if(0 != compare_dstring(&(ri1_p->as), &(ri2_p->as)))
+		return 0;
+	if(get_element_count_arraylist(&(ri1_p->columns_as)) != get_element_count_arraylist(&(ri2_p->columns_as)))
+		return 0;
+	for(cy_uint i = 0; i < get_element_count_arraylist(&(ri1_p->columns_as)); i++)
+	{
+		if(0 != compare_dstring(get_from_front_of_arraylist(&(ri1_p->columns_as), i), get_from_front_of_arraylist(&(ri2_p->columns_as), i)))
+			return 0;
+	}
+	return 1;
+}
+
+int are_equal_dql(const sql_dql* dql1, const sql_dql* dql2)
+{
+	if(dql1 == dql2)
+		return 0;
+	if(dql1 == NULL || dql2 == NULL) // both NULL, is fine handled above
+		return 0;
+
+	{
+		if(get_element_count_arraylist(&(dql1->with_ctes)) != get_element_count_arraylist(&(dql2->with_ctes)))
+			return 0;
+		if(dql1->with_recursive_ctes != dql2->with_recursive_ctes)
+			return 0;
+		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->with_ctes)); i++)
+			if(!are_equal_cte(get_from_front_of_arraylist(&(dql1->with_ctes), i), get_from_front_of_arraylist(&(dql2->with_ctes), i)))
+				return 0;
+	}
+
+	if(dql1->type != dql2->type)
+		return 0;
+	switch(dql1->type)
+	{
+		case SELECT_QUERY :
+		{
+			if(dql1->select_query.projection_mode != dql2->select_query.projection_mode)
+				return 0;
+
+			{
+				if(get_element_count_arraylist(&(dql1->select_query.projections)) != get_element_count_arraylist(&(dql2->select_query.projections)))
+					return 0;
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->select_query.projections)); i++)
+				{
+					const projection* p1 = get_from_front_of_arraylist(&(dql1->select_query.projections), i);
+					const projection* p2 = get_from_front_of_arraylist(&(dql2->select_query.projections), i);
+					if(!are_equal_sql_expr(p1->projection_expr, p2->projection_expr))
+						return 0;
+					if(0 != compare_dstring(&(p1->as), &(p2->as)))
+						return 0;
+				}
+			}
+
+			{
+				if(dql1->select_query.has_base_input != dql2->select_query.has_base_input)
+					return 0;
+				if(dql1->select_query.has_base_input)
+				{
+					if(!are_equal_relation_input(&(dql1->select_query.base_input), &(dql2->select_query.base_input)))
+						return 0;
+				}
+			}
+
+			{
+				if(get_element_count_arraylist(&(dql1->select_query.joins_with)) != get_element_count_arraylist(&(dql2->select_query.joins_with)))
+					return 0;
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->select_query.joins_with)); i++)
+				{
+					const join_with* j1 = get_from_front_of_arraylist(&(dql1->select_query.joins_with), i);
+					const join_with* j2 = get_from_front_of_arraylist(&(dql2->select_query.joins_with), i);
+
+					if(j1->condition_type != j2->condition_type)
+						return 0;
+
+					if(j1->is_lateral != j2->is_lateral)
+						return 0;
+
+					if(!are_equal_relation_input(&(j1->input), &(j2->input)))
+						return 0;
+
+					switch(j1->condition_type)
+					{
+						case NO_JOIN_CONDITION:
+							break;
+						case NATURAL_JOIN_CONDITION:
+							break;
+						case ON_EXPR_JOIN_CONDITION:
+						{
+							if(!are_equal_sql_expr(j1->on_expr, j2->on_expr))
+								return 0;
+							break;
+						}
+						case USING_JOIN_CONDITION:
+						{
+							if(get_element_count_arraylist(&(j1->using_cols)) != get_element_count_arraylist(&(j2->using_cols)))
+								return 0;
+							for(cy_uint k = 0; k < get_element_count_arraylist(&(j1->using_cols)); k++)
+							{
+								if(0 != compare_dstring(get_from_front_of_arraylist(&(j1->using_cols), k), get_from_front_of_arraylist(&(j2->using_cols), k)))
+									return 0;
+							}
+							break;
+						}
+					}
+				}
+			}
+
+			if(!are_equal_sql_expr(dql1->select_query.where_expr, dql2->select_query.where_expr))
+				return 0;
+
+			{
+				if(get_element_count_arraylist(&(dql1->select_query.group_by)) != get_element_count_arraylist(&(dql2->select_query.group_by)))
+					return 0;
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->select_query.group_by)); i++)
+					if(!are_equal_sql_expr(get_from_front_of_arraylist(&(dql1->select_query.group_by), i), get_from_front_of_arraylist(&(dql2->select_query.group_by), i)))
+						return 0;
+			}
+
+			if(!are_equal_sql_expr(dql1->select_query.having_expr, dql2->select_query.having_expr))
+				return 0;
+
+			{
+				if(get_element_count_arraylist(&(dql1->select_query.ordered_by)) != get_element_count_arraylist(&(dql2->select_query.ordered_by)))
+					return 0;
+				for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->select_query.ordered_by)); i++)
+				{
+					const order_by* o1 = get_from_front_of_arraylist(&(dql1->select_query.ordered_by), i);
+					const order_by* o2 = get_from_front_of_arraylist(&(dql2->select_query.ordered_by), i);
+					if(o1->dir != o2->dir)
+						return 0;
+					if(!are_equal_sql_expr(o1->ordering_expr, o2->ordering_expr))
+						return 0;
+				}
+			}
+
+			if(!are_equal_sql_expr(dql1->select_query.offset_expr, dql2->select_query.offset_expr))
+				return 0;
+
+			if(!are_equal_sql_expr(dql1->select_query.limit_expr, dql2->select_query.limit_expr))
+				return 0;
+
+			break;
+		}
+		case VALUES_QUERY :
+		{
+			if(get_element_count_arraylist(&(dql1->values_query.values)) != get_element_count_arraylist(&(dql2->values_query.values)))
+				return 0;
+			for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->values_query.values)); i++)
+			{
+				const arraylist* row1 = get_from_front_of_arraylist(&(dql1->values_query.values), i);
+				const arraylist* row2 = get_from_front_of_arraylist(&(dql2->values_query.values), i);
+				if(get_element_count_arraylist(row1) != get_element_count_arraylist(row2))
+					return 0;
+				for(cy_uint j = 0; j < get_element_count_arraylist(row1); j++)
+					if(!are_equal_sql_expr(get_from_front_of_arraylist(row1, j), get_from_front_of_arraylist(row2, j)))
+						return 0;
+			}
+			break;
+		}
+		case SET_OPERATION :
+		{
+			if(!are_equal_dql(dql1->set_operation.left, dql2->set_operation.left))
+				return 0;
+			if(dql1->set_operation.op_type != dql2->set_operation.op_type)
+				return 0;
+			if(dql1->set_operation.op_mod != dql2->set_operation.op_mod)
+				return 0;
+			if(!are_equal_dql(dql1->set_operation.right, dql2->set_operation.right))
+				return 0;
+			break;
+		}
+	}
+
+	return 1;
 }
 
 void destroy_relation_input(relation_input* ri_p)
