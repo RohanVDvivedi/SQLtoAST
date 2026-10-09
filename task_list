@@ -1,10 +1,12 @@
 PICKED TASKS
 
-* expression dfs iterator
-
 * function expression calls carry a flag if aggregate and aggregated_intermediate_name a dstring
 
 * for logical plan collect all aggregate function calls, and ensure that there are no nested aggregate function calls per query in any of it's expression
+
+* expression dfs iterator
+  * we do a pre_order traversal, and present the entire stack and ask if we should go deeper or skip the sub tree or complete the traversal
+  * make the call back implement tings like has sub-query, and let the user callback accumulate information and parameters and variables on the sub tree
 
 * LOGICAL QUERY PLAN
  * implement everything except the CTE parts
