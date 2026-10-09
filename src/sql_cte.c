@@ -69,7 +69,7 @@ int are_equal_cte(const sql_cte* cte1, const sql_cte* cte2)
 	if(get_element_count_arraylist(&(cte1->cte_column_names)) != get_element_count_arraylist(&(cte2->cte_column_names)))
 		return 0;
 	for(cy_uint i = 0; i < get_element_count_arraylist(&(cte1->cte_column_names)); i++)
-		if(!compare_dstring(get_from_front_of_arraylist(&(cte1->cte_column_names), i), get_from_front_of_arraylist(&(cte2->cte_column_names), i)))
+		if(0 != compare_dstring(get_from_front_of_arraylist(&(cte1->cte_column_names), i), get_from_front_of_arraylist(&(cte2->cte_column_names), i)))
 			return 0;
 	if(cte1->cte_type != cte2->cte_type)
 		return 0;
