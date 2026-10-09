@@ -1,7 +1,5 @@
 PICKED TASKS
 
-* are_equal integrate with current parser tests
-
 * expression dfs iterator
 
 * function expression calls carry a flag if aggregate and aggregated_intermediate_name a dstring
