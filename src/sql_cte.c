@@ -64,7 +64,7 @@ int are_equal_cte(const sql_cte* cte1, const sql_cte* cte2)
 	if(cte1 == NULL || cte2 == NULL)
 		return 0;
 
-	if(!compare_dstring(&(cte1->cte_name), &(cte2->cte_name)))
+	if(0 != compare_dstring(&(cte1->cte_name), &(cte2->cte_name)))
 		return 0;
 	if(get_element_count_arraylist(&(cte1->cte_column_names)) != get_element_count_arraylist(&(cte2->cte_column_names)))
 		return 0;

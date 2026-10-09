@@ -969,7 +969,7 @@ void snprint_sql_expr(dstring* str_p, const sql_expression* expr)
 int are_equal_sql_expr(const sql_expression* expr1, const sql_expression* expr2)
 {
 	if(expr1 == expr2)
-		return 0;
+		return 1;
 	if(expr1 == NULL || expr2 == NULL) // both NULL, is fine handled above
 		return 0;
 

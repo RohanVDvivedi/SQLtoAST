@@ -491,7 +491,7 @@ int are_equal_dql(const sql_dql* dql1, const sql_dql* dql2)
 	{
 		if(get_element_count_arraylist(&(dql1->with_ctes)) != get_element_count_arraylist(&(dql2->with_ctes)))
 			return 0;
-		if(get_element_count_arraylist(&(dql1->with_ctes)) >= 0 && dql1->with_recursive_ctes != dql2->with_recursive_ctes)
+		if(get_element_count_arraylist(&(dql1->with_ctes)) > 0 && dql1->with_recursive_ctes != dql2->with_recursive_ctes)
 			return 0;
 		for(cy_uint i = 0; i < get_element_count_arraylist(&(dql1->with_ctes)); i++)
 			if(!are_equal_cte(get_from_front_of_arraylist(&(dql1->with_ctes), i), get_from_front_of_arraylist(&(dql2->with_ctes), i)))
@@ -538,6 +538,9 @@ int are_equal_dql(const sql_dql* dql1, const sql_dql* dql2)
 				{
 					const join_with* j1 = get_from_front_of_arraylist(&(dql1->select_query.joins_with), i);
 					const join_with* j2 = get_from_front_of_arraylist(&(dql2->select_query.joins_with), i);
+
+					if(j1->type != j2->type)
+						return 0;
 
 					if(j1->condition_type != j2->condition_type)
 						return 0;
