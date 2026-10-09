@@ -60,6 +60,41 @@ int main()
 				else
 					printf("REPARSING SUCCESS\n");
 
+				if(sqlast1->type == sqlast2->type)
+				{
+					switch(sqlast1->type)
+					{
+						case DQL :
+						{
+							if(are_equal_dql(sqlast1->dql_query, sqlast2->dql_query))
+								printf("PARSE-TREES IDENTICAL\n");
+							else
+								printf("PARSE-TREES DIFFERENT\n");
+							break;
+						}
+						case DML :
+						{
+							if(are_equal_dml(sqlast1->dml_query, sqlast2->dml_query))
+								printf("PARSE-TREES IDENTICAL\n");
+							else
+								printf("PARSE-TREES DIFFERENT\n");
+							break;
+						}
+						case EXPR :
+						{
+							if(are_equal_sql_expr(sqlast1->expr, sqlast2->expr))
+								printf("PARSE-TREES IDENTICAL\n");
+							else
+								printf("PARSE-TREES DIFFERENT\n");
+							break;
+						}
+						default :
+							break;
+					}
+				}
+				else
+					printf("PARSE-TREES DIFFERENT\n");
+
 				deinit_dstring(&str2);
 
 				delete_sql(sqlast2);
