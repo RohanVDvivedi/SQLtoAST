@@ -167,6 +167,23 @@ struct expression_breaker_context
 	expression_breaker_error error;
 };
 
+void initialize_expression_breaker_context(expression_breaker_context* ebc, schema_query_interface* sqi, uint8_t expected_aggregation_depth_calls)
+{
+	ebc->sqi = sqi;
+	ebc->expected_aggregation_depth_calls = expected_aggregation_depth_calls;
+
+	initialize_arraylist(&(ebc->expressions_stack), 5);
+	ebc->aggregation_calls_in_expressions_stack = 0;
+
+	initialize_arraylist(&(ebc->before_aggregation_expressions), 5);
+	initialize_arraylist(&(ebc->aggregation_call_expressions), 5);
+	initialize_arraylist(&(ebc->after_aggregation_expressions), 5);
+
+	initialize_arraylist(&(ebc->accessed_variable_identifiers), 5);
+
+	ebc->error = NO_ERROR_FROM_EXPRESSION_BREAKER;
+}
+
 traversal_status pre_order_callback_expression_breaker(const sql_expression* expr, void* context)
 {
 	expression_breaker_context* ebc = context;
