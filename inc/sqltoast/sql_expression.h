@@ -180,6 +180,7 @@ struct sql_expression
 
 			unsigned int is_aggregate:1; // this flag is user derived from the schema/execution layer, this information is not received in the serialized query
 			// must be set by the user upon identifying this function call as an aggregation call
+			dstring intermediate_column_name; // there is a possibility this function was pre-evaluated, if yes and so, pick it's value from the parent operator's output, very likely for aggregate functions
 		};
 
 		// for sql_cast

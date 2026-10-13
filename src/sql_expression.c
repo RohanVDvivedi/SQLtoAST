@@ -89,6 +89,7 @@ sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, 
 	expr->func_name = func_name;
 	expr->param_expr_list = param_expr_list;
 	expr->is_aggregate = 0; // init-ed to 0
+	init_empty_dstring(&(expr->intermediate_column_name), 0);
 	return expr;
 }
 
@@ -1290,6 +1291,7 @@ void delete_sql_expr(sql_expression* expr)
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
 				delete_sql_expr((sql_expression*)get_from_front_of_arraylist(&(expr->param_expr_list), i));
 			deinitialize_arraylist(&(expr->param_expr_list));
+			deinit_dstring(&(expr->intermediate_column_name));
 			break;
 		}
 
