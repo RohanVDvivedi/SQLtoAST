@@ -149,8 +149,8 @@ struct expression_breaker_context
 {
 	// helper integrface to get schema information
 	schema_query_interface* sqi;
-	uint8_t expected_aggregation_depth_calls; // set to 0 for where, join conditons and group by clauses
-	                                          // set to 1 for the rest in the subquery
+	uint8_t expected_aggregation_depth_calls; // set to 0 for where, join conditons, limit, offset and group by clauses
+	                                          // set to 1 for the rest in the expression clauses like projections, having and order by
 
 	// every pre-order callback pushes on to this stack and analyzes the expression and increments the aggregation_calls_in_expressions_stack
 	arraylist expressions_stack;
