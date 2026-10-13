@@ -1,5 +1,7 @@
 #include<sqltoast/sql_expression_iter.h>
 
+#include<cutlery/cutlery_math.h>
+
 int iterate_over_sql_expr(const sql_expression* expr, traversal_status (*pre_order_callback)(const sql_expression* expr, void* context), void (*post_order_callback)(const sql_expression* expr, void* context), void* context)
 {
 	traversal_status status = (pre_order_callback != NULL) ? pre_order_callback(expr, context) : CONTINUE_ITERATION;

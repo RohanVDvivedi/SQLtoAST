@@ -3,20 +3,22 @@
 
 #include<sqltoast/sqltoast.h>
 
+#include<cutlery/dstring.h>
+
 typedef struct schema_query_interface schema_query_interface;
 struct schema_query_interface
 {
 	void* schema_context;
 
 	// return NULL if such a table does not exists
-	void* (*fetch_table_handle_by_name)(const char* table_name, void* schema_context);
+	void* (*fetch_table_handle_by_name)(const dstring* table_name, void* schema_context);
 	uint32_t (*get_column_count_for_fetched_table_handle)(void* table_handle, void* schema_context);
-	void* (*fetch_column_handle_for_fetched_table_handle_by_column_name)(void* table_handle, const char* column_name, void* schema_context);
+	void* (*fetch_column_handle_for_fetched_table_handle_by_column_name)(void* table_handle, const dstring* column_name, void* schema_context);
 	void* (*fetch_column_handle_for_fetched_table_handle_by_index)(void* table_handle, uint32_t index, void* schema_context); // index < get_column_count_*
 	uint32_t (*get_index_for_column_in_table)(void* table_handle, void* column_handle, void* schema_context);
 
 	// return NULL if such a function does not exists
-	void* (*fetch_function_handle_by_name)(const char* function_name, void* schema_context);
+	void* (*fetch_function_handle_by_name)(const dstring* function_name, void* schema_context);
 	int (*is_aggregate_function_for_fetched_function_handle)(void* function_handle, void* schema_context);
 	uint32_t (*get_param_count_for_fetched_function_handle)(void* function_handle, void* schema_context);
 };

@@ -132,7 +132,17 @@ logical_operator* get_logical_plan_for_sql(const sql* sql, schema_query_interfac
 	}
 }
 
-// every sql expression in a single query, is exacly expression -> aggregate-function -> expression
+#include<sqltoast/sql_expression_iter.h>
+
+typedef enum expression_breaker_error expression_breaker_error;
+enum expression_breaker_error
+{
+	NO_ERROR_FROM_EXPRESSION_BREAKER,
+	TOO_DEEP_AGGREGATION_DEPTH_FROM_EXPRESSION_BREAKER, // more aggregation calls depth than expected_aggregation_depth_calls
+	UNIDENTIFIED_FUNCTION_FROM_EXPRESSION_BREAKER,
+};
+
+// every sql expression in a single query without any nested queries and CTEs, is exacly expression -> aggregate-function -> expression
 // it will also set the is_aggregation bit in the function calls or clear it
 typedef struct expression_breaker_context expression_breaker_context;
 struct expression_breaker_context
@@ -142,13 +152,89 @@ struct expression_breaker_context
 	uint8_t expected_aggregation_depth_calls; // set to 0 for where and group by clauses
 	                                          // set to 1 for the rest in the subquery
 
-	// every pre-order callback pushes on to this stack and analyzes the expression
-	uint32_t aggreation_calls_depth;
+	// every pre-order callback pushes on to this stack and analyzes the expression and increments the aggregation_calls_in_expressions_stack
 	arraylist expressions_stack;
+	uint32_t aggregation_calls_in_expressions_stack;
 
 	// actual expression stack
 	arraylist before_aggregation_expressions;
 	arraylist aggregation_call_expressions;	    // will get an intermediate_column_name for after_aggregation_expressions to evaluate them
 	arraylist after_aggregation_expressions;    // every expression processed gets a single entry here
                                                 // for expressions with no aggregates, there will be no entry in before_aggregation_expressions and aggregation_call_expressions
+
+	arraylist accessed_variable_identifiers;    // list of all column identifiers
+
+	expression_breaker_error error;
 };
+
+traversal_status pre_order_callback_expression_breaker(const sql_expression* expr, void* context)
+{
+	expression_breaker_context* ebc = context;
+
+	if(expr->type == SQL_FUNCTION_CALL)
+	{
+		void* function_handle = ebc->sqi->fetch_function_handle_by_name(&(expr->func_name), ebc->sqi->schema_context);
+		if(function_handle == NULL)
+		{
+			ebc->error = UNIDENTIFIED_FUNCTION_FROM_EXPRESSION_BREAKER;
+			return EXIT_ITERATION;
+		}
+		if(ebc->sqi->is_aggregate_function_for_fetched_function_handle(function_handle, ebc->sqi->schema_context))
+		{
+			((sql_expression*)expr)->is_aggregate = 1;
+		}
+
+		if(expr->is_aggregate)
+		{
+			ebc->aggregation_calls_in_expressions_stack++;
+			if(is_full_arraylist(&(ebc->expressions_stack)) && !expand_arraylist(&(ebc->expressions_stack)))
+				exit(-1);
+			push_back_to_arraylist(&(ebc->expressions_stack), expr);
+		}
+
+		if(ebc->aggregation_calls_in_expressions_stack > ebc->expected_aggregation_depth_calls)
+		{
+			ebc->error = TOO_DEEP_AGGREGATION_DEPTH_FROM_EXPRESSION_BREAKER;
+			return EXIT_ITERATION;
+		}
+
+		if(expr->is_aggregate)
+		{
+			if(is_full_arraylist(&(ebc->aggregation_call_expressions)) && !expand_arraylist(&(ebc->aggregation_call_expressions)))
+				exit(-1);
+			push_back_to_arraylist(&(ebc->aggregation_call_expressions), expr);
+
+			for(uint32_t i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
+			{
+				if(is_full_arraylist(&(ebc->before_aggregation_expressions)) && !expand_arraylist(&(ebc->before_aggregation_expressions)))
+					exit(-1);
+				push_back_to_arraylist(&(ebc->before_aggregation_expressions), get_from_front_of_arraylist(&(expr->param_expr_list), i));
+			}
+		}
+	}
+	else if(expr->type == SQL_VAR)
+	{
+		if(is_full_arraylist(&(ebc->accessed_variable_identifiers)) && !expand_arraylist(&(ebc->accessed_variable_identifiers)))
+			exit(-1);
+		push_back_to_arraylist(&(ebc->accessed_variable_identifiers), expr);
+	}
+
+	return CONTINUE_ITERATION;
+}
+
+void post_order_callback_expression_breaker(const sql_expression* expr, void* context)
+{
+	expression_breaker_context* ebc = context;
+
+	if(expr == get_back_of_arraylist(&(ebc->expressions_stack)))
+	{
+		if(expr->type == SQL_FUNCTION_CALL)
+		{
+			if(expr->is_aggregate)
+			{
+				ebc->aggregation_calls_in_expressions_stack--;
+				pop_back_from_arraylist(&(ebc->expressions_stack));
+			}
+		}
+	}
+}
