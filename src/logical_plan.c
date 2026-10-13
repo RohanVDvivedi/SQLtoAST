@@ -147,6 +147,7 @@ struct expression_breaker_context
 
 	// actual expression stack
 	arraylist before_aggregation_expressions;
-	arraylist aggregation_call_expressions;		// will get an intermediate_column_name for after_aggregation_expressions to evaluate them
-	arraylist after_aggregation_expressions;
+	arraylist aggregation_call_expressions;	    // will get an intermediate_column_name for after_aggregation_expressions to evaluate them
+	arraylist after_aggregation_expressions;    // every expression processed gets a single entry here
+                                                // for expressions with no aggregates, there will be no entry in before_aggregation_expressions and aggregation_call_expressions
 };
