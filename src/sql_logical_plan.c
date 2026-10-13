@@ -99,6 +99,26 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 		}
 		case SELECT_QUERY :
 		{
+			// scan operator
+
+			// join operators
+
+			// filter operator (where clause)
+
+			// projection before aggregation operator
+
+			// aggregation operator (preserved keys if it has group by) (with/without group by)
+
+			// filter operator (having clause)
+
+			// projection after aggregation operator
+
+			// order by
+
+			// offset
+
+			// limit
+
 			return NULL;
 		}
 		default :
