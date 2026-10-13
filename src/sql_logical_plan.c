@@ -255,3 +255,12 @@ void post_order_callback_expression_breaker(const sql_expression* expr, void* co
 		}
 	}
 }
+
+void deinitialize_expression_breaker_context(expression_breaker_context* ebc)
+{
+	deinitialize_arraylist(&(ebc->expressions_stack));
+	deinitialize_arraylist(&(ebc->before_aggregation_expressions));
+	deinitialize_arraylist(&(ebc->aggregation_call_expressions));
+	deinitialize_arraylist(&(ebc->after_aggregation_expressions));
+	deinitialize_arraylist(&(ebc->accessed_variable_identifiers));
+}
