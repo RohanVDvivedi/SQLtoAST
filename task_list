@@ -1,7 +1,5 @@
 PICKED TASKS
 
-* for logical plan collect all aggregate function calls, and ensure that there are no nested aggregate function calls per query in any of it's expression
-
 * LOGICAL QUERY PLAN
  * implement everything except the CTE parts
 
