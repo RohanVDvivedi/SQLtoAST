@@ -92,8 +92,9 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 			(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
 			return NULL;
 		}
-		case VALUES_QUERY :
+		case VALUES_QUERY : // HANDLED LATER
 		{
+			(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
 			return NULL;
 		}
 		case SELECT_QUERY :
@@ -118,7 +119,7 @@ logical_operator* get_logical_plan_for_sql(const sql* sql, schema_query_interfac
 	{
 		case DQL :
 			return get_logical_plan_for_dql(sql->dql_query, sqi, error);
-		case DML :
+		case DML : // HANDLED LATER
 		{
 			(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
 			return NULL;
