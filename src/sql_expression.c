@@ -88,6 +88,7 @@ sql_expression* new_func_sql_expr(dstring func_name, set_op_mod aggregate_mode, 
 	expr->aggregate_mode = aggregate_mode;
 	expr->func_name = func_name;
 	expr->param_expr_list = param_expr_list;
+	expr->is_aggregate = 0; // init-ed to 0
 	return expr;
 }
 
