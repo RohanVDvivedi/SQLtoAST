@@ -177,6 +177,9 @@ struct sql_expression
 			dstring func_name; // name of the function
 			set_op_mod aggregate_mode;
 			arraylist param_expr_list;
+
+			unsigned int is_aggregate:1; // this flag is user derived from the schema/execution layer, this information is not received in the serialized query
+			// must be set by the user upon identifying this function call as an aggregation call
 		};
 
 		// for sql_cast
