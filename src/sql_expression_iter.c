@@ -1,15 +1,16 @@
 #include<sqltoast/sql_expression_iter.h>
 
-// if returns 0 exit immediately
-int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (*pre_order_callback)(const sql_expression* expr, void* context), void (*post_order_callback)(const sql_expression* expr, void* context), void* context)
+int iterate_over_sql_expr(const sql_expression* expr, traversal_status (*pre_order_callback)(const sql_expression* expr, void* context), void (*post_order_callback)(const sql_expression* expr, void* context), void* context)
 {
 	traversal_status status = (pre_order_callback != NULL) ? pre_order_callback(expr, context) : CONTINUE_ITERATION;
 	if(status == EXIT_ITERATION)
-		return 0;
-	if(status == EXIT_EXPRESSION)
-		return 1;
+		goto EXIT_ITERATION_CASE;
 	if(status == SKIP_CHILD_ITERATION)
-		goto POST_ORDER_CALL;
+		goto POST_ORDER_CALLBACK_WITH_SUCCESS;
+
+	// if the expression for some reason is NULL, skip iterating it's children
+	if(expr == NULL)
+		goto POST_ORDER_CALLBACK_WITH_SUCCESS;
 
 	switch(expr->type)
 	{
@@ -18,8 +19,8 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 		case SQL_BITNOT :
 		case SQL_LOGNOT :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->unary_of, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->unary_of, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 			break;
 		}
 
@@ -29,10 +30,10 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 		case SQL_DIV :
 		case SQL_MOD :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->left, pre_order_callback, post_order_callback, context))
-				return 0;
-			if(!iterate_over_sql_expr_recurse(expr->right, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->left, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
+			if(!iterate_over_sql_expr(expr->right, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 			break;
 		}
 
@@ -43,12 +44,12 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 		case SQL_EQ :
 		case SQL_NEQ :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->left, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->left, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 			if(expr->cmp_rhs_quantfier == SQL_CMP_NONE)
 			{
-				if(!iterate_over_sql_expr_recurse(expr->right, pre_order_callback, post_order_callback, context))
-					return 0;
+				if(!iterate_over_sql_expr(expr->right, pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 			}
 			break;
 		}
@@ -65,21 +66,21 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 		case SQL_LIKE :
 		case SQL_IS :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->left, pre_order_callback, post_order_callback, context))
-				return 0;
-			if(!iterate_over_sql_expr_recurse(expr->right, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->left, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
+			if(!iterate_over_sql_expr(expr->right, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 			break;
 		}
 
 		case SQL_BTWN :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->btwn_input, pre_order_callback, post_order_callback, context))
-				return 0;
-			if(!iterate_over_sql_expr_recurse(expr->bounds[0], pre_order_callback, post_order_callback, context))
-				return 0;
-			if(!iterate_over_sql_expr_recurse(expr->bounds[1], pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->btwn_input, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
+			if(!iterate_over_sql_expr(expr->bounds[0], pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
+			if(!iterate_over_sql_expr(expr->bounds[1], pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 			break;
 		}
 
@@ -92,21 +93,21 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->expr_list)); i++)
 			{
-				if(!iterate_over_sql_expr_recurse(get_from_front_of_arraylist(&(expr->expr_list), i), pre_order_callback, post_order_callback, context))
-					return 0;
+				if(!iterate_over_sql_expr(get_from_front_of_arraylist(&(expr->expr_list), i), pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 			}
 			break;
 		}
 
 		case SQL_IN :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->in_input, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->in_input, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->in_expr_list)); i++)
 			{
-				if(!iterate_over_sql_expr_recurse(get_from_front_of_arraylist(&(expr->in_expr_list), i), pre_order_callback, post_order_callback, context))
-					return 0;
+				if(!iterate_over_sql_expr(get_from_front_of_arraylist(&(expr->in_expr_list), i), pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 			}
 			break;
 		}
@@ -128,24 +129,24 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 
 		case SQL_PARAMETER :
 		{
-			if(expr->parameter_resolution != NULL) // only when both paramerters is resolved
-				if(!iterate_over_sql_expr_recurse(expr->parameter_resolution, pre_order_callback, post_order_callback, context))
-					return 0;
+			if(expr->parameter_resolution != NULL) // only when paramerter is resolved
+				if(!iterate_over_sql_expr(expr->parameter_resolution, pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 			break;
 		}
 
 		case SQL_FUNCTION_CALL :
 		{
 			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->param_expr_list)); i++)
-				if(!iterate_over_sql_expr_recurse(get_from_front_of_arraylist(&(expr->param_expr_list), i), pre_order_callback, post_order_callback, context))
-					return 0;
+				if(!iterate_over_sql_expr(get_from_front_of_arraylist(&(expr->param_expr_list), i), pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 			break;
 		}
 
 		case SQL_CAST :
 		{
-			if(!iterate_over_sql_expr_recurse(expr->cast_expr, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(!iterate_over_sql_expr(expr->cast_expr, pre_order_callback, post_order_callback, context))
+				goto EXIT_ITERATION_CASE;
 			break;
 		}
 
@@ -158,31 +159,33 @@ int iterate_over_sql_expr_recurse(const sql_expression* expr, traversal_status (
 		case SQL_CASE :
 		{
 			if(expr->case_expr != NULL)
-				if(!iterate_over_sql_expr_recurse(expr->case_expr, pre_order_callback, post_order_callback, context))
-					return 0;
+				if(!iterate_over_sql_expr(expr->case_expr, pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->when_exprs)); i++)
-				if(!iterate_over_sql_expr_recurse(get_from_front_of_arraylist(&(expr->when_exprs), i), pre_order_callback, post_order_callback, context))
-					return 0;
+			for(cy_uint i = 0; i < max(get_element_count_arraylist(&(expr->when_exprs)), get_element_count_arraylist(&(expr->then_exprs))); i++)
+			{
+				if(i < get_element_count_arraylist(&(expr->when_exprs)))
+					if(!iterate_over_sql_expr(get_from_front_of_arraylist(&(expr->when_exprs), i), pre_order_callback, post_order_callback, context))
+						goto EXIT_ITERATION_CASE;
+				if(i < get_element_count_arraylist(&(expr->then_exprs)))
+					if(!iterate_over_sql_expr(get_from_front_of_arraylist(&(expr->then_exprs), i), pre_order_callback, post_order_callback, context))
+						goto EXIT_ITERATION_CASE;
+			}
 
-			for(cy_uint i = 0; i < get_element_count_arraylist(&(expr->then_exprs)); i++)
-				if(!iterate_over_sql_expr_recurse(get_from_front_of_arraylist(&(expr->then_exprs), i), pre_order_callback, post_order_callback, context))
-					return 0;
-
-			if(!iterate_over_sql_expr_recurse(expr->else_expr, pre_order_callback, post_order_callback, context))
-				return 0;
+			if(expr->else_expr != NULL)
+				if(!iterate_over_sql_expr(expr->else_expr, pre_order_callback, post_order_callback, context))
+					goto EXIT_ITERATION_CASE;
 			break;
 		}
 	}
 
-	POST_ORDER_CALL:;
+	POST_ORDER_CALLBACK_WITH_SUCCESS:;
 	if(post_order_callback != NULL)
 		post_order_callback(expr, context);
-
 	return 1;
-}
 
-void iterate_over_sql_expr(const sql_expression* expr, traversal_status (*pre_order_callback)(const sql_expression* expr, void* context), void (*post_order_callback)(const sql_expression* expr, void* context), void* context)
-{
-	iterate_over_sql_expr_recurse(expr, pre_order_callback, post_order_callback, context);
+	EXIT_ITERATION_CASE:;
+	if(post_order_callback != NULL)
+		post_order_callback(expr, context);
+	return 0;
 }
