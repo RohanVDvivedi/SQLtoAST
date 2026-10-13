@@ -130,3 +130,23 @@ logical_operator* get_logical_plan_for_sql(const sql* sql, schema_query_interfac
 		}
 	}
 }
+
+// every sql expression in a single query, is exacly expression -> aggregate-function -> expression
+// it will also set the is_aggregation bit in the function calls or clear it
+typedef struct expression_breaker_context expression_breaker_context;
+struct expression_breaker_context
+{
+	// helper integrface to get schema information
+	schema_query_interface* sqi;
+	uint8_t expected_aggregation_depth_calls; // set to 0 for where and group by clauses
+	                                          // set to 1 for the rest in the subquery
+
+	// every pre-order callback pushes on to this stack and analyzes the expression
+	uint32_t aggreation_calls_depth;
+	arraylist expressions_stack;
+
+	// actual expression stack
+	arraylist before_aggregation_expressions;
+	arraylist aggregation_call_expressions;		// will get an intermediate_column_name for after_aggregation_expressions to evaluate them
+	arraylist after_aggregation_expressions;
+};
