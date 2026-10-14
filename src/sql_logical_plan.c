@@ -20,6 +20,43 @@
 	PROJECTION if returning is present -> can be input to some other query
 */
 
+static logical_operator* get_logical_plan_for_relation_input(const relation_input* ri_p, schema_query_interface* sqi, logical_plan_error* error);
+static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_query_interface* sqi, logical_plan_error* error);
+
+static logical_operator* get_logical_plan_for_relation_input(const relation_input* ri_p, schema_query_interface* sqi, logical_plan_error* error)
+{
+	switch(ri_p->type)
+	{
+		case RELATION :
+		{
+			void* table_handle = sqi->fetch_table_handle_by_name(&(ri_p->relation_name), sqi->schema_context);
+			if(table_handle == NULL)
+			{
+				(*error) = LOGICAL_PLAN_UNIDENTIFIED_TABLE;
+				return NULL;
+			}
+
+			logical_operator* result = malloc(sizeof(logical_operator));
+			result->type = TABLE_SCAN_LOGI_OP;
+			result->table_scan_info.scan_name = get_dstring_pointing_to_dstring(&(ri_p->relation_name));
+			result->table_scan_info.table_handle = table_handle;
+			return result;
+		}
+		case SUB_QUERY :
+		{
+			return get_logical_plan_for_dql(ri_p->sub_query, sqi, error);
+		}
+		case FUNCTION_CALL : // HANDLED LATER
+		{
+			(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
+			return NULL;
+		}
+	}
+
+	(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
+	return NULL;
+}
+
 static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_query_interface* sqi, logical_plan_error* error)
 {
 	switch(dql->type)
@@ -99,7 +136,20 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 		}
 		case SELECT_QUERY :
 		{
+			logical_operator* result = NULL;
+
 			// scan operator
+			if(dql->select_query.has_base_input)
+			{
+				logical_operator* scan = get_logical_plan_for_relation_input(&(dql->select_query.base_input), sqi, error);
+				if(*error)
+				{
+					if(result != NULL)
+						delete_logical_plan(result);
+					return NULL;
+				}
+				result = scan;
+			}
 
 			// join operators
 
@@ -119,7 +169,7 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 
 			// limit
 
-			return NULL;
+			return result;
 		}
 		default :
 		{
