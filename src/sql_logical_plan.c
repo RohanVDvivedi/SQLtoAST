@@ -25,7 +25,7 @@
 typedef enum expression_breaker_error expression_breaker_error;
 enum expression_breaker_error
 {
-	NO_ERROR_FROM_EXPRESSION_BREAKER,
+	NO_ERROR_FROM_EXPRESSION_BREAKER = 0,
 	TOO_DEEP_AGGREGATION_DEPTH_FROM_EXPRESSION_BREAKER, // more aggregation calls depth than expected_aggregation_depth_calls
 	UNIDENTIFIED_FUNCTION_FROM_EXPRESSION_BREAKER,
 };
@@ -201,12 +201,26 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 					case NO_JOIN_CONDITION :
 						break;
 					case ON_EXPR_JOIN_CONDITION :
+					{
+						{
+							expression_breaker_result eb_res = break_expressions(j->on_expr, sqi, 0);
+							if(eb_res.error)
+							{
+								deinitialize_expression_breaker_result(&eb_res);
+								delete_logical_plan(result);
+								(*error) = LOGICAL_PLAN_AGGREATION_DEPTH_TOO_HIGH;
+								return NULL;
+							}
+							deinitialize_expression_breaker_result(&eb_res);
+						}
 						join_condition = j->on_expr;
 						break;
+					}
 					default :
 					case NATURAL_JOIN_CONDITION :  // HANDLED LATER
 					case USING_JOIN_CONDITION :    // HANDLED LATER
 					{
+						delete_logical_plan(result);
 						(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
 						return NULL;
 					}
@@ -232,6 +246,18 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 			// filter operator (where clause)
 			if(dql->select_query.where_expr != NULL) // must have aggregation depth of 0
 			{
+				{
+					expression_breaker_result eb_res = break_expressions(j->on_expr, sqi, 0);
+					if(eb_res.error)
+					{
+						deinitialize_expression_breaker_result(&eb_res);
+						delete_logical_plan(result);
+						(*error) = LOGICAL_PLAN_AGGREATION_DEPTH_TOO_HIGH;
+						return NULL;
+					}
+					deinitialize_expression_breaker_result(&eb_res);
+				}
+
 				logical_operator* filter_op = malloc(sizeof(logical_operator));
 				filter_op->type = SELECTION_LOGI_OP;
 				filter_op->selection_info.input_operator = result;
