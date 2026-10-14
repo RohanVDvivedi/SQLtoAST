@@ -247,7 +247,7 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 			if(dql->select_query.where_expr != NULL) // must have aggregation depth of 0
 			{
 				{
-					expression_breaker_result eb_res = break_expressions(j->on_expr, sqi, 0);
+					expression_breaker_result eb_res = break_expressions(dql->select_query.where_expr, sqi, 0);
 					if(eb_res.error)
 					{
 						deinitialize_expression_breaker_result(&eb_res);
