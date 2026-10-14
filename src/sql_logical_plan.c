@@ -192,6 +192,55 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 			}
 
 			// join operators
+			for(uint32_t i = 0; i < get_element_count_arraylist(&(dql->select_query.joins_with)); i++)
+			{
+				join_with* j = (join_with*) get_from_front_of_arraylist(&(dql->select_query.joins_with), i);
+
+				logical_operator_type type = INNER_JOIN_LOGI_OP;
+				sql_expression* join_condition = NULL;
+				if(j->type != CROSS_JOIN)
+					type = INNER_JOIN_LOGI_OP + j->type;
+
+				if(j->is_lateral)
+				{
+					if(result != NULL)
+						delete_logical_plan(result);
+					(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
+					return NULL;
+				}
+
+				switch(j->condition_type)
+				{
+					case NO_JOIN_CONDITION :
+						break;
+					case ON_EXPR_JOIN_CONDITION :
+						join_condition = j->on_expr;
+						break;
+					default :
+					case NATURAL_JOIN_CONDITION :  // HANDLED LATER
+					case USING_JOIN_CONDITION :    // HANDLED LATER
+					{
+						(*error) = LOGICAL_PLAN_UNSUPPORTED_QUERY;
+						return NULL;
+					}
+				}
+
+				logical_operator* scan = get_logical_plan_for_relation_input(&(j->input), sqi, error);
+				if(*error)
+				{
+					if(result != NULL)
+						delete_logical_plan(result);
+					return NULL;
+				}
+
+				logical_operator* join_op = malloc(sizeof(logical_operator));
+				join_op->type = type;
+				join_op->join_info.input_operator[0] = result;
+				join_op->join_info.input_operator[1] = scan;
+				join_op->join_info.join_expr = join_condition;
+
+				result = join_op;
+			}
 
 			// filter operator (where clause)
 
