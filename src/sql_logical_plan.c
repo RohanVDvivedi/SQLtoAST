@@ -243,12 +243,30 @@ static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_que
 			}
 
 			// filter operator (where clause)
+			if(dql->select_query.where_expr != NULL) // must have aggregation depth of 0
+			{
+				logical_operator* filter_op = malloc(sizeof(logical_operator));
+				filter_op->type = SELECTION_LOGI_OP;
+				filter_op->selection_info.input_operator = result;
+				filter_op->selection_info.selection_expr = dql->select_query.where_expr;
+
+				result = filter_op;
+			}
 
 			// projection before aggregation operator
 
 			// aggregation operator (preserved keys if it has group by) (with/without group by)
 
 			// filter operator (having clause)
+			if(dql->select_query.having_expr != NULL) // must have aggregation depth of 1
+			{
+				logical_operator* filter_op = malloc(sizeof(logical_operator));
+				filter_op->type = SELECTION_LOGI_OP;
+				filter_op->selection_info.input_operator = result;
+				filter_op->selection_info.selection_expr = dql->select_query.having_expr;
+
+				result = filter_op;
+			}
 
 			// projection after aggregation operator
 
