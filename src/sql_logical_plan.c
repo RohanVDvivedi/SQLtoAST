@@ -20,6 +20,46 @@
 	PROJECTION if returning is present -> can be input to some other query
 */
 
+#include<sqltoast/sql_expression_iter.h>
+
+typedef enum expression_breaker_error expression_breaker_error;
+enum expression_breaker_error
+{
+	NO_ERROR_FROM_EXPRESSION_BREAKER,
+	TOO_DEEP_AGGREGATION_DEPTH_FROM_EXPRESSION_BREAKER, // more aggregation calls depth than expected_aggregation_depth_calls
+	UNIDENTIFIED_FUNCTION_FROM_EXPRESSION_BREAKER,
+};
+
+// every sql expression in a single query without any nested queries and CTEs, is exacly expression -> aggregate-function -> expression
+// it will also set the is_aggregation bit in the function calls or clear it
+typedef struct expression_breaker_context expression_breaker_context;
+struct expression_breaker_context
+{
+	// helper integrface to get schema information
+	schema_query_interface* sqi;
+	uint8_t expected_aggregation_depth_calls; // set to 0 for where, join conditons, limit, offset and group by clauses
+	                                          // set to 1 for the rest in the expression clauses like projections, having and order by
+
+	// every pre-order callback pushes on to this stack and analyzes the expression and increments the aggregation_calls_in_expressions_stack
+	arraylist expressions_stack;
+	uint32_t aggregation_calls_in_expressions_stack;
+
+	// actual expression stack
+	arraylist before_aggregation_expressions;
+	arraylist aggregation_call_expressions;	    // will get an intermediate_column_name for after_aggregation_expressions to evaluate them
+	arraylist after_aggregation_expressions;    // every expression processed gets a single entry here
+                                                // for expressions with no aggregates, there will be no entry in before_aggregation_expressions and aggregation_call_expressions
+
+	arraylist accessed_variable_identifiers;    // list of all column identifiers
+
+	expression_breaker_error error;
+};
+
+static void initialize_expression_breaker_context(expression_breaker_context* ebc, schema_query_interface* sqi, uint8_t expected_aggregation_depth_calls);
+static traversal_status pre_order_callback_expression_breaker(const sql_expression* expr, void* context);
+static void post_order_callback_expression_breaker(const sql_expression* expr, void* context);
+static void deinitialize_expression_breaker_context(expression_breaker_context* ebc);
+
 static logical_operator* get_logical_plan_for_relation_input(const relation_input* ri_p, schema_query_interface* sqi, logical_plan_error* error);
 static logical_operator* get_logical_plan_for_dql(const sql_dql* dql, schema_query_interface* sqi, logical_plan_error* error);
 
@@ -202,42 +242,7 @@ logical_operator* get_logical_plan_for_sql(const sql* sql, schema_query_interfac
 	}
 }
 
-#include<sqltoast/sql_expression_iter.h>
-
-typedef enum expression_breaker_error expression_breaker_error;
-enum expression_breaker_error
-{
-	NO_ERROR_FROM_EXPRESSION_BREAKER,
-	TOO_DEEP_AGGREGATION_DEPTH_FROM_EXPRESSION_BREAKER, // more aggregation calls depth than expected_aggregation_depth_calls
-	UNIDENTIFIED_FUNCTION_FROM_EXPRESSION_BREAKER,
-};
-
-// every sql expression in a single query without any nested queries and CTEs, is exacly expression -> aggregate-function -> expression
-// it will also set the is_aggregation bit in the function calls or clear it
-typedef struct expression_breaker_context expression_breaker_context;
-struct expression_breaker_context
-{
-	// helper integrface to get schema information
-	schema_query_interface* sqi;
-	uint8_t expected_aggregation_depth_calls; // set to 0 for where, join conditons, limit, offset and group by clauses
-	                                          // set to 1 for the rest in the expression clauses like projections, having and order by
-
-	// every pre-order callback pushes on to this stack and analyzes the expression and increments the aggregation_calls_in_expressions_stack
-	arraylist expressions_stack;
-	uint32_t aggregation_calls_in_expressions_stack;
-
-	// actual expression stack
-	arraylist before_aggregation_expressions;
-	arraylist aggregation_call_expressions;	    // will get an intermediate_column_name for after_aggregation_expressions to evaluate them
-	arraylist after_aggregation_expressions;    // every expression processed gets a single entry here
-                                                // for expressions with no aggregates, there will be no entry in before_aggregation_expressions and aggregation_call_expressions
-
-	arraylist accessed_variable_identifiers;    // list of all column identifiers
-
-	expression_breaker_error error;
-};
-
-void initialize_expression_breaker_context(expression_breaker_context* ebc, schema_query_interface* sqi, uint8_t expected_aggregation_depth_calls)
+static void initialize_expression_breaker_context(expression_breaker_context* ebc, schema_query_interface* sqi, uint8_t expected_aggregation_depth_calls)
 {
 	ebc->sqi = sqi;
 	ebc->expected_aggregation_depth_calls = expected_aggregation_depth_calls;
@@ -254,7 +259,7 @@ void initialize_expression_breaker_context(expression_breaker_context* ebc, sche
 	ebc->error = NO_ERROR_FROM_EXPRESSION_BREAKER;
 }
 
-traversal_status pre_order_callback_expression_breaker(const sql_expression* expr, void* context)
+static traversal_status pre_order_callback_expression_breaker(const sql_expression* expr, void* context)
 {
 	expression_breaker_context* ebc = context;
 
@@ -309,7 +314,7 @@ traversal_status pre_order_callback_expression_breaker(const sql_expression* exp
 	return CONTINUE_ITERATION;
 }
 
-void post_order_callback_expression_breaker(const sql_expression* expr, void* context)
+static void post_order_callback_expression_breaker(const sql_expression* expr, void* context)
 {
 	expression_breaker_context* ebc = context;
 
@@ -326,7 +331,7 @@ void post_order_callback_expression_breaker(const sql_expression* expr, void* co
 	}
 }
 
-void deinitialize_expression_breaker_context(expression_breaker_context* ebc)
+static void deinitialize_expression_breaker_context(expression_breaker_context* ebc)
 {
 	deinitialize_arraylist(&(ebc->expressions_stack));
 	deinitialize_arraylist(&(ebc->before_aggregation_expressions));
