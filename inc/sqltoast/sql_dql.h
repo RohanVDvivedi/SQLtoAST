@@ -63,6 +63,12 @@ struct relation_input
 	// if empty, ignore
 	// valid only for type = SUB_QUERY or FUNCTION_CALL
 	arraylist columns_as;
+
+	// pointers owned by the planner and query executor
+	// not managed by this file
+	// primarily required for supporting views
+	void* logical_plan;
+	void* physical_plan;
 };
 
 typedef enum join_type join_type;
@@ -198,9 +204,9 @@ struct sql_dql
 
 sql_dql* new_dql(sql_dql_type type);
 
-#define init_relation_input(ri_p, relation_name_, as_)                             {(ri_p)->type = RELATION; (ri_p)->relation_name = relation_name_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
-#define init_sub_query_relation_input(ri_p, sub_query_, as_)                       {(ri_p)->type = SUB_QUERY; (ri_p)->sub_query = sub_query_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
-#define init_function_call_relation_input(ri_p, function_call_, as_)               {(ri_p)->type = FUNCTION_CALL; (ri_p)->function_call = function_call_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
+#define init_relation_input(ri_p, relation_name_, as_)                             {(ri_p)->type = RELATION; (ri_p)->logical_plan = NULL; (ri_p)->physical_plan = NULL; (ri_p)->relation_name = relation_name_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
+#define init_sub_query_relation_input(ri_p, sub_query_, as_)                       {(ri_p)->type = SUB_QUERY; (ri_p)->logical_plan = NULL; (ri_p)->physical_plan = NULL; (ri_p)->sub_query = sub_query_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
+#define init_function_call_relation_input(ri_p, function_call_, as_)               {(ri_p)->type = FUNCTION_CALL; (ri_p)->logical_plan = NULL; (ri_p)->physical_plan = NULL; (ri_p)->function_call = function_call_; (ri_p)->as = as_; initialize_arraylist(&((ri_p)->columns_as), 0);}
 
 void flatten_exprs_dql(sql_dql* dql);
 
