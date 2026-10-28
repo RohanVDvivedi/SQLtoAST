@@ -8,6 +8,8 @@
 sql_dql* new_dql(sql_dql_type type)
 {
 	sql_dql* dql = malloc(sizeof(sql_dql));
+	dql->logical_plan = NULL;
+	dql->physical_plan = NULL;
 
 	dql->with_recursive_ctes = 0;
 	initialize_arraylist(&(dql->with_ctes), 0);

@@ -189,6 +189,11 @@ struct sql_dql
 			sql_dql* right;
 		} set_operation;
 	};
+
+	// pointers owned by the planner and query executor
+	// not managed by this file
+	void* logical_plan;
+	void* physical_plan;
 };
 
 sql_dql* new_dql(sql_dql_type type);

@@ -75,6 +75,11 @@ struct sql_dml
 	};
 
 	arraylist returning_projections; // same as list of projections in select statement
+
+	// pointers owned by the planner and query executor
+	// not managed by this file
+	void* logical_plan;
+	void* physical_plan;
 };
 
 columns_to_be_set* new_columns_to_be_set(cy_uint capacity);

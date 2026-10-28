@@ -16,6 +16,8 @@ columns_to_be_set* new_columns_to_be_set(cy_uint capacity)
 sql_dml* new_dml(sql_dml_type type)
 {
 	sql_dml* dml = malloc(sizeof(sql_dml));
+	dml->logical_plan = NULL;
+	dml->physical_plan = NULL;
 
 	dml->with_recursive_ctes = 0;
 	initialize_arraylist(&(dml->with_ctes), 0);
